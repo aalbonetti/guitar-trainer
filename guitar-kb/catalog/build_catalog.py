@@ -38,6 +38,10 @@ def check_chord(cid, root, quality, frets, bass=None):
 C = []
 def chord(cid, name, root, quality, frets, fingers, tags, bass=None, barre=None, alt_of=None):
     check_chord(cid, root, quality, frets, bass)
+    # a finger number only where a fret is pressed, and every pressed fret has a finger (T = thumb is not used here)
+    for i, (f, g) in enumerate(zip(frets, fingers)):
+        if (f > 0) != (g > 0):
+            errors.append(f"{cid}: string {6 - i} fret {f} has finger {g}")
     C.append({k: v for k, v in dict(id=cid, name=name, root=root, quality=quality, bass=bass,
               frets=frets, fingers=fingers, barre=barre, tags=tags, alt_of=alt_of).items() if v is not None})
 
@@ -60,7 +64,7 @@ chord('C7', 'C7', 'C', '7', [X,3,2,3,1,0], [0,3,2,4,1,0], ['open'])
 chord('Cmaj7', 'Cmaj7', 'C', 'maj7', [X,3,2,0,0,0], [0,3,2,0,0,0], ['open'])
 chord('Fmaj7', 'Fmaj7', 'F', 'maj7', [X,X,3,2,1,0], [0,0,3,2,1,0], ['open','beginner'])
 chord('Am7', 'Am7', 'A', 'm7', [X,0,2,0,1,0], [0,0,2,0,1,0], ['open'])
-chord('Em7', 'Em7', 'E', 'm7', [0,2,2,0,3,3], [1,2,0,0,3,4], ['open','worship','g-family'])
+chord('Em7', 'Em7', 'E', 'm7', [0,2,2,0,3,3], [0,1,2,0,3,4], ['open','worship','g-family'])
 chord('Em7_simple', 'Em7 (simple)', 'E', 'm7', [0,2,0,0,0,0], [0,2,0,0,0,0], ['open','beginner'], alt_of='Em7')
 chord('Cadd9', 'Cadd9', 'C', 'add9', [X,3,2,0,3,3], [0,2,1,0,3,4], ['open','worship','g-family'])
 chord('Dsus4', 'Dsus4', 'D', 'sus4', [X,X,0,2,3,3], [0,0,0,1,3,4], ['open','worship','g-family'])
