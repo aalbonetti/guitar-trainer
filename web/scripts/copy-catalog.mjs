@@ -14,6 +14,12 @@ for (const f of fs.readdirSync(src)) {
   if (!f.endsWith('.json') || SKIP.has(f)) continue;
   fs.copyFileSync(path.join(src, f), path.join(out, f)); n++;
 }
+// Lesson text: guitar-kb/content/*.md -> public/content
+const csrc = path.resolve(here, '../../guitar-kb/content'), cout = path.resolve(here, '../public/content');
+fs.rmSync(cout, { recursive: true, force: true }); fs.mkdirSync(cout, { recursive: true });
+let nc = 0;
+if (fs.existsSync(csrc)) for (const f of fs.readdirSync(csrc)) if (f.endsWith('.md')) { fs.copyFileSync(path.join(csrc, f), path.join(cout, f)); nc++; }
+console.log(`content: ${nc} lesson files`);
 // chords-db (MIT, Copyright (c) 2016 David Rubert): keep up to 3 voicings per chord, frets made absolute.
 const db = require('@tombatossals/chords-db/lib/guitar.json');
 const lib = {};

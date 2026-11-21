@@ -1,5 +1,45 @@
 [
  {
+  "id": "Q_open_strings",
+  "lesson": "F.01",
+  "type": "generated",
+  "prompt": "Open string {n} is which note? / Which string is the open {note}?",
+  "params": {
+   "strings": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  }
+ },
+ {
+  "id": "Q_read_diagram",
+  "lesson": "F.04",
+  "type": "generated",
+  "prompt": "Which chord is this diagram?",
+  "params": {
+   "chords": [
+    "C",
+    "A",
+    "G",
+    "E",
+    "D",
+    "Am",
+    "Em",
+    "Dm",
+    "E7",
+    "A7",
+    "D7",
+    "G7",
+    "Cadd9",
+    "Dsus4"
+   ]
+  }
+ },
+ {
   "id": "Q_note_names",
   "lesson": "F.07",
   "type": "generated",

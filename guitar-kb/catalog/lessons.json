@@ -8,7 +8,11 @@
    "type": "quiz",
    "score": 0.9
   },
-  "assets": {},
+  "assets": {
+   "quizzes": [
+    "Q_open_strings"
+   ]
+  },
   "content": "content/F.01.md",
   "review_days": [
    1,
@@ -71,7 +75,11 @@
    "type": "quiz",
    "score": 0.9
   },
-  "assets": {},
+  "assets": {
+   "quizzes": [
+    "Q_read_diagram"
+   ]
+  },
   "content": "content/F.04.md",
   "review_days": [
    1,
