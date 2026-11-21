@@ -10,9 +10,10 @@ Personal-use **website / installable web app** for learning worship guitar (acou
 5. `m0/`: the audio feasibility test page. Its `dsp.js` is the proven DSP to port into `web/src/dsp/`.
 
 ## Current state
-- **M0** audio test: built, served at `/m0/`. Connor reports it works on the phone; paste-in of the numeric results is still pending (fill the §10 table when they arrive).
+- **M0** audio test: built, served at `/m0/`. Connor chose to skip entering the numbers for now, so chord graders default to `assisted` mode until real measurements exist.
 - **M1 + M2** (first cut): `web/` app shell with Today / Path / Lesson / Songs / Tools / Settings, adaptive nav, tuner + metronome engine, lesson tool bar, song charts with key/capo/Nashville and chord diagrams, set-list CSV import (stored on the phone only), offline service worker.
-- **Next:** M3 (IndexedDB progress + lesson text in `guitar-kb/content/`), then M4 timing grader.
+- **M3** (in progress): lesson text in `guitar-kb/content/{lesson}.md` (markdown + embed tokens, renderer in `web/src/ui/Content.tsx`, token IDs checked by `web/test/progress.test.ts`); IndexedDB progress (`web/src/db.ts`, rules in `web/src/progress.ts`); quiz engine (`web/src/quiz.ts`); self-check passing. Lessons whose grader isn't built yet (timing/pitch/chord) can be self-marked, recorded as `grader_mode: self`.
+- **Next:** finish lesson text for A/ER/EL, then M4 timing grader.
 
 ## Build and deploy
 - `cd web && npm ci && npm test && npm run build` (copies the catalog, builds chords-lib.json from chords-db, adds m0 at /m0/, writes sw.js).

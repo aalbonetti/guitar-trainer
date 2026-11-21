@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { loadCatalog, type Catalog } from './catalog';
 import { Today, Path, LessonView, Songs, Tools, Settings } from './ui/Screens';
 import { MetroStrip } from './ui/Tools';
+import { loadProgress } from './progressStore';
 
 const NAV = [
   { h: '#/today', label: 'Today', icon: '☀' },
@@ -22,7 +23,7 @@ export function App() {
   const [err, setErr] = useState('');
   const [, bump] = useState(0);
   const hash = useHash();
-  useEffect(() => { loadCatalog().then(setCat).catch(e => setErr(String(e))); }, []);
+  useEffect(() => { void loadProgress(); loadCatalog().then(setCat).catch(e => setErr(String(e))); }, []);
   const [, route, arg] = hash.split('/');
   const active = NAV.find(n => n.h.split('/')[1] === route || (route === 'lesson' && n.label === 'Path') || (route === 'song' && n.label === 'Songs'));
   let body;
