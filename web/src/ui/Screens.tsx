@@ -11,6 +11,8 @@ import { LessonContent } from './Content';
 import { progress, recordAttempt } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
 import { exportAll, importAll } from '../db';
+import { TimingPanel, CalibrationCard } from './Timing';
+import { attempt } from '../grading/runner';
 
 export const instrumentPref = persisted<'acoustic' | 'electric' | 'both'>('gt_instruments', 'both');
 const go = (h: string) => { location.hash = h; };
@@ -158,10 +160,22 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
   const today = dayOf();
   const doneToday = p?.first_pass_day === today && p.state !== 'passed';
   const states = computeStates(cat.lessons, cat.tracks, pr.lp);
+  const att = useStore(attempt);
   const mark = async (mode: 'auto' | 'self') => { const ev = await recordAttempt(l, { met: true, atTarget: true, score: 1, mode }); setMsg(EVENT_TEXT[ev] || 'Logged. It counts once per day.'); };
   if (type === 'quiz') return (
     <section class="card"><h2>Pass it</h2><p class="muted">Pass the quiz on this page on two different days. {due ? 'A review is due: take the quiz again today.' : ''}</p>
       {states[l.id] === 'locked' ? <p class="muted">Tip: finish the earlier lessons first ({l.prereqs.join(', ')}).</p> : null}</section>);
+  if (type === 'timing') return (
+    <section class="card">
+      <h2>Pass it {due ? <small class="badge b-due">review due</small> : null}</h2>
+      {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''}. Practice any time.</p> : null}
+      {doneToday && !(att.lessonId === l.id && att.phase === 'result') ? <p class="okText">Passed once today ✓ Pass it again on another day to complete the lesson.</p> : null}
+      <TimingPanel cat={cat} l={l} reviewDue={due} passed={p?.state === 'passed'} />
+      {msg ? <p class="note">{msg}</p> : null}
+      {p?.state !== 'passed' || due ? <details class="selfmark"><summary>Can't use the mic right now?</summary>
+        <p class="muted">Mark it yourself when you can play it at the goal. Self-marked passes are recorded as such.</p>
+        <button disabled={doneToday} onClick={() => mark('self')}>{doneToday ? 'Marked today ✓' : 'I can do this'}</button></details> : null}
+    </section>);
   const graded = type !== 'self_check';
   return (
     <section class="card">
@@ -290,6 +304,7 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
         <p class="muted">Hides the tracks you don't play on the Path. You can switch any time.</p>
       </section>
       <section class="card"><h2>Audio</h2><InputPicker /></section>
+      <section class="card"><h2>Timing calibration</h2><CalibrationCard /></section>
       <section class="card">
         <h2>Church set list</h2>
         <p class="muted">Import the set-list CSV (Name, new, total, then one column per week). It's stored only on this phone and never uploaded.</p>

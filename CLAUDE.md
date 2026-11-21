@@ -13,10 +13,11 @@ Personal-use **website / installable web app** for learning worship guitar (acou
 - **M0** audio test: built, served at `/m0/`. Connor chose to skip entering the numbers for now, so chord graders default to `assisted` mode until real measurements exist.
 - **M1 + M2** (first cut): `web/` app shell with Today / Path / Lesson / Songs / Tools / Settings, adaptive nav, tuner + metronome engine, lesson tool bar, song charts with key/capo/Nashville and chord diagrams, set-list CSV import (stored on the phone only), offline service worker.
 - **M3** (done, first cut): all 48 lessons written as in `guitar-kb/content/{lesson}.md` (markdown + embed tokens, renderer in `web/src/ui/Content.tsx`, token IDs checked by `web/test/progress.test.ts`); IndexedDB progress (`web/src/db.ts`, rules in `web/src/progress.ts`); quiz engine (`web/src/quiz.ts`); self-check passing. Lessons whose grader isn't built yet (timing/pitch/chord) can be self-marked, recorded as `grader_mode: self`.
-- **Next:** M4 timing grader (strum calibration + onset grading from m0's DSP), then M5 daily loop polish, then G1 Arcade tap-mode games.
+- **M4** (done, first cut): timing grader for the 13 `timing` lessons. Engine has one shared mic capture (`acquireCapture`/`releaseCapture`/`onBlock`) used by the tuner and graders, plus fixed click plans on the AudioContext clock. `web/src/grading/timing.ts` (pure: expected-strum grid incl. rests from the lesson's pattern, onset matching, ladder, calibration math), `runner.ts` (count-in learns click-bleed level and arrival, then grades), `ui/Timing.tsx` (calibration card, attempt runner, result card with per-strum chart). Strum calibration is stored per input route + posture in IndexedDB `calibration` (DB v2). Strums in a pattern's rests count against "slots right". Bluetooth output blocks graded attempts. Self-mark stays available under "Can't use the mic right now?".
+- **Next:** M5 daily loop polish, then G1 Arcade tap-mode games. Real-phone check of M4 still to do (calibration folded/unfolded, phone mic vs USB).
 
 ## Build and deploy
-- `cd web && npm ci && npm test && npm run build` (copies the catalog, builds chords-lib.json from chords-db, adds m0 at /m0/, writes sw.js).
+- `cd web && npm ci && npm test && npm run build`. Then `python3 test/m4_e2e.py` (headless Chrome; `?sim` in the URL swaps the mic for synthesized strums fed through the real capture + onset path) (copies the catalog, builds chords-lib.json from chords-db, adds m0 at /m0/, writes sw.js).
 - GitHub Actions (`.github/workflows/pages.yml`) builds and deploys `web/dist` to Pages on every push to `main`.
 
 ## Hard rules
