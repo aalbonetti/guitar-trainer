@@ -1,0 +1,1248 @@
+[
+ {
+  "id": "F.01",
+  "track": "F",
+  "title": "Parts, strings & standard tuning",
+  "prereqs": [],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.9
+  },
+  "assets": {},
+  "content": "content/F.01.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "F.02",
+  "track": "F",
+  "title": "Tuning",
+  "prereqs": [
+   "F.01"
+  ],
+  "pass_criteria": {
+   "type": "pitch",
+   "cents": 5,
+   "scope": "all_strings"
+  },
+  "assets": {},
+  "content": "content/F.02.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "F.03",
+  "track": "F",
+  "title": "Posture, fret hand, pick grip",
+  "prereqs": [
+   "F.01"
+  ],
+  "pass_criteria": {
+   "type": "self_check"
+  },
+  "assets": {},
+  "content": "content/F.03.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "F.04",
+  "track": "F",
+  "title": "Reading chord diagrams, tab & charts",
+  "prereqs": [
+   "F.01"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.9
+  },
+  "assets": {},
+  "content": "content/F.04.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "F.05",
+  "track": "F",
+  "title": "Spider warm-up",
+  "prereqs": [
+   "F.03"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 60,
+   "subdivision": 8,
+   "max_err_ms": 50,
+   "bars": 4
+  },
+  "assets": {
+   "exercises": [
+    "EX_spider"
+   ]
+  },
+  "content": "content/F.05.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "F.06",
+  "track": "F",
+  "title": "Playing with a click",
+  "prereqs": [
+   "F.03"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 70,
+   "subdivision": 4,
+   "max_err_ms": 50,
+   "bars": 8
+  },
+  "assets": {
+   "rhythm": [
+    "S1_quarters"
+   ]
+  },
+  "content": "content/F.06.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "F.07",
+  "track": "F",
+  "title": "Note names on strings 6 & 5",
+  "prereqs": [
+   "F.04"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.9,
+   "max_s": 3
+  },
+  "assets": {
+   "quizzes": [
+    "Q_note_names"
+   ]
+  },
+  "content": "content/F.07.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.01",
+  "track": "A",
+  "title": "Em & G",
+  "prereqs": [
+   "F.06"
+  ],
+  "pass_criteria": {
+   "type": "changes_per_min",
+   "target": 30,
+   "pair": [
+    "Em",
+    "G"
+   ]
+  },
+  "assets": {
+   "chords": [
+    "Em",
+    "G",
+    "G_4f"
+   ]
+  },
+  "content": "content/A.01.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.02",
+  "track": "A",
+  "title": "The G family",
+  "prereqs": [
+   "A.01"
+  ],
+  "pass_criteria": {
+   "type": "changes_per_min",
+   "target": 30
+  },
+  "assets": {
+   "chords": [
+    "G_4f",
+    "Cadd9",
+    "Dsus4",
+    "Em7"
+   ],
+   "exercises": [
+    "EX_changes_gfamily"
+   ]
+  },
+  "content": "content/A.02.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.03",
+  "track": "A",
+  "title": "D family",
+  "prereqs": [
+   "A.01"
+  ],
+  "pass_criteria": {
+   "type": "changes_per_min",
+   "target": 25
+  },
+  "assets": {
+   "chords": [
+    "D",
+    "A",
+    "Asus4",
+    "A7sus4",
+    "Bm_partial"
+   ]
+  },
+  "content": "content/A.03.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.04",
+  "track": "A",
+  "title": "C family",
+  "prereqs": [
+   "A.01"
+  ],
+  "pass_criteria": {
+   "type": "changes_per_min",
+   "target": 25
+  },
+  "assets": {
+   "chords": [
+    "C",
+    "Am",
+    "Fmaj7",
+    "G"
+   ],
+   "exercises": [
+    "EX_changes_open"
+   ]
+  },
+  "content": "content/A.04.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.05",
+  "track": "A",
+  "title": "Eighth-note strum, accents on 2 & 4",
+  "prereqs": [
+   "A.02"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 80,
+   "subdivision": 8,
+   "max_err_ms": 40,
+   "bars": 8
+  },
+  "assets": {
+   "rhythm": [
+    "S2_eighths"
+   ]
+  },
+  "content": "content/A.05.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.06",
+  "track": "A",
+  "title": "Worship strum pattern",
+  "prereqs": [
+   "A.05"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 90,
+   "subdivision": 8,
+   "max_err_ms": 40,
+   "bars": 8
+  },
+  "assets": {
+   "rhythm": [
+    "S3_worship"
+   ]
+  },
+  "content": "content/A.06.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.07",
+  "track": "A",
+  "title": "Hymn meters: 3/4 & 6/8",
+  "prereqs": [
+   "A.05"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 90,
+   "subdivision": 6,
+   "max_err_ms": 40,
+   "bars": 8
+  },
+  "assets": {
+   "rhythm": [
+    "S4_waltz",
+    "S5_six_eight"
+   ]
+  },
+  "content": "content/A.07.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.08",
+  "track": "A",
+  "title": "Capo & keys",
+  "prereqs": [
+   "A.04",
+   "T.04"
+  ],
+  "pass_criteria": {
+   "type": "chord_accuracy",
+   "ratio": 0.9
+  },
+  "assets": {},
+  "content": "content/A.08.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.09",
+  "track": "A",
+  "title": "Dynamics & percussive chunk",
+  "prereqs": [
+   "A.06"
+  ],
+  "pass_criteria": {
+   "type": "self_check"
+  },
+  "assets": {
+   "rhythm": [
+    "S9_whole",
+    "S10_half",
+    "S6_chunk"
+   ]
+  },
+  "content": "content/A.09.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.10",
+  "track": "A",
+  "title": "Arpeggio picking for intros",
+  "prereqs": [
+   "A.04"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 70,
+   "subdivision": 8,
+   "max_err_ms": 50,
+   "bars": 4
+  },
+  "assets": {
+   "picking": [
+    "P2_pima",
+    "P3_rolling_34"
+   ]
+  },
+  "content": "content/A.10.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.11",
+  "track": "A",
+  "title": "First hymns",
+  "prereqs": [
+   "A.07",
+   "A.08"
+  ],
+  "pass_criteria": {
+   "type": "chord_accuracy",
+   "ratio": 0.9
+  },
+  "assets": {
+   "songs": [
+    "SONG_amazing_grace"
+   ]
+  },
+  "content": "content/A.11.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "A.12",
+  "track": "A",
+  "title": "Intro to barre chords",
+  "prereqs": [
+   "A.06"
+  ],
+  "pass_criteria": {
+   "type": "chord_accuracy",
+   "ratio": 0.8
+  },
+  "assets": {
+   "chords": [
+    "F",
+    "Bm"
+   ],
+   "shapes": [
+    "E_shape_major",
+    "A_shape_minor"
+   ]
+  },
+  "content": "content/A.12.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.01",
+  "track": "ER",
+  "title": "Electric basics: tone, attack, muting",
+  "prereqs": [
+   "F.06"
+  ],
+  "pass_criteria": {
+   "type": "self_check"
+  },
+  "assets": {},
+  "content": "content/ER.01.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.02",
+  "track": "ER",
+  "title": "Power chords & palm-muted chug",
+  "prereqs": [
+   "ER.01",
+   "F.07"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 90,
+   "subdivision": 8,
+   "max_err_ms": 40,
+   "bars": 8
+  },
+  "assets": {
+   "shapes": [
+    "power_r6",
+    "power_r5"
+   ],
+   "rhythm": [
+    "S7_chug"
+   ]
+  },
+  "content": "content/ER.02.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.03",
+  "track": "ER",
+  "title": "Root pulse + dotted-eighth delay",
+  "prereqs": [
+   "ER.02",
+   "T.07"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 100,
+   "subdivision": 8,
+   "max_err_ms": 30,
+   "bars": 16
+  },
+  "assets": {
+   "exercises": [
+    "EX_root_pulse_G"
+   ]
+  },
+  "content": "content/ER.03.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.04",
+  "track": "ER",
+  "title": "Triads on strings 3-2-1",
+  "prereqs": [
+   "ER.02"
+  ],
+  "pass_criteria": {
+   "type": "changes_per_min",
+   "target": 20
+  },
+  "assets": {
+   "triads": [
+    "tri_321_G_root",
+    "tri_321_G_inv1",
+    "tri_321_G_inv2",
+    "tri_321_Gm_root",
+    "tri_321_Gm_inv1",
+    "tri_321_Gm_inv2"
+   ],
+   "exercises": [
+    "EX_triads_I_V_vi_IV_G"
+   ]
+  },
+  "content": "content/ER.04.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.05",
+  "track": "ER",
+  "title": "Triads on strings 4-3-2",
+  "prereqs": [
+   "ER.04"
+  ],
+  "pass_criteria": {
+   "type": "chord_accuracy",
+   "ratio": 0.9
+  },
+  "assets": {
+   "triads": [
+    "tri_432_G_root",
+    "tri_432_G_inv1",
+    "tri_432_G_inv2"
+   ]
+  },
+  "content": "content/ER.05.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.06",
+  "track": "ER",
+  "title": "Drone voicings (keys of E & D)",
+  "prereqs": [
+   "ER.04"
+  ],
+  "pass_criteria": {
+   "type": "changes_per_min",
+   "target": 25
+  },
+  "assets": {
+   "chords": [
+    "E",
+    "Asus2",
+    "Bsus4_drone",
+    "Csharpm7_drone",
+    "D",
+    "Dsus2",
+    "A7sus4",
+    "G_over_B",
+    "Em7"
+   ]
+  },
+  "content": "content/ER.06.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.07",
+  "track": "ER",
+  "title": "Swells & pads",
+  "prereqs": [
+   "ER.01"
+  ],
+  "pass_criteria": {
+   "type": "self_check"
+  },
+  "assets": {},
+  "content": "content/ER.07.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.08",
+  "track": "ER",
+  "title": "Song dynamics map",
+  "prereqs": [
+   "ER.03",
+   "ER.04"
+  ],
+  "pass_criteria": {
+   "type": "self_check"
+  },
+  "assets": {},
+  "content": "content/ER.08.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.09",
+  "track": "ER",
+  "title": "Full barre chords for big choruses",
+  "prereqs": [
+   "ER.02"
+  ],
+  "pass_criteria": {
+   "type": "chord_accuracy",
+   "ratio": 0.9
+  },
+  "assets": {
+   "shapes": [
+    "E_shape_major",
+    "E_shape_minor",
+    "A_shape_major",
+    "A_shape_minor"
+   ]
+  },
+  "content": "content/ER.09.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.10",
+  "track": "ER",
+  "title": "Sixteenth muted groove",
+  "prereqs": [
+   "ER.03"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 90,
+   "subdivision": 16,
+   "max_err_ms": 30,
+   "bars": 8
+  },
+  "assets": {
+   "rhythm": [
+    "S8_sixteenths"
+   ]
+  },
+  "content": "content/ER.10.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "ER.11",
+  "track": "ER",
+  "title": "Playing from number charts",
+  "prereqs": [
+   "ER.04",
+   "T.03"
+  ],
+  "pass_criteria": {
+   "type": "chord_accuracy",
+   "ratio": 0.9
+  },
+  "assets": {
+   "quizzes": [
+    "Q_nashville"
+   ]
+  },
+  "content": "content/ER.11.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.01",
+  "track": "EL",
+  "title": "Major pentatonic, position 1",
+  "prereqs": [
+   "F.07"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 80,
+   "subdivision": 8,
+   "max_err_ms": 40,
+   "bars": 4
+  },
+  "assets": {
+   "scales": [
+    "G_major_pent_pos2"
+   ]
+  },
+  "content": "content/EL.01.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.02",
+  "track": "EL",
+  "title": "Relative minor pentatonic + positions 2 & 5",
+  "prereqs": [
+   "EL.01"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 80,
+   "subdivision": 8,
+   "max_err_ms": 40,
+   "bars": 4
+  },
+  "assets": {
+   "scales": [
+    "Am_pent_pos1",
+    "Am_pent_pos2",
+    "Am_pent_pos5"
+   ]
+  },
+  "content": "content/EL.02.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.03",
+  "track": "EL",
+  "title": "Hammer-ons, pull-offs, slides",
+  "prereqs": [
+   "EL.01"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 70,
+   "subdivision": 8,
+   "max_err_ms": 50,
+   "bars": 4
+  },
+  "assets": {},
+  "content": "content/EL.03.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.04",
+  "track": "EL",
+  "title": "Octave melodies",
+  "prereqs": [
+   "EL.01",
+   "ER.04"
+  ],
+  "pass_criteria": {
+   "type": "pitch",
+   "note_accuracy": 0.9
+  },
+  "assets": {
+   "exercises": [
+    "EX_octaves_G_major"
+   ]
+  },
+  "content": "content/EL.04.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.05",
+  "track": "EL",
+  "title": "Bends & vibrato",
+  "prereqs": [
+   "EL.03"
+  ],
+  "pass_criteria": {
+   "type": "pitch",
+   "cents": 15
+  },
+  "assets": {},
+  "content": "content/EL.05.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.06",
+  "track": "EL",
+  "title": "Double stops: 3rds & 6ths",
+  "prereqs": [
+   "EL.04"
+  ],
+  "pass_criteria": {
+   "type": "pitch",
+   "note_accuracy": 0.9
+  },
+  "assets": {},
+  "content": "content/EL.06.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.07",
+  "track": "EL",
+  "title": "Hymn melody as a lead line",
+  "prereqs": [
+   "EL.04"
+  ],
+  "pass_criteria": {
+   "type": "pitch",
+   "note_accuracy": 0.9
+  },
+  "assets": {
+   "songs": [
+    "SONG_amazing_grace"
+   ]
+  },
+  "content": "content/EL.07.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.08",
+  "track": "EL",
+  "title": "Lead lines with dotted-eighth delay",
+  "prereqs": [
+   "EL.07",
+   "ER.03"
+  ],
+  "pass_criteria": {
+   "type": "timing",
+   "bpm": 100,
+   "subdivision": 8,
+   "max_err_ms": 30,
+   "bars": 8
+  },
+  "assets": {},
+  "content": "content/EL.08.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.09",
+  "track": "EL",
+  "title": "Major scale + chord-tone targeting",
+  "prereqs": [
+   "EL.02",
+   "T.02"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.9
+  },
+  "assets": {
+   "scales": [
+    "G_major_pos2"
+   ]
+  },
+  "content": "content/EL.09.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.10",
+  "track": "EL",
+  "title": "Writing intro & tag hooks",
+  "prereqs": [
+   "EL.07"
+  ],
+  "pass_criteria": {
+   "type": "self_check"
+  },
+  "assets": {},
+  "content": "content/EL.10.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "EL.11",
+  "track": "EL",
+  "title": "Ambient lead: harmonics & swells",
+  "prereqs": [
+   "ER.07",
+   "EL.05"
+  ],
+  "pass_criteria": {
+   "type": "pitch",
+   "note_accuracy": 0.9
+  },
+  "assets": {},
+  "content": "content/EL.11.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "T.01",
+  "track": "T",
+  "title": "Intervals & the fretboard",
+  "prereqs": [
+   "F.07"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.9
+  },
+  "assets": {
+   "quizzes": [
+    "Q_intervals"
+   ]
+  },
+  "content": "content/T.01.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "T.02",
+  "track": "T",
+  "title": "Major scale & diatonic chords",
+  "prereqs": [
+   "T.01"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.9
+  },
+  "assets": {
+   "quizzes": [
+    "Q_diatonic"
+   ]
+  },
+  "content": "content/T.02.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "T.03",
+  "track": "T",
+  "title": "Nashville Number System",
+  "prereqs": [
+   "T.02"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.9
+  },
+  "assets": {
+   "quizzes": [
+    "Q_nashville"
+   ]
+  },
+  "content": "content/T.03.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "T.04",
+  "track": "T",
+  "title": "Capo math & transposing",
+  "prereqs": [
+   "T.01"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.9
+  },
+  "assets": {
+   "quizzes": [
+    "Q_capo"
+   ]
+  },
+  "content": "content/T.04.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "T.05",
+  "track": "T",
+  "title": "Ear: major vs minor",
+  "prereqs": [
+   "F.06"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.85
+  },
+  "assets": {
+   "quizzes": [
+    "Q_ear_quality"
+   ]
+  },
+  "content": "content/T.05.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "T.06",
+  "track": "T",
+  "title": "Ear: hearing 1-4-5-6m movement",
+  "prereqs": [
+   "T.03",
+   "T.05"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.8
+  },
+  "assets": {
+   "quizzes": [
+    "Q_ear_numbers"
+   ]
+  },
+  "content": "content/T.06.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ },
+ {
+  "id": "T.07",
+  "track": "T",
+  "title": "Tempo, subdivision & delay time",
+  "prereqs": [
+   "F.06"
+  ],
+  "pass_criteria": {
+   "type": "quiz",
+   "score": 0.9
+  },
+  "assets": {
+   "quizzes": [
+    "Q_delay"
+   ]
+  },
+  "content": "content/T.07.md",
+  "review_days": [
+   1,
+   3,
+   7,
+   14,
+   30
+  ]
+ }
+]

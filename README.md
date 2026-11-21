@@ -1,9 +1,10 @@
 # Guitar Trainer
 
-Personal web app for learning worship guitar (acoustic basics, electric rhythm and lead), built for Chrome on a OnePlus Open.
+Personal web app for learning worship guitar (acoustic basics, electric rhythm and lead), built for Chrome on a OnePlus Open and installable to the home screen.
 
-- **Live site:** this repo's GitHub Pages URL. Right now it hosts the **M0 audio test** (tuner, click, latency, timing, chord check, fold test).
-- **Spec:** `guitar-kb/06-app-spec.md` · **Games:** `guitar-kb/07-games.md` · **Data:** `guitar-kb/catalog/SCHEMA.md`
-- **M0 source:** `m0/` (`python3 m0/build.py` rebuilds the page; `node m0/test/test_dsp.js` runs the DSP tests)
+- **App:** `web/` (Preact + Vite + TypeScript). Lessons, tuner, metronome, song charts (key / capo / Nashville numbers, chord diagrams).
+- **Audio test (M0):** `m0/`, served at `/m0/`.
+- **Knowledge base + spec:** `guitar-kb/` (start with `06-app-spec.md`).
+- **Deploy:** GitHub Actions builds `web/` and publishes to GitHub Pages on every push to `main`.
 
-Song data is facts only (keys, chords, Nashville numbers, CCLI numbers); no lyrics. Chord library: chords-db, MIT, Copyright (c) 2016 David Rubert.
+Song data is facts only (keys, chords, Nashville numbers, CCLI numbers); no lyrics. Chord library: chords-db, MIT License, Copyright (c) 2016 David Rubert.
