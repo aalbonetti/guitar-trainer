@@ -7,7 +7,7 @@
     "catalog": "node scripts/copy-catalog.mjs",
     "dev": "npm run catalog && vite",
     "build": "npm run catalog && tsc --noEmit && vite build && node scripts/postbuild.mjs",
-    "test": "vitest run"
+    "test": "npm run catalog && vitest run"
   },
   "dependencies": {
     "preact": "^11.2.0"
