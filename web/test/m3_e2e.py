@@ -20,6 +20,8 @@ async def main():
         await pg.reload(); await pg.wait_for_selector('h1 .badge'); print('badge after reload:', await pg.inner_text('h1 .badge'))
         await pg.goto(base+'#/path'); await pg.wait_for_selector('.lessons'); print('path legend states:', await pg.eval_on_selector_all('.lessons li','e=>e.slice(0,7).map(x=>x.className+":"+x.querySelector(".sticon").textContent).join(" ")'))
         await pg.goto(base+'#/today'); await pg.wait_for_selector('text=Up next'); print('today up next:', (await pg.inner_text('section:has(h2:has-text("Up next"))')).replace('\n',' | ')[:200])
+        for lid in ['A.02','ER.04','EL.04','A.12','ER.09']:
+            await pg.goto(base+'#/lesson/'+lid); await pg.wait_for_selector('.content .md'); print(lid,'embeds',await pg.eval_on_selector_all('.content figure, .content pre.tab, .content .quiz, .content .chords','e=>e.length'),'errors-in-page',await pg.eval_on_selector_all('.content .error','e=>e.map(x=>x.textContent)'))
         await pg.goto(base+'#/lesson/T.07'); await pg.wait_for_selector('.content table'); await pg.screenshot(path='test/m3_t07.png', full_page=True)
         print('ERRORS:', errs or 'none'); await b.close()
 asyncio.run(main())
