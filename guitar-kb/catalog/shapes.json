@@ -1,0 +1,306 @@
+{
+ "movable_chords": [
+  {
+   "id": "E_shape_major",
+   "quality": "major",
+   "root_string": 6,
+   "offsets": [
+    0,
+    2,
+    2,
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "E_shape_minor",
+   "quality": "minor",
+   "root_string": 6,
+   "offsets": [
+    0,
+    2,
+    2,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "E_shape_7",
+   "quality": "7",
+   "root_string": 6,
+   "offsets": [
+    0,
+    2,
+    0,
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "A_shape_major",
+   "quality": "major",
+   "root_string": 5,
+   "offsets": [
+    null,
+    0,
+    2,
+    2,
+    2,
+    0
+   ]
+  },
+  {
+   "id": "A_shape_minor",
+   "quality": "minor",
+   "root_string": 5,
+   "offsets": [
+    null,
+    0,
+    2,
+    2,
+    1,
+    0
+   ]
+  },
+  {
+   "id": "A_shape_7",
+   "quality": "7",
+   "root_string": 5,
+   "offsets": [
+    null,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  },
+  {
+   "id": "power_r6",
+   "quality": "5",
+   "root_string": 6,
+   "offsets": [
+    0,
+    2,
+    2,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "id": "power_r5",
+   "quality": "5",
+   "root_string": 5,
+   "offsets": [
+    null,
+    0,
+    2,
+    2,
+    null,
+    null
+   ]
+  },
+  {
+   "id": "maj7_r6",
+   "quality": "maj7",
+   "root_string": 6,
+   "offsets": [
+    0,
+    null,
+    1,
+    1,
+    0,
+    null
+   ]
+  },
+  {
+   "id": "m7_r6",
+   "quality": "m7",
+   "root_string": 6,
+   "offsets": [
+    0,
+    null,
+    0,
+    0,
+    0,
+    null
+   ]
+  },
+  {
+   "id": "m7b5_r5",
+   "quality": "m7b5",
+   "root_string": 5,
+   "offsets": [
+    null,
+    0,
+    1,
+    0,
+    1,
+    null
+   ]
+  }
+ ],
+ "triads": [
+  {
+   "id": "tri_321_G_root",
+   "root": "G",
+   "quality": "major",
+   "strings": [
+    3,
+    2,
+    1
+   ],
+   "frets": [
+    12,
+    12,
+    10
+   ]
+  },
+  {
+   "id": "tri_321_G_inv1",
+   "root": "G",
+   "quality": "major",
+   "strings": [
+    3,
+    2,
+    1
+   ],
+   "frets": [
+    4,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "tri_321_G_inv2",
+   "root": "G",
+   "quality": "major",
+   "strings": [
+    3,
+    2,
+    1
+   ],
+   "frets": [
+    7,
+    8,
+    7
+   ]
+  },
+  {
+   "id": "tri_321_Gm_root",
+   "root": "G",
+   "quality": "minor",
+   "strings": [
+    3,
+    2,
+    1
+   ],
+   "frets": [
+    12,
+    11,
+    10
+   ]
+  },
+  {
+   "id": "tri_321_Gm_inv1",
+   "root": "G",
+   "quality": "minor",
+   "strings": [
+    3,
+    2,
+    1
+   ],
+   "frets": [
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "tri_321_Gm_inv2",
+   "root": "G",
+   "quality": "minor",
+   "strings": [
+    3,
+    2,
+    1
+   ],
+   "frets": [
+    7,
+    8,
+    6
+   ]
+  },
+  {
+   "id": "tri_432_G_root",
+   "root": "G",
+   "quality": "major",
+   "strings": [
+    4,
+    3,
+    2
+   ],
+   "frets": [
+    5,
+    4,
+    3
+   ]
+  },
+  {
+   "id": "tri_432_G_inv1",
+   "root": "G",
+   "quality": "major",
+   "strings": [
+    4,
+    3,
+    2
+   ],
+   "frets": [
+    9,
+    7,
+    8
+   ]
+  },
+  {
+   "id": "tri_432_G_inv2",
+   "root": "G",
+   "quality": "major",
+   "strings": [
+    4,
+    3,
+    2
+   ],
+   "frets": [
+    12,
+    12,
+    12
+   ]
+  }
+ ],
+ "octaves": [
+  {
+   "low_string": 6,
+   "high_string": 4,
+   "fret_offset": 2
+  },
+  {
+   "low_string": 5,
+   "high_string": 3,
+   "fret_offset": 2
+  },
+  {
+   "low_string": 4,
+   "high_string": 2,
+   "fret_offset": 3
+  },
+  {
+   "low_string": 3,
+   "high_string": 1,
+   "fret_offset": 3
+  }
+ ]
+}

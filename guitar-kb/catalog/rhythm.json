@@ -1,0 +1,333 @@
+{
+ "strumming": [
+  {
+   "id": "S1_quarters",
+   "name": "Quarter-note downs",
+   "meter": "4/4",
+   "grid": 4,
+   "steps": [
+    "D",
+    "D",
+    "D",
+    "D"
+   ],
+   "accents": [],
+   "swing": false,
+   "level": 1
+  },
+  {
+   "id": "S2_eighths",
+   "name": "Straight eighths",
+   "meter": "4/4",
+   "grid": 8,
+   "steps": [
+    "D",
+    "U",
+    "D",
+    "U",
+    "D",
+    "U",
+    "D",
+    "U"
+   ],
+   "accents": [
+    2,
+    6
+   ],
+   "swing": false,
+   "level": 1
+  },
+  {
+   "id": "S3_worship",
+   "name": "Worship pattern (old faithful)",
+   "meter": "4/4",
+   "grid": 8,
+   "steps": [
+    "D",
+    "-",
+    "D",
+    "U",
+    "-",
+    "U",
+    "D",
+    "U"
+   ],
+   "accents": [
+    2,
+    6
+   ],
+   "swing": false,
+   "level": 2
+  },
+  {
+   "id": "S4_waltz",
+   "name": "Hymn waltz",
+   "meter": "3/4",
+   "grid": 6,
+   "steps": [
+    "D",
+    "-",
+    "D",
+    "U",
+    "D",
+    "U"
+   ],
+   "accents": [
+    0
+   ],
+   "swing": false,
+   "level": 2
+  },
+  {
+   "id": "S5_six_eight",
+   "name": "6/8 hymn feel",
+   "meter": "6/8",
+   "grid": 6,
+   "steps": [
+    "D",
+    "D",
+    "U",
+    "D",
+    "D",
+    "U"
+   ],
+   "accents": [
+    0,
+    3
+   ],
+   "swing": false,
+   "level": 2
+  },
+  {
+   "id": "S6_chunk",
+   "name": "Percussive chunk on 2 & 4",
+   "meter": "4/4",
+   "grid": 8,
+   "steps": [
+    "D",
+    "U",
+    "X",
+    "U",
+    "D",
+    "U",
+    "X",
+    "U"
+   ],
+   "accents": [
+    2,
+    6
+   ],
+   "swing": false,
+   "level": 3,
+   "notes": "X = muted percussive strum"
+  },
+  {
+   "id": "S7_chug",
+   "name": "Palm-muted eighth chug",
+   "meter": "4/4",
+   "grid": 8,
+   "steps": [
+    "D",
+    "D",
+    "D",
+    "D",
+    "D",
+    "D",
+    "D",
+    "D"
+   ],
+   "accents": [
+    0,
+    4
+   ],
+   "swing": false,
+   "level": 2,
+   "palm_mute": true
+  },
+  {
+   "id": "S8_sixteenths",
+   "name": "Sixteenth groove",
+   "meter": "4/4",
+   "grid": 16,
+   "steps": [
+    "D",
+    "U",
+    "D",
+    "U",
+    "D",
+    "U",
+    "D",
+    "U",
+    "D",
+    "U",
+    "D",
+    "U",
+    "D",
+    "U",
+    "D",
+    "U"
+   ],
+   "accents": [
+    4,
+    12
+   ],
+   "swing": false,
+   "level": 3
+  },
+  {
+   "id": "S9_whole",
+   "name": "Whole-note strums (verse)",
+   "meter": "4/4",
+   "grid": 4,
+   "steps": [
+    "D",
+    "-",
+    "-",
+    "-"
+   ],
+   "accents": [
+    0
+   ],
+   "swing": false,
+   "level": 1
+  },
+  {
+   "id": "S10_half",
+   "name": "Half-note strums",
+   "meter": "4/4",
+   "grid": 4,
+   "steps": [
+    "D",
+    "-",
+    "D",
+    "-"
+   ],
+   "accents": [],
+   "swing": false,
+   "level": 1
+  }
+ ],
+ "picking": [
+  {
+   "id": "P1_bass_pinch",
+   "name": "Bass + pinch",
+   "meter": "4/4",
+   "grid": 4,
+   "steps": [
+    {
+     "p": "root",
+     "fingers": [
+      3,
+      2,
+      1
+     ]
+    },
+    {
+     "p": "root"
+    },
+    {
+     "p": "root",
+     "fingers": [
+      3,
+      2,
+      1
+     ]
+    },
+    {
+     "p": "root"
+    }
+   ]
+  },
+  {
+   "id": "P2_pima",
+   "name": "PIMA arpeggio",
+   "meter": "4/4",
+   "grid": 8,
+   "steps": [
+    {
+     "p": "root"
+    },
+    {
+     "i": 3
+    },
+    {
+     "m": 2
+    },
+    {
+     "a": 1
+    },
+    {
+     "p": "root"
+    },
+    {
+     "i": 3
+    },
+    {
+     "m": 2
+    },
+    {
+     "a": 1
+    }
+   ]
+  },
+  {
+   "id": "P3_rolling_34",
+   "name": "Rolling 3/4",
+   "meter": "3/4",
+   "grid": 6,
+   "steps": [
+    {
+     "p": "root"
+    },
+    {
+     "i": 3
+    },
+    {
+     "m": 2
+    },
+    {
+     "a": 1
+    },
+    {
+     "m": 2
+    },
+    {
+     "i": 3
+    }
+   ]
+  },
+  {
+   "id": "P4_travis",
+   "name": "Travis pattern",
+   "meter": "4/4",
+   "grid": 8,
+   "steps": [
+    {
+     "p": "root"
+    },
+    {
+     "m": 2
+    },
+    {
+     "p": "alt_bass"
+    },
+    {
+     "i": 3
+    },
+    {
+     "p": "root"
+    },
+    {
+     "m": 2
+    },
+    {
+     "p": "alt_bass"
+    },
+    {
+     "i": 3
+    }
+   ],
+   "notes": "Thumb alternates root and alternate bass every beat. C: 5-4, G: 6-4, D: 4-3"
+  }
+ ]
+}
