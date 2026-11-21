@@ -243,6 +243,8 @@ SONGS = [dict(
 
 # ---------------- quiz generators ----------------
 QUIZZES = [
+    dict(id='Q_open_strings', lesson='F.01', type='generated', prompt='Open string {n} is which note? / Which string is the open {note}?', params=dict(strings=[1,2,3,4,5,6])),
+    dict(id='Q_read_diagram', lesson='F.04', type='generated', prompt='Which chord is this diagram?', params=dict(chords=['C','A','G','E','D','Am','Em','Dm','E7','A7','D7','G7','Cadd9','Dsus4'])),
     dict(id='Q_note_names', lesson='F.07', type='generated', prompt='Name the note: string {s}, fret {f}', params=dict(strings=[6,5], frets=[0,12])),
     dict(id='Q_intervals', lesson='T.01', type='generated', prompt='How many semitones is a {interval}?', params=dict(intervals=['m2','M2','m3','M3','P4','TT','P5','m6','M6','m7','M7','P8'])),
     dict(id='Q_diatonic', lesson='T.02', type='generated', prompt='In the key of {key}, what is the {degree} chord?', params=dict(keys=['C','G','D','A','E','F','Bb'], degrees=['ii','iii','IV','V','vi'])),
@@ -268,10 +270,10 @@ def L(id, title, prereqs, pass_, assets=None, instrument=None):
     return d
 P = lambda t, **k: dict(type=t, **k)
 LESSONS = [
-    L('F.01','Parts, strings & standard tuning',[],P('quiz',score=0.9)),
+    L('F.01','Parts, strings & standard tuning',[],P('quiz',score=0.9),{'quizzes':['Q_open_strings']}),
     L('F.02','Tuning',['F.01'],P('pitch',cents=5,scope='all_strings')),
     L('F.03','Posture, fret hand, pick grip',['F.01'],P('self_check')),
-    L('F.04','Reading chord diagrams, tab & charts',['F.01'],P('quiz',score=0.9)),
+    L('F.04','Reading chord diagrams, tab & charts',['F.01'],P('quiz',score=0.9),{'quizzes':['Q_read_diagram']}),
     L('F.05','Spider warm-up',['F.03'],P('timing',bpm=60,subdivision=8,max_err_ms=50,bars=4),{'exercises':['EX_spider']}),
     L('F.06','Playing with a click',['F.03'],P('timing',bpm=70,subdivision=4,max_err_ms=50,bars=8),{'rhythm':['S1_quarters']}),
     L('F.07','Note names on strings 6 & 5',['F.04'],P('quiz',score=0.9,max_s=3),{'quizzes':['Q_note_names']}),

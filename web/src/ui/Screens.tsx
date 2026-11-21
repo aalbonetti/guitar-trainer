@@ -1,12 +1,16 @@
 // Screens: Today, Path, Lesson, Songs, Song, Tools, Settings.
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import type { Catalog, Lesson, Outline } from '../catalog';
 import { describePass, lessonTempo } from '../catalog';
 import { shapeFor, transposeChord, keyUsesFlats, pcOf, keyName, KEY_NAMES, capoOptions, type Shape } from '../music';
 import { ChordDiagram, ScaleDiagram, StrumGrid } from './Diagrams';
 import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
 import { getSetList, importSetList, clearSetList, recentSongs } from '../setlist';
-import { persisted } from '../store';
+import { persisted, useStore } from '../store';
+import { LessonContent } from './Content';
+import { progress, recordAttempt } from '../progressStore';
+import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
+import { exportAll, importAll } from '../db';
 
 export const instrumentPref = persisted<'acoustic' | 'electric' | 'both'>('gt_instruments', 'both');
 const go = (h: string) => { location.hash = h; };
@@ -17,12 +21,23 @@ const trackVisible = (cat: Catalog, trackId: string) => {
 
 // ---------- Today ----------
 export function Today({ cat }: { cat: Catalog }) {
+  const { pr, states } = useStates(cat);
+  const day = dayOf();
   const sl = getSetList();
   const recent = sl ? recentSongs(sl, 4) : [];
-  const start = cat.lessons.filter(l => l.track === 'F').slice(0, 3);
+  const visible = cat.lessons.filter(l => trackVisible(cat, l.track));
+  const reviews = visible.filter(l => isReviewDue(pr.lp[l.id], day)).slice(0, 3);
+  const next: Lesson[] = [];
+  for (const t of cat.tracks.filter(t => trackVisible(cat, t.id))) {
+    const l = cat.lessons.find(x => x.track === t.id && (states[x.id] === 'in_progress' || states[x.id] === 'available'));
+    if (l) next.push(l);
+  }
+  const streak = (() => { let n = 0, d = day; const set = new Set(pr.days); if (!set.has(d)) d = addDaysLocal(d, -1); while (set.has(d)) { n++; d = addDaysLocal(d, -1); } return n; })();
+  const passed = Object.values(states).filter(s => s === 'passed').length;
   return (
     <div class="page">
       <h1>Today</h1>
+      <p class="muted">{passed} of {cat.lessons.length} lessons passed{streak ? ` · ${streak}-day streak` : ''}</p>
       <section class="card">
         <h2>Quick tools</h2>
         <div class="row">
@@ -30,10 +45,10 @@ export function Today({ cat }: { cat: Catalog }) {
           <button class="primary" onClick={() => go('#/tools/metronome')}>⏱ Metronome</button>
         </div>
       </section>
+      {reviews.length ? <section class="card"><h2>Reviews due</h2><ul class="list">{reviews.map(l => <li><a href={`#/lesson/${l.id}`}><b>{l.id}</b> {l.title}<small>quick check so it sticks</small></a></li>)}</ul></section> : null}
       <section class="card">
-        <h2>Start here</h2>
-        <p class="muted">Progress tracking and daily reviews arrive in the next update. For now, work through Foundations in order.</p>
-        <ul class="list">{start.map(l => <li><a href={`#/lesson/${l.id}`}><b>{l.id}</b> {l.title}</a></li>)}</ul>
+        <h2>Up next</h2>
+        <ul class="list">{next.map(l => <li><a href={`#/lesson/${l.id}`}><b>{l.id}</b> {l.title}<small>{cat.tracks.find(t => t.id === l.track)?.name} · {pr.lp[l.id]?.first_pass_day ? 'passed once, pass again on another day' : describePass(l.pass_criteria)}</small></a></li>)}</ul>
       </section>
       <section class="card">
         <h2>This month's songs</h2>
@@ -45,18 +60,31 @@ export function Today({ cat }: { cat: Catalog }) {
     </div>
   );
 }
+function addDaysLocal(day: string, n: number) { const [y, m, d] = day.split('-').map(Number); return dayOf(new Date(y, m - 1, d + n)); }
 
 // ---------- Path ----------
+const ICON: Record<State, string> = { locked: '🔒', available: '○', in_progress: '◐', passed: '●' };
+function useStates(cat: Catalog) { const pr = useStore(progress); return { pr, states: computeStates(cat.lessons, cat.tracks, pr.lp) }; }
+function StateBadge({ cat, id }: { cat: Catalog; id: string }) {
+  const { pr, states } = useStates(cat);
+  const s = states[id], due = isReviewDue(pr.lp[id], dayOf());
+  const label = due ? 'review due' : s === 'in_progress' && pr.lp[id]?.first_pass_day ? 'passed once' : s.replace('_', ' ');
+  return <small class={`badge b-${due ? 'due' : s}`}>{label}</small>;
+}
 export function Path({ cat }: { cat: Catalog }) {
+  const { pr, states } = useStates(cat);
+  const day = dayOf();
+  const done = Object.values(states).filter(s => s === 'passed').length;
   return (
     <div class="page">
-      <h1>Path</h1>
+      <h1>Path <small class="muted">{done}/{cat.lessons.length} passed</small></h1>
+      <p class="muted legend">● passed · ◐ in progress · ○ ready · 🔒 needs earlier lessons · ↻ review due</p>
       {cat.tracks.filter(t => trackVisible(cat, t.id)).map(t => (
         <section class="card">
           <h2>{t.name} <small class="muted">{t.instrument === 'both' ? 'acoustic + electric' : t.instrument}</small></h2>
           <ul class="list lessons">
             {cat.lessons.filter(l => l.track === t.id).map(l => (
-              <li><a href={`#/lesson/${l.id}`}><b>{l.id}</b> {l.title}<small>{describePass(l.pass_criteria)}</small></a></li>
+              <li class={`st-${states[l.id]}`}><a href={`#/lesson/${l.id}`}><i class="sticon">{ICON[states[l.id]]}{isReviewDue(pr.lp[l.id], day) ? '↻' : ''}</i><b>{l.id}</b> {l.title}<small>{describePass(l.pass_criteria)}</small></a></li>
             ))}
           </ul>
         </section>
@@ -83,10 +111,12 @@ export function LessonView({ cat, id }: { cat: Catalog; id: string }) {
   const triads = (a.triads || []).map(tid => cat.shapes.triads.find(t => t.id === tid)).filter(Boolean);
   const exercises = (a.exercises || []).map(eid => cat.exercises.find(e => e.id === eid)).filter(Boolean);
   const tempo = lessonTempo(l, cat);
+  const [md, setMd] = useState<string | null>(null);
+  useEffect(() => { setMd(null); fetch(`./content/${l.id}.md`).then(r => (r.ok ? r.text() : '')).then(t => setMd(t.startsWith('<') ? '' : t)).catch(() => setMd('')); }, [l.id]);
   return (
     <div class="page lesson">
       <div class="crumbs"><a href="#/path">Path</a> › {cat.tracks.find(t => t.id === l.track)?.name}</div>
-      <h1><span class="lid">{l.id}</span> {l.title}</h1>
+      <h1><span class="lid">{l.id}</span> {l.title} <StateBadge cat={cat} id={l.id} /></h1>
       <ToolBar preset={tempo} label="lesson tempo" />
       <div class="two">
         <div>
@@ -97,8 +127,10 @@ export function LessonView({ cat, id }: { cat: Catalog; id: string }) {
           </section>
           <section class="card">
             <h2>Lesson</h2>
-            <p class="muted">The written lesson for {l.id} is being drafted and will appear here. Use the diagrams, patterns and tools on this page to practice in the meantime.</p>
+            {md === null ? <p class="muted">Loading…</p> : md ? <LessonContent md={md} cat={cat} lessonId={l.id} />
+              : <p class="muted">The written lesson for {l.id} is being drafted. Use the diagrams, patterns and tools on this page to practice in the meantime.</p>}
           </section>
+          <PassPanel cat={cat} l={l} />
           {exercises.length ? <section class="card"><h2>Exercises</h2><ul class="list">{exercises.map(e => <li><b>{e!.name}</b>{e!.tempo ? <small>start {e!.tempo.start} → target {e!.tempo.target} BPM</small> : null}{e!.pairs ? <small>{e!.pairs.map(p => p.join(' ↔ ')).join(' · ')}</small> : null}</li>)}</ul></section> : null}
           {songs.length ? <section class="card"><h2>Songs that use this</h2><ul class="list">{songs.map(o => <li><a href={`#/song/${o.id}`}>{o.title}</a> <small class="muted">{o.artist}</small></li>)}</ul></section> : null}
         </div>
@@ -114,6 +146,32 @@ export function LessonView({ cat, id }: { cat: Catalog; id: string }) {
         {next ? <a class="btn" href={`#/lesson/${next.id}`}>{next.id} →</a> : <span />}
       </div>
     </div>
+  );
+}
+
+function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
+  const pr = useStore(progress);
+  const [msg, setMsg] = useState('');
+  const type = l.pass_criteria.type;
+  const p = pr.lp[l.id];
+  const due = isReviewDue(p, dayOf());
+  const today = dayOf();
+  const doneToday = p?.first_pass_day === today && p.state !== 'passed';
+  const states = computeStates(cat.lessons, cat.tracks, pr.lp);
+  const mark = async (mode: 'auto' | 'self') => { const ev = await recordAttempt(l, { met: true, atTarget: true, score: 1, mode }); setMsg(EVENT_TEXT[ev] || 'Logged. It counts once per day.'); };
+  if (type === 'quiz') return (
+    <section class="card"><h2>Pass it</h2><p class="muted">Pass the quiz on this page on two different days. {due ? 'A review is due: take the quiz again today.' : ''}</p>
+      {states[l.id] === 'locked' ? <p class="muted">Tip: finish the earlier lessons first ({l.prereqs.join(', ')}).</p> : null}</section>);
+  const graded = type !== 'self_check';
+  return (
+    <section class="card">
+      <h2>Pass it {due ? <small class="badge b-due">review due</small> : null}</h2>
+      {graded ? <p class="muted">Automatic grading for this lesson ({describePass(l.pass_criteria).split(':')[0].toLowerCase()}) arrives in a later update. Until then, mark it yourself when you can do it at the goal above, on two different days.</p>
+        : <p class="muted">When it feels solid, mark it. Do that on two different days to pass.</p>}
+      {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''}.</p>
+        : <button class="primary" disabled={doneToday} onClick={() => mark(graded ? 'self' : 'auto')}>{doneToday ? 'Marked today ✓ (come back another day)' : due ? 'Review: I can still do this' : 'I can do this'}</button>}
+      {msg ? <p class="note">{msg}</p> : null}
+    </section>
   );
 }
 
@@ -215,6 +273,7 @@ function DelayCalc() {
 export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void }) {
   const [msg, setMsg] = useState('');
   const [inst, setInst] = useState(instrumentPref.get());
+  const [backup, setBackup] = useState<string | null>(null);
   const sl = getSetList();
   const onFile = async (e: Event) => {
     const f = (e.target as HTMLInputElement).files?.[0];
@@ -237,6 +296,16 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
         <input type="file" accept=".csv,text/csv" onChange={onFile} />
         {sl ? <p>Current: {sl.songs.length} songs, imported {new Date(sl.importedAt).toLocaleDateString()}. <button class="small" onClick={() => { clearSetList(); setMsg('Set list removed.'); onChange(); }}>Remove</button></p> : null}
         {msg ? <p class="note">{msg}</p> : null}
+      </section>
+      <section class="card">
+        <h2>Backup</h2>
+        <p class="muted">Your progress lives in Chrome on this phone. Copy a backup now and then (paste it into a note or email to yourself).</p>
+        <div class="row">
+          <button onClick={async () => { const j = JSON.stringify(await exportAll()); try { await navigator.clipboard.writeText(j); setMsg('Backup copied to the clipboard.'); } catch { setBackup(j); } }}>Copy backup</button>
+          <button onClick={() => setBackup(backup === null ? '' : null)}>Restore…</button>
+        </div>
+        {backup !== null ? <div><textarea class="backup" value={backup} onInput={e => setBackup((e.target as HTMLTextAreaElement).value)} placeholder="Paste a backup here" />
+          <button onClick={async () => { try { await importAll(JSON.parse(backup)); location.reload(); } catch (e) { setMsg('That backup could not be read: ' + (e as Error).message); } }}>Restore from pasted backup</button></div> : null}
       </section>
       <section class="card">
         <h2>About</h2>
