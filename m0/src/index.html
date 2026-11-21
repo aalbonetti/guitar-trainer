@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14161a">
+<title>Guitar Trainer · Audio Test</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+  :root { --bg:#14161a; --card:#1d2026; --line:#2c3038; --ink:#e9ebef; --muted:#8b919c; --accent:#e8a33d; --ok:#4cc38a; --bad:#ef6461; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  header { position:sticky; top:0; z-index:5; background:rgba(20,22,26,.96); border-bottom:1px solid var(--line); padding:12px 16px; }
+  header h1 { margin:0; font-size:18px; letter-spacing:.2px; }
+  header h1 span { color:var(--accent); }
+  #status { color:var(--muted); font-size:13px; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .meter { height:6px; background:var(--line); border-radius:3px; margin-top:8px; overflow:hidden; }
+  #level { height:100%; width:0; background:var(--ok); transition:width .05s; }
+  main { padding:16px; display:grid; gap:14px; grid-template-columns:1fr; max-width:1200px; margin:0 auto; }
+  @media (min-width:600px) { main { grid-template-columns:1fr 1fr; } .wide { grid-column:1 / -1; } }
+  section { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
+  h2 { font-size:16px; margin:0 0 4px; } h2 b { color:var(--accent); margin-right:6px; }
+  p { margin:6px 0; } .muted, small { color:var(--muted); }
+  button, select { font:inherit; color:var(--ink); background:#2a2f38; border:1px solid #3a404b; border-radius:10px; padding:10px 14px; min-height:44px; }
+  button.primary { background:var(--accent); color:#1a1300; border-color:var(--accent); font-weight:600; }
+  button.running { opacity:.6; } body.busy button:not(.running) { pointer-events:none; opacity:.45; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+  pre.out { white-space:pre-wrap; background:#15171b; border:1px solid var(--line); border-radius:10px; padding:10px; min-height:44px; margin:10px 0 0; font:13px/1.45 ui-monospace,Menlo,Consolas,monospace; font-variant-numeric:tabular-nums; }
+  .tuner { display:flex; align-items:center; gap:18px; margin-top:10px; }
+  .dial { position:relative; width:150px; height:84px; overflow:hidden; flex:none; }
+  .dial::before { content:""; position:absolute; inset:0 0 -66px 0; border:2px solid var(--line); border-radius:50%; }
+  #tNeedle { position:absolute; left:74px; bottom:0; width:3px; height:76px; background:var(--muted); transform-origin:bottom center; border-radius:2px; transition:transform .08s; }
+  #tNeedle.ok { background:var(--ok); }
+  #tNote { font-size:44px; font-weight:700; line-height:1; } #tCents { font-size:20px; font-variant-numeric:tabular-nums; } #tFreq { color:var(--muted); font-size:13px; }
+  #chordPrompt { display:flex; flex-direction:column; align-items:center; padding:12px 0 4px; min-height:110px; justify-content:center; text-align:center; }
+  #chordPrompt .big { font-size:52px; font-weight:800; line-height:1; } #chordPrompt .frets { font:20px ui-monospace,Menlo,monospace; color:var(--accent); letter-spacing:4px; margin-top:4px; }
+  #chordPrompt .sub { color:var(--muted); font-size:14px; margin-top:6px; }
+  #chromaBars { display:grid; grid-template-columns:repeat(12,1fr); gap:3px; height:70px; margin-top:8px; }
+  .bar { height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; } .bar i { width:100%; background:var(--accent); border-radius:3px 3px 0 0; min-height:1px; } .bar b { font-size:10px; color:var(--muted); font-weight:400; }
+  #chordLog span { display:inline-block; margin:2px; padding:2px 6px; border-radius:6px; font-size:13px; } #chordLog .ok { background:#1f3a2d; } #chordLog .bad { background:#45201f; }
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; } th, td { text-align:left; padding:7px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  td.ok { color:var(--ok); } td.bad { color:var(--bad); } .tablewrap { overflow-x:auto; }
+  #toast { position:fixed; left:50%; bottom:20px; transform:translateX(-50%) translateY(120px); background:#2a2f38; border:1px solid #3a404b; padding:10px 16px; border-radius:10px; transition:transform .25s; z-index:9; max-width:90vw; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+  #secure { display:none; background:#45201f; padding:10px 16px; }
+  textarea#copyArea { display:none; width:100%; height:160px; margin-top:8px; background:#15171b; color:var(--ink); border:1px solid var(--line); border-radius:10px; font:12px ui-monospace,monospace; }
+  ol.how { margin:6px 0 0 18px; padding:0; color:var(--muted); font-size:14px; }
+</style>
+</head>
+<body>
+<div id="secure">This page needs a secure (https) address to use the microphone.</div>
+<header>
+  <h1>Guitar Trainer <span>· Audio Test (M0)</span></h1>
+  <div id="status">Audio not started</div>
+  <div class="meter"><div id="level"></div></div>
+</header>
+<main>
+  <section class="wide">
+    <h2><b>0</b>Setup</h2>
+    <p class="muted">Use media volume around 70%, phone on a table about 1 m from the guitar. Bluetooth headphones off. Results save on this phone; tap <b>Copy results</b> at the bottom and paste them into the chat.</p>
+    <div class="row">
+      <button class="primary" id="startBtn">Start audio</button>
+      <select id="inputSel" aria-label="Input"><option value="">Default microphone</option></select>
+      <span id="chanWrap" style="display:none"><select id="chanSel" aria-label="Channel"></select></span>
+    </div>
+    <ol class="how">
+      <li>Run every test <b>folded</b>, then unfold and run them again: results are kept per posture.</li>
+      <li>To test the Kemper: connect it with a USB-B → USB-C cable, tap Restart audio, and pick it in the input list. Use a clean, dry patch.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><b>1</b>Tuner</h2>
+    <div class="tuner">
+      <div class="dial"><div id="tNeedle"></div></div>
+      <div><div id="tNote">–</div><div id="tCents">±0.0¢</div><div id="tFreq">— Hz</div></div>
+    </div>
+    <p class="muted">Play open strings and compare with a tuner you trust. The self-test plays reference tones through the speaker and measures them.</p>
+    <div class="row"><button id="tunerTest">Run self-test</button></div>
+    <pre class="out" id="tunerOut"></pre>
+  </section>
+
+  <section>
+    <h2><b>2</b>Click stability</h2>
+    <p class="muted">Plays a click and listens to it through the mic to check that the timing never wavers. Keep the room quiet.</p>
+    <div class="row"><select id="stabLen"><option value="120">2 minutes</option><option value="30">30 s (quick)</option></select><button id="stabBtn">Run</button></div>
+    <pre class="out" id="stabOut"></pre>
+  </section>
+
+  <section>
+    <h2><b>3</b>Round-trip latency</h2>
+    <p class="muted">16 clicks, speaker → mic. Measures the audio delay and how repeatable it is.</p>
+    <div class="row"><button id="latBtn">Run</button></div>
+    <pre class="out" id="latOut"></pre>
+  </section>
+
+  <section>
+    <h2><b>4</b>Strum calibration</h2>
+    <p class="muted">4-click count-in, then strum <b>muted strings</b> exactly on each of 16 clicks at 80 BPM. Run step 3 first.</p>
+    <div class="row"><button id="calBtn">Run</button></div>
+    <pre class="out" id="calOut"></pre>
+  </section>
+
+  <section>
+    <h2><b>5</b>Onset timing</h2>
+    <p class="muted">4-click count-in, then strum eighth notes (down-up) on a G chord for 8 bars at 80 BPM.</p>
+    <div class="row"><button id="timBtn">Run</button></div>
+    <pre class="out" id="timOut"></pre>
+  </section>
+
+  <section>
+    <h2><b>6</b>Chord check: G family</h2>
+    <p class="muted">20 trials. Play the chord shown, strum once, let it ring. Acoustic: phone mic at about 1 m.</p>
+    <div id="chordPrompt"><span class="sub">G · Cadd9 · Dsus4 · Em7 (anchored ring and pinky)</span></div>
+    <div id="chromaBars"></div>
+    <div class="row"><button id="chordBtn">Run</button></div>
+    <div id="chordLog" style="margin-top:8px"></div>
+  </section>
+
+  <section class="wide">
+    <h2><b>7</b>Fold / unfold</h2>
+    <p class="muted">Plays a click for 36 s while you fold and unfold the phone 2–3 times. Checks for audio dropouts and logs which mic and settings each posture uses.</p>
+    <div class="row"><button id="foldBtn">Run</button></div>
+    <pre class="out" id="foldOut"></pre>
+    <pre class="out" id="foldLog" style="max-height:220px;overflow:auto"></pre>
+  </section>
+
+  <section class="wide">
+    <h2><b>✓</b>Results</h2>
+    <div class="tablewrap" id="results"></div>
+    <div class="row"><button class="primary" id="copyBtn">Copy results</button><button id="clearBtn">Clear results</button></div>
+    <textarea id="copyArea" readonly></textarea>
+  </section>
+</main>
+<div id="toast"></div>
+<script>/*DSP*/</script>
+<script>/*APP*/</script>
+</body>
+</html>

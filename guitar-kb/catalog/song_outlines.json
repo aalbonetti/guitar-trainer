@@ -1,0 +1,5767 @@
+[
+ {
+  "id": "MS_goodness_of_god",
+  "title": "Goodness of God",
+  "artist": "Bethel Music / Jenn Johnson",
+  "ccli": 7117726,
+  "original_key": "Ab",
+  "bpm": 63,
+  "meter": "4/4",
+  "chart_key": "Ab",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "Ab",
+     "Db",
+     "Ab"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "Ab",
+     "Db",
+     "Ab",
+     "Eb/G",
+     "Fm",
+     "Db",
+     "Eb",
+     "Fm",
+     "Db",
+     "Ab",
+     "Eb/G",
+     "Fm",
+     "Db",
+     "Eb",
+     "Ab"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5/7",
+     "6m",
+     "4",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5/7",
+     "6m",
+     "4",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "Db",
+     "Ab",
+     "Db",
+     "Ab",
+     "Eb",
+     "Db",
+     "Ab",
+     "Eb/G",
+     "Fm",
+     "Db",
+     "Eb",
+     "Ab"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "4",
+     "1",
+     "5",
+     "4",
+     "1",
+     "5/7",
+     "6m",
+     "4",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "Ab/C",
+     "Db",
+     "Eb",
+     "Ab",
+     "Ab/C",
+     "Db",
+     "Eb",
+     "Ab",
+     "Ab/C",
+     "Ab",
+     "Eb",
+     "Fm",
+     "Ab/C",
+     "Db",
+     "Eb",
+     "Ab"
+    ],
+    "numbers": [
+     "1/3",
+     "4",
+     "5",
+     "1",
+     "1/3",
+     "4",
+     "5",
+     "1",
+     "1/3",
+     "1",
+     "5",
+     "6m",
+     "1/3",
+     "4",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 1
+   },
+   {
+    "shapes": "E",
+    "capo": 4
+   },
+   {
+    "shapes": "D",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.06",
+   "A.09",
+   "ER.07",
+   "EL.04"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7117726"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Bethel-Music/Victory/Goodness-of-God/",
+   "chords": "https://www.worshiptogether.com/songs/goodness-of-god-bethel/"
+  },
+  "chords_verified": "full",
+  "notes": null,
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_build_my_life",
+  "title": "Build My Life",
+  "artist": "Housefires / Pat Barrett",
+  "ccli": 7070345,
+  "original_key": "G",
+  "bpm": 70,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Intro/Verse",
+    "chords_in_chart_key": [
+     "G",
+     "C/G",
+     "G/B",
+     "C/G"
+    ],
+    "numbers": [
+     "1",
+     "4/1",
+     "1/3",
+     "4/1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "Cmaj9",
+     "Am7",
+     "G",
+     "Em7"
+    ],
+    "numbers": [
+     "4maj9",
+     "2m7",
+     "1",
+     "6m7"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "Cmaj9",
+     "Dsus",
+     "Em7",
+     "G/B"
+    ],
+    "numbers": [
+     "4maj9",
+     "5sus",
+     "6m7",
+     "1/3"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.05",
+   "ER.04",
+   "ER.08"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7070345"
+  },
+  "sources": {
+   "meta": "https://www.worshiptogether.com/songs/build-my-life-pat-barrett/",
+   "chords": "https://www.worshiptogether.com/songs/build-my-life-pat-barrett/"
+  },
+  "chords_verified": "full",
+  "notes": "Time signature 4/4 per Musicnotes listing.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_what_a_beautiful_name",
+  "title": "What a Beautiful Name",
+  "artist": "Hillsong Worship",
+  "ccli": 7068424,
+  "original_key": "D",
+  "bpm": 68,
+  "meter": "4/4",
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D",
+     "G",
+     "Bm",
+     "A",
+     "Bm",
+     "A/C#",
+     "D",
+     "G",
+     "Bm",
+     "A"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "6m",
+     "5",
+     "6m",
+     "5/7",
+     "1",
+     "4",
+     "6m",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "D",
+     "A",
+     "Bm",
+     "A",
+     "G",
+     "D/F#",
+     "A",
+     "Bm",
+     "A",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "5",
+     "4",
+     "1/3",
+     "5",
+     "6m",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Instrumental",
+    "chords_in_chart_key": [
+     "G",
+     "A",
+     "Bm",
+     "F#m",
+     "G",
+     "A",
+     "Bm",
+     "A"
+    ],
+    "numbers": [
+     "4",
+     "5",
+     "6m",
+     "3m",
+     "4",
+     "5",
+     "6m",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "ER.03",
+   "EL.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7068424"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/hillsong-worship/what-a-beautiful-name-(radio-edit)/what-a-beautiful-name-(radio-edit)/",
+   "chords": "https://www.worshiptogether.com/songs/what-a-beautiful-name-hillsong-worship/"
+  },
+  "chords_verified": "partial (bridge not captured)",
+  "notes": null,
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_10000_reasons",
+  "title": "10,000 Reasons (Bless the Lord)",
+  "artist": "Matt Redman",
+  "ccli": 6016351,
+  "original_key": "G",
+  "bpm": 72.5,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "C",
+     "G",
+     "D/F#",
+     "Em",
+     "C",
+     "G",
+     "Dsus",
+     "D"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "5/7",
+     "6m",
+     "4",
+     "1",
+     "5sus",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "C",
+     "G",
+     "D",
+     "Em",
+     "C",
+     "G",
+     "D",
+     "C",
+     "Em",
+     "C",
+     "D",
+     "Em",
+     "C",
+     "D",
+     "Gsus",
+     "G"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "4",
+     "6m",
+     "4",
+     "5",
+     "6m",
+     "4",
+     "5",
+     "1sus",
+     "1"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "G",
+     "D",
+     "Em",
+     "C",
+     "G",
+     "D",
+     "Em",
+     "C",
+     "G",
+     "D",
+     "Em",
+     "C",
+     "G",
+     "D",
+     "G"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.04",
+   "A.05",
+   "T.03"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/6016351"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Matt-Redman/10,000-Reasons/10,000-Reasons/",
+   "chords": "https://www.worshiptogether.com/songs/10-000-reasons-bless-the-lord/"
+  },
+  "chords_verified": "full",
+  "notes": null,
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_holy_forever",
+  "title": "Holy Forever",
+  "artist": "Chris Tomlin",
+  "ccli": 7201044,
+  "original_key": "Db",
+  "bpm": 72,
+  "meter": "4/4",
+  "chart_key": "Db",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "Gb",
+     "Bbm",
+     "Absus",
+     "Db/F",
+     "Bbm",
+     "Absus"
+    ],
+    "numbers": [
+     "4",
+     "6m",
+     "5sus",
+     "1/3",
+     "6m",
+     "5sus"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "Db",
+     "Gb",
+     "Db",
+     "Bbm",
+     "Ab(add4)",
+     "Gb2"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "6m",
+     "5(add4)",
+     "4(2)"
+    ]
+   },
+   {
+    "name": "Pre-Chorus",
+    "chords_in_chart_key": [
+     "Gb2",
+     "Bbm",
+     "Ab(add4)",
+     "Bbm",
+     "Gb2",
+     "Gb2",
+     "Bbm",
+     "Ab(add4)",
+     "Bbm",
+     "Ebm7"
+    ],
+    "numbers": [
+     "4(2)",
+     "6m",
+     "5(add4)",
+     "6m",
+     "4(2)",
+     "4(2)",
+     "6m",
+     "5(add4)",
+     "6m",
+     "2m7"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "Gb2",
+     "Bbm",
+     "Ab(add4)",
+     "Db/F",
+     "Bbm",
+     "Ebm7",
+     "Ab(add4)",
+     "Db",
+     "Dbsus",
+     "Db"
+    ],
+    "numbers": [
+     "4(2)",
+     "6m",
+     "5(add4)",
+     "1/3",
+     "6m",
+     "2m7",
+     "5(add4)",
+     "1",
+     "1sus",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 1
+   },
+   {
+    "shapes": "A",
+    "capo": 4
+   },
+   {
+    "shapes": "G",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.08",
+   "ER.04",
+   "ER.08"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7201044"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Chris-Tomlin/Always/Holy-Forever/",
+   "chords": "https://www.worshiptogether.com/songs/holy-forever-chris-tomlin/"
+  },
+  "chords_verified": "full",
+  "notes": null,
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_gratitude",
+  "title": "Gratitude",
+  "artist": "Brandon Lake",
+  "ccli": 7158417,
+  "original_key": "B",
+  "bpm": 78,
+  "meter": "6/8",
+  "chart_key": "B",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "B",
+     "G#m",
+     "F#",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "B",
+     "G#m",
+     "F#",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "B",
+     "F#",
+     "E",
+     "G#m",
+     "F#",
+     "B"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "4",
+     "6m",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Channel",
+    "chords_in_chart_key": [
+     "B"
+    ],
+    "numbers": [
+     "1"
+    ]
+   },
+   {
+    "name": "Channel 2",
+    "chords_in_chart_key": [
+     "E",
+     "G#m",
+     "F#"
+    ],
+    "numbers": [
+     "4",
+     "6m",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 2
+   },
+   {
+    "shapes": "G",
+    "capo": 4
+   },
+   {
+    "shapes": "E",
+    "capo": 7
+   }
+  ],
+  "practice_for": [
+   "A.07",
+   "A.08",
+   "ER.03",
+   "ER.08"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7158417"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Brandon-Lake/House-of-Miracles/Gratitude/",
+   "chords": "https://www.worshiptogether.com/songs/gratitude-brandon-lake/"
+  },
+  "chords_verified": "full",
+  "notes": "WorshipTogether lists 155 BPM (eighth-note count); MultiTracks master is 78 BPM in 6/8. Use 78 dotted-quarter.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_cornerstone",
+  "title": "Cornerstone",
+  "artist": "Hillsong Worship",
+  "ccli": 6158927,
+  "original_key": "C",
+  "bpm": 71.5,
+  "meter": "4/4",
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "F",
+     "G",
+     "Am",
+     "Am/G",
+     "F",
+     "G",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "5",
+     "6m",
+     "6m/5",
+     "4",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "F",
+     "Am",
+     "G",
+     "F",
+     "Am",
+     "G",
+     "C",
+     "F",
+     "Am",
+     "G",
+     "C"
+    ],
+    "numbers": [
+     "4",
+     "6m",
+     "5",
+     "4",
+     "6m",
+     "5",
+     "1",
+     "4",
+     "6m",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Instrumental",
+    "chords_in_chart_key": [
+     "C",
+     "Am",
+     "F",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "4",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 0
+   },
+   {
+    "shapes": "A",
+    "capo": 3
+   },
+   {
+    "shapes": "G",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.05",
+   "ER.04"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/6158927"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Hillsong/Cornerstone/Cornerstone/",
+   "chords": "https://www.worshiptogether.com/songs/cornerstone-hillsong-worship/"
+  },
+  "chords_verified": "full",
+  "notes": "Verse text is the 1834 hymn \"My Hope Is Built\" (PD); the modern chorus/arrangement is copyrighted (2011).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_living_hope",
+  "title": "Living Hope",
+  "artist": "Phil Wickham",
+  "ccli": 7106807,
+  "original_key": "Eb",
+  "bpm": 72,
+  "meter": "4/4",
+  "chart_key": "E",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "E",
+     "A2",
+     "E",
+     "A2"
+    ],
+    "numbers": [
+     "1",
+     "4(2)",
+     "1",
+     "4(2)"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "E",
+     "Bsus",
+     "A2",
+     "C#m7",
+     "Bsus",
+     "E",
+     "Bsus",
+     "A2",
+     "Bsus",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "5sus",
+     "4(2)",
+     "6m7",
+     "5sus",
+     "1",
+     "5sus",
+     "4(2)",
+     "5sus",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "A2",
+     "E",
+     "B",
+     "C#m7",
+     "A2",
+     "E",
+     "B",
+     "C#m7",
+     "A2",
+     "E",
+     "B",
+     "C#m7",
+     "E",
+     "B",
+     "A2",
+     "Bsus",
+     "B",
+     "E"
+    ],
+    "numbers": [
+     "4(2)",
+     "1",
+     "5",
+     "6m7",
+     "4(2)",
+     "1",
+     "5",
+     "6m7",
+     "4(2)",
+     "1",
+     "5",
+     "6m7",
+     "1",
+     "5",
+     "4(2)",
+     "5sus",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 1
+   },
+   {
+    "shapes": "C",
+    "capo": 3
+   },
+   {
+    "shapes": "A",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.08",
+   "EL.07",
+   "ER.06"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7106807"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/phil-wickham/living-hope/living-hope/",
+   "chords": "https://essentialworship.com/songs/phil-wickham/living-hope/"
+  },
+  "chords_verified": "full",
+  "notes": "Chart source is in E; original recording is Eb (play E shapes and tune down, or capo 1 with D shapes).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_way_maker",
+  "title": "Way Maker",
+  "artist": "Leeland (written by Sinach)",
+  "ccli": 7115744,
+  "original_key": "E",
+  "bpm": 68,
+  "meter": "4/4",
+  "chart_key": "E",
+  "sections": [
+   {
+    "name": "Verse/Chorus loop",
+    "chords_in_chart_key": [
+     "A",
+     "E",
+     "B",
+     "C#m"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "5",
+     "6m"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "E",
+    "capo": 0
+   },
+   {
+    "shapes": "D",
+    "capo": 2
+   },
+   {
+    "shapes": "C",
+    "capo": 4
+   }
+  ],
+  "practice_for": [
+   "A.06",
+   "A.08",
+   "ER.03",
+   "EL.04"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7115744"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Leeland/Better-Word/Way-Maker/",
+   "chords": "https://www.e-chords.com/chords/leeland/way-maker"
+  },
+  "chords_verified": "core loop only",
+  "notes": "4 1 5 6m loop confirmed by three independent charts (E, capo-4 C shapes, capo-2 G shapes).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_king_of_kings",
+  "title": "King of Kings",
+  "artist": "Hillsong Worship",
+  "ccli": 7127647,
+  "original_key": "D",
+  "bpm": 68,
+  "meter": "4/4",
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "D(no3)"
+    ],
+    "numbers": [
+     "1(no3)"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D/F#",
+     "G",
+     "A",
+     "D"
+    ],
+    "numbers": [
+     "1/3",
+     "4",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "D(no3)",
+     "G2",
+     "Bm7",
+     "D/A",
+     "A",
+     "D(no3)",
+     "G2",
+     "Bm7",
+     "G2",
+     "A",
+     "D(no3)"
+    ],
+    "numbers": [
+     "1(no3)",
+     "4(2)",
+     "6m7",
+     "1/5",
+     "5",
+     "1(no3)",
+     "4(2)",
+     "6m7",
+     "4(2)",
+     "5",
+     "1(no3)"
+    ]
+   },
+   {
+    "name": "Verse 3",
+    "chords_in_chart_key": [
+     "Bm",
+     "G",
+     "A",
+     "D"
+    ],
+    "numbers": [
+     "6m",
+     "4",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "ER.06",
+   "EL.04",
+   "ER.08"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7127647"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/hillsong-worship/awake/king-of-kings/",
+   "chords": "https://www.worshiptogether.com/songs/king-of-kings-hillsong-worship/"
+  },
+  "chords_verified": "full",
+  "notes": null,
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_firm_foundation",
+  "title": "Firm Foundation (He Won't)",
+  "artist": "Cody Carnes",
+  "ccli": 7188203,
+  "original_key": "Bb",
+  "bpm": 75,
+  "meter": "6/8",
+  "chart_key": "Bb",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "Bb",
+     "Cm7",
+     "Bb/D",
+     "Eb2"
+    ],
+    "numbers": [
+     "1",
+     "2m7",
+     "1/3",
+     "4(2)"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "Bb",
+     "Gm7",
+     "F",
+     "Bbsus",
+     "Bb",
+     "Gm7",
+     "F",
+     "Eb",
+     "Bb/D",
+     "Gm7",
+     "F"
+    ],
+    "numbers": [
+     "1",
+     "6m7",
+     "5",
+     "1sus",
+     "1",
+     "6m7",
+     "5",
+     "4",
+     "1/3",
+     "6m7",
+     "5"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "Ebmaj7",
+     "Bb/D",
+     "Gm"
+    ],
+    "numbers": [
+     "4maj7",
+     "1/3",
+     "6m"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 1
+   },
+   {
+    "shapes": "G",
+    "capo": 3
+   },
+   {
+    "shapes": "E",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.07",
+   "A.08",
+   "ER.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7188203"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Cody-Carnes/Firm-Foundation-(He-Won't)/Firm-Foundation-(He-Won't)/",
+   "chords": "https://www.worshiptogether.com/songs/firm-foundation-he-wont-cody-carnes/"
+  },
+  "chords_verified": "partial (chorus not captured cleanly)",
+  "notes": "WorshipTogether lists 148 BPM (eighth-note count); master is 75 BPM in 6/8.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_raise_a_hallelujah",
+  "title": "Raise a Hallelujah",
+  "artist": "Bethel Music",
+  "ccli": 7119315,
+  "original_key": "Db",
+  "bpm": 82,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "C",
+     "Em",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "6m",
+     "5"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "G",
+     "Em",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 1
+   },
+   {
+    "shapes": "A",
+    "capo": 4
+   },
+   {
+    "shapes": "G",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.06",
+   "ER.02",
+   "ER.10"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7119315"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/bethel-music/victory/raise-a-hallelujah/",
+   "chords": "https://worshipchords.com/pdf/raise-a-hallelujah-chords-key-g-88471.pdf"
+  },
+  "chords_verified": "core loops only",
+  "notes": "Chart source in G; original is Db (capo 1 with C shapes, or capo 6 with G shapes).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_great_are_you_lord",
+  "title": "Great Are You Lord",
+  "artist": "All Sons & Daughters",
+  "ccli": 6460220,
+  "original_key": "A",
+  "bpm": 72,
+  "meter": "6/8",
+  "chart_key": "A",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D",
+     "F#m",
+     "E"
+    ],
+    "numbers": [
+     "4",
+     "6m",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "D",
+     "F#m",
+     "E"
+    ],
+    "numbers": [
+     "4",
+     "6m",
+     "5"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "A",
+     "Asus4",
+     "D",
+     "A"
+    ],
+    "numbers": [
+     "1",
+     "1sus4",
+     "4",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 0
+   },
+   {
+    "shapes": "G",
+    "capo": 2
+   },
+   {
+    "shapes": "E",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.07",
+   "A.08"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/6460220"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/all-sons-and-daughters/all-sons-and-daughters-live/great-are-you-lord/",
+   "chords": "https://tabs.ultimate-guitar.com/tab/all-sons-daughters/great-are-you-lord-chords-1401417"
+  },
+  "chords_verified": "full",
+  "notes": "With capo 2 and G shapes this becomes Cadd9-Em-D: a G-family song.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_who_you_say_i_am",
+  "title": "Who You Say I Am",
+  "artist": "Hillsong Worship",
+  "ccli": 7102401,
+  "original_key": "Gb",
+  "bpm": 86,
+  "meter": "6/8",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "Em",
+     "D",
+     "G",
+     "G",
+     "Em",
+     "D",
+     "C",
+     "Em",
+     "D",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "5",
+     "1",
+     "1",
+     "6m",
+     "5",
+     "4",
+     "6m",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "Em",
+     "D",
+     "C",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "5",
+     "4",
+     "1"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "Em",
+     "D/F#",
+     "G",
+     "C"
+    ],
+    "numbers": [
+     "6m",
+     "5/7",
+     "1",
+     "4"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "E",
+    "capo": 2
+   },
+   {
+    "shapes": "D",
+    "capo": 4
+   },
+   {
+    "shapes": "C",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.07",
+   "ER.05"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7102401"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/hillsong-worship/there-is-more/who-you-say-i-am/",
+   "chords": "https://www.worshiptogether.com/songs/who-you-say-i-am-hillsong-worship/"
+  },
+  "chords_verified": "full",
+  "notes": "Original master is Gb; chart source in G (a half step up) is the common church key.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_in_christ_alone",
+  "title": "In Christ Alone",
+  "artist": "Keith Getty & Stuart Townend",
+  "ccli": 3350395,
+  "original_key": "D",
+  "bpm": 68,
+  "meter": "3/4",
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "D",
+     "G2",
+     "Bm7",
+     "G2"
+    ],
+    "numbers": [
+     "1",
+     "4(2)",
+     "6m7",
+     "4(2)"
+    ]
+   },
+   {
+    "name": "Verse (each half)",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "G",
+     "A",
+     "D/F#",
+     "G",
+     "A",
+     "D"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "4",
+     "5",
+     "1/3",
+     "4",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.07",
+   "A.10",
+   "EL.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/3350395"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/mtcomplete/In-Christ-Alone/overview/",
+   "chords": "https://tabs.ultimate-guitar.com/tab/keith-getty/in-christ-alone-chords-1161935"
+  },
+  "chords_verified": "full",
+  "notes": "No original-master entry on MultiTracks; BPM varies by recording (62-79). Some charts use Bm for the 3rd chord.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_love_of_god",
+  "title": "Love of God",
+  "artist": "Phil Wickham & Brandon Lake",
+  "ccli": 7241154,
+  "original_key": "Gb",
+  "bpm": 74,
+  "meter": "4/4",
+  "chart_key": "Gb",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "Gb",
+     "Bbm",
+     "Cb"
+    ],
+    "numbers": [
+     "1",
+     "3m",
+     "4"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "Gb",
+     "Cb",
+     "Ebm",
+     "Dbsus",
+     "Gb/Bb",
+     "Cb",
+     "Gb/Db",
+     "Db",
+     "Gb"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "6m",
+     "5sus",
+     "1/3",
+     "4",
+     "1/5",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "Gb/Bb",
+     "Cb",
+     "Gb",
+     "Db",
+     "Ebm7",
+     "Cb",
+     "Gb/Bb",
+     "Dbsus",
+     "Db",
+     "Gb/Bb",
+     "Cb",
+     "Db",
+     "Gb",
+     "Bbm7",
+     "Cb",
+     "Ebm7",
+     "Db",
+     "Gb"
+    ],
+    "numbers": [
+     "1/3",
+     "4",
+     "1",
+     "5",
+     "6m7",
+     "4",
+     "1/3",
+     "5sus",
+     "5",
+     "1/3",
+     "4",
+     "5",
+     "1",
+     "3m7",
+     "4",
+     "6m7",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "E",
+    "capo": 2
+   },
+   {
+    "shapes": "D",
+    "capo": 4
+   },
+   {
+    "shapes": "C",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.08",
+   "ER.03",
+   "ER.08",
+   "EL.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7241154"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Brandon-Lake/Love-of-God/Love-of-God/",
+   "chords": "https://www.worshiptogether.com/songs/love-of-god-brandon-lake-phil-wickham/"
+  },
+  "chords_verified": "full",
+  "notes": "Most-played song in the HOPE set (4x Aug-Nov 2026). Gb: capo 2 with E shapes or capo 4 with D shapes.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_o_come_to_the_altar",
+  "title": "O Come to the Altar",
+  "artist": "Elevation Worship",
+  "ccli": 7051511,
+  "original_key": "B",
+  "bpm": 70,
+  "meter": "6/8",
+  "chart_key": "B",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "B",
+     "E",
+     "B",
+     "E",
+     "G#m",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "4",
+     "6m",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "B",
+     "C#m",
+     "G#m",
+     "E",
+     "B"
+    ],
+    "numbers": [
+     "1",
+     "2m",
+     "6m",
+     "4",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 2
+   },
+   {
+    "shapes": "G",
+    "capo": 4
+   },
+   {
+    "shapes": "E",
+    "capo": 7
+   }
+  ],
+  "practice_for": [
+   "A.07",
+   "A.08",
+   "ER.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7051511"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/elevation-worship/here-as-in-heaven/o-come-to-the-altar/",
+   "chords": "https://essentialworship.com/?p=1873"
+  },
+  "chords_verified": "verse and chorus",
+  "notes": "B: capo 4 with G shapes (G C Em / G Am Em C G).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_reckless_love",
+  "title": "Reckless Love",
+  "artist": "Cory Asbury",
+  "ccli": 7089641,
+  "original_key": "Gb",
+  "bpm": 83,
+  "meter": "6/8",
+  "chart_key": "B",
+  "sections": [
+   {
+    "name": "Verse/Chorus loop",
+    "chords_in_chart_key": [
+     "G#m",
+     "F#",
+     "E",
+     "B"
+    ],
+    "numbers": [
+     "6m",
+     "5",
+     "4",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "E",
+    "capo": 2
+   },
+   {
+    "shapes": "D",
+    "capo": 4
+   },
+   {
+    "shapes": "C",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.07",
+   "ER.03",
+   "EL.04"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7089641"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Cory-Asbury/Reckless-Love/Reckless-Love/charts/",
+   "chords": "https://tabs.ultimate-guitar.com/tab/cory-asbury/reckless-love-chords-2750127"
+  },
+  "chords_verified": "core loop only",
+  "notes": "6m 5 4 1 loop throughout; a second chart (Em D C G, tuned down) agrees. Gb original: capo 2 with E shapes = C#m B A E.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_blessed_be_your_name",
+  "title": "Blessed Be Your Name",
+  "artist": "Matt Redman",
+  "ccli": 3798438,
+  "original_key": "Bb",
+  "bpm": 116,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "Em",
+     "C",
+     "G",
+     "D",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Pre-Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "Em",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "Em",
+     "C",
+     "G",
+     "D",
+     "Em",
+     "D",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "Em",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 1
+   },
+   {
+    "shapes": "G",
+    "capo": 3
+   },
+   {
+    "shapes": "E",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.06",
+   "ER.02"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/3798438"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Matt-Redman/Coming-Back-To-The-Heart/Blessed-Be-Your-Name/",
+   "chords": "https://tabs.ultimate-guitar.com/tab/matt-redman/blessed-be-your-name-chords-52780"
+  },
+  "chords_verified": "full",
+  "notes": "Chart in G; Bb master = capo 3 with G shapes. Methodist Church hymnal chart in Bb matches.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_glorious_day",
+  "title": "Glorious Day",
+  "artist": "Passion / Kristian Stanfill",
+  "ccli": 7081388,
+  "original_key": "D",
+  "bpm": 110,
+  "meter": "4/4",
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D",
+     "Bm",
+     "G",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "4",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus (end)",
+    "chords_in_chart_key": [
+     "G",
+     "Dsus",
+     "D"
+    ],
+    "numbers": [
+     "4",
+     "1sus",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "ER.02",
+   "ER.10"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7081388"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Passion/Worthy-of-Your-Name/Glorious-Day/overview/",
+   "chords": "https://tabs.ultimate-guitar.com/tab/passion/glorious-day-chords-1928417"
+  },
+  "chords_verified": "partial",
+  "notes": "Intro/verse often played as single notes on low E (10-7-3 = D-Bm-G roots): a good ER.02 riff exercise.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_holy_is_the_lord",
+  "title": "Holy Is the Lord",
+  "artist": "Chris Tomlin",
+  "ccli": 4158039,
+  "original_key": "A",
+  "bpm": 84,
+  "meter": "4/4",
+  "chart_key": "A",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "A",
+     "D2",
+     "Esus",
+     "A/C#",
+     "D2",
+     "Esus"
+    ],
+    "numbers": [
+     "1",
+     "4(2)",
+     "5sus",
+     "1/3",
+     "4(2)",
+     "5sus"
+    ]
+   },
+   {
+    "name": "Pre-Chorus",
+    "chords_in_chart_key": [
+     "B7",
+     "D"
+    ],
+    "numbers": [
+     "2(7)",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "A/C#",
+     "D2",
+     "Esus",
+     "F#m7",
+     "D2",
+     "Esus"
+    ],
+    "numbers": [
+     "1/3",
+     "4(2)",
+     "5sus",
+     "6m7",
+     "4(2)",
+     "5sus"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "A",
+     "E/G#",
+     "G2",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "5/7",
+     "b7(2)",
+     "4"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 0
+   },
+   {
+    "shapes": "G",
+    "capo": 2
+   },
+   {
+    "shapes": "E",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.06",
+   "A.08",
+   "ER.04"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/4158039"
+  },
+  "sources": {
+   "meta": "https://www.worshiptogether.com/songs/holy-is-the-lord-chris-tomlin/",
+   "chords": "https://www.worshiptogether.com/songs/holy-is-the-lord-chris-tomlin/"
+  },
+  "chords_verified": "full",
+  "notes": "Key/BPM from WorshipTogether (no MultiTracks check); 4/4 not confirmed by source. B7 = secondary dominant (II7); G2 = borrowed bVII.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_i_will_follow",
+  "title": "I Will Follow",
+  "artist": "Chris Tomlin",
+  "ccli": 5806878,
+  "original_key": "Bb",
+  "bpm": 96,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "Em",
+     "C",
+     "G",
+     "D"
+    ],
+    "numbers": [
+     "6m",
+     "4",
+     "1",
+     "5"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "Em7",
+     "D",
+     "G",
+     "D",
+     "C"
+    ],
+    "numbers": [
+     "4",
+     "6m7",
+     "5",
+     "1",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "C",
+     "G",
+     "D"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 1
+   },
+   {
+    "shapes": "G",
+    "capo": 3
+   },
+   {
+    "shapes": "E",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.05",
+   "A.06",
+   "ER.02"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/5806878"
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Chris-Tomlin/And-If-Our-God-Is-For-Us/I-Will-Follow/",
+   "chords": "https://worshipchords.com/i-will-follow-chords/"
+  },
+  "chords_verified": "full",
+  "notes": "Chart in G = capo 3 to Bb (Tomlin plays it this way).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_hymn_of_heaven",
+  "title": "Hymn of Heaven",
+  "artist": "Phil Wickham",
+  "ccli": null,
+  "original_key": "E",
+  "bpm": 71,
+  "meter": "4/4",
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "D",
+     "D/F#",
+     "G",
+     "Bm7",
+     "A(add4)"
+    ],
+    "numbers": [
+     "1",
+     "1/3",
+     "4",
+     "6m7",
+     "5(add4)"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D",
+     "Dsus",
+     "D",
+     "Bm7",
+     "G",
+     "A(add4)",
+     "D/F#",
+     "G",
+     "D",
+     "A/C#",
+     "Bm7",
+     "G",
+     "Asus",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "1sus",
+     "1",
+     "6m7",
+     "4",
+     "5(add4)",
+     "1/3",
+     "4",
+     "1",
+     "5/7",
+     "6m7",
+     "4",
+     "5sus",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "D/F#",
+     "G",
+     "Asus",
+     "D",
+     "D/F#",
+     "G",
+     "Bm7",
+     "Asus",
+     "D/F#",
+     "G",
+     "A",
+     "D"
+    ],
+    "numbers": [
+     "1/3",
+     "4",
+     "5sus",
+     "1",
+     "1/3",
+     "4",
+     "6m7",
+     "5sus",
+     "1/3",
+     "4",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "E",
+    "capo": 0
+   },
+   {
+    "shapes": "D",
+    "capo": 2
+   },
+   {
+    "shapes": "C",
+    "capo": 4
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.08",
+   "EL.07",
+   "ER.08"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Phil-Wickham/Hymn-of-Heaven/Hymn-of-Heaven/",
+   "chords": "https://www.worshiptogether.com/songs/hymn-of-heaven-bethel-music/"
+  },
+  "chords_verified": "full",
+  "notes": "Chart in D; E original = capo 2 with D shapes.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_at_the_cross_love_ran_red",
+  "title": "At the Cross (Love Ran Red)",
+  "artist": "Chris Tomlin",
+  "ccli": null,
+  "original_key": "Ab",
+  "bpm": 73,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "Em",
+     "D/F#",
+     "G",
+     "G/B",
+     "C"
+    ],
+    "numbers": [
+     "6m",
+     "5/7",
+     "1",
+     "1/3",
+     "4"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "Em",
+     "D/F#",
+     "G",
+     "G/B",
+     "C2",
+     "D(add4)",
+     "C2",
+     "D(add4)",
+     "C2"
+    ],
+    "numbers": [
+     "6m",
+     "5/7",
+     "1",
+     "1/3",
+     "4(2)",
+     "5(add4)",
+     "4(2)",
+     "5(add4)",
+     "4(2)"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "C2",
+     "G",
+     "D",
+     "Am7",
+     "C2",
+     "G",
+     "D",
+     "Am7",
+     "C2",
+     "G"
+    ],
+    "numbers": [
+     "4(2)",
+     "1",
+     "5",
+     "2m7",
+     "4(2)",
+     "1",
+     "5",
+     "2m7",
+     "4(2)",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 1
+   },
+   {
+    "shapes": "E",
+    "capo": 4
+   },
+   {
+    "shapes": "D",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.08",
+   "ER.04"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Chris-Tomlin/Love-Ran-Red/At-The-Cross-(Love-Ran-Red)/overview/",
+   "chords": "https://www.worshiptogether.com/songs/at-the-cross-love-ran-red-chris-tomlin/"
+  },
+  "chords_verified": "full",
+  "notes": "Chart in G; Ab original = capo 1. G is the common church key (Tomlin live version is in G).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_amazing_grace_my_chains",
+  "title": "Amazing Grace (My Chains Are Gone)",
+  "artist": "Chris Tomlin",
+  "ccli": null,
+  "original_key": "G",
+  "bpm": 63,
+  "meter": "4/4",
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D",
+     "G/D",
+     "D",
+     "A/D",
+     "D",
+     "D/F#",
+     "G",
+     "D",
+     "A/D",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "4/1",
+     "1",
+     "5/1",
+     "1",
+     "1/3",
+     "4",
+     "1",
+     "5/1",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "D/F#",
+     "G",
+     "D/F#",
+     "G/B",
+     "D/A",
+     "D/F#",
+     "G",
+     "D/F#",
+     "Em7",
+     "A7",
+     "D"
+    ],
+    "numbers": [
+     "1/3",
+     "4",
+     "1/3",
+     "4/6",
+     "1/5",
+     "1/3",
+     "4",
+     "1/3",
+     "2m7",
+     "5(7)",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.05",
+   "EL.07"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/chris-tomlin/see-the-morning/amazing-grace-(my-chains-are-gone)/",
+   "chords": "https://www.worshiptogether.com/songs/amazing-grace-my-chains-are-gone/"
+  },
+  "chords_verified": "full",
+  "notes": "Verses are the PD hymn (Newton); the chorus is Tomlin/Giglio (copyrighted). Links to catalog song SONG_amazing_grace for the hymn melody.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_everlasting_god",
+  "title": "Everlasting God",
+  "artist": "Brenton Brown / Chris Tomlin",
+  "ccli": null,
+  "original_key": "B",
+  "bpm": 100,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "Gsus",
+     "G",
+     "Gsus",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "1sus",
+     "1",
+     "1sus",
+     "1"
+    ]
+   },
+   {
+    "name": "Pre-Chorus",
+    "chords_in_chart_key": [
+     "G/B",
+     "C",
+     "G/B",
+     "C",
+     "D",
+     "Em",
+     "D"
+    ],
+    "numbers": [
+     "1/3",
+     "4",
+     "1/3",
+     "4",
+     "5",
+     "6m",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "C",
+     "Em",
+     "C",
+     "D/C",
+     "C",
+     "Am7/C"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "6m",
+     "4",
+     "5/4",
+     "4",
+     "2m7/4"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 2
+   },
+   {
+    "shapes": "G",
+    "capo": 4
+   },
+   {
+    "shapes": "E",
+    "capo": 7
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "ER.02",
+   "ER.10"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/MultiTracks/See-the-Morning/Everlasting-God/overview/",
+   "chords": "https://www.worshiptogether.com/songs/everlasting-god/"
+  },
+  "chords_verified": "full",
+  "notes": "No original-master listing found; B at 100-113 BPM across recordings (Tomlin \"See the Morning\" track used). Chart in G = capo 4.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_come_as_you_are",
+  "title": "Come As You Are",
+  "artist": "Crowder",
+  "ccli": null,
+  "original_key": "C",
+  "bpm": 67.5,
+  "meter": "6/8",
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "F",
+     "C",
+     "F",
+     "C",
+     "G",
+     "Am",
+     "G/B",
+     "C",
+     "F",
+     "C",
+     "F",
+     "C",
+     "G",
+     "Am"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "5/7",
+     "1",
+     "4",
+     "1",
+     "4",
+     "1",
+     "5",
+     "6m"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "Fmaj7",
+     "C",
+     "Fmaj7",
+     "G",
+     "Gsus",
+     "G",
+     "Fmaj7",
+     "Am",
+     "Fmaj7",
+     "G",
+     "Fmaj7"
+    ],
+    "numbers": [
+     "4maj7",
+     "1",
+     "4maj7",
+     "5",
+     "5sus",
+     "5",
+     "4maj7",
+     "6m",
+     "4maj7",
+     "5",
+     "4maj7"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "Am",
+     "G/B",
+     "C",
+     "F",
+     "C",
+     "G"
+    ],
+    "numbers": [
+     "6m",
+     "5/7",
+     "1",
+     "4",
+     "1",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 0
+   },
+   {
+    "shapes": "A",
+    "capo": 3
+   },
+   {
+    "shapes": "G",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.07",
+   "ER.07"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Crowder/Neon-Steeple/Come-As-You-Are/",
+   "chords": "https://www.worshiptogether.com/songs/come-as-you-are-crowder/"
+  },
+  "chords_verified": "full",
+  "notes": "All open C-family chords: a great first 6/8 song.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_all_the_people_said_amen",
+  "title": "All the People Said Amen",
+  "artist": "Matt Maher",
+  "ccli": null,
+  "original_key": "G",
+  "bpm": 95,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "C2",
+     "G",
+     "D"
+    ],
+    "numbers": [
+     "4(2)",
+     "1",
+     "5"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C2",
+     "G",
+     "D",
+     "Em",
+     "C2",
+     "G",
+     "D",
+     "Em",
+     "Am",
+     "Em",
+     "D"
+    ],
+    "numbers": [
+     "4(2)",
+     "1",
+     "5",
+     "6m",
+     "4(2)",
+     "1",
+     "5",
+     "6m",
+     "2m",
+     "6m",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "G",
+     "C",
+     "C",
+     "G",
+     "D",
+     "C",
+     "G",
+     "B",
+     "Em",
+     "C",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "1",
+     "4",
+     "4",
+     "1",
+     "5",
+     "4",
+     "1",
+     "3",
+     "6m",
+     "4",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.06",
+   "ER.02"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://www.multitracks.com/songs/Matt-Maher/All-The-People-Said-Amen/All-The-People-Said-Amen/charts/",
+   "chords": "https://www.worshiptogether.com/songs/all-the-people-said-amen/"
+  },
+  "chords_verified": "full",
+  "notes": "B major in the chorus is a III (secondary dominant of Em): good ear-training moment.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_this_is_amazing_grace",
+  "title": "This Is Amazing Grace",
+  "artist": "Phil Wickham",
+  "ccli": 6333821,
+  "original_key": "Bb",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "C",
+     "Em",
+     "D",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "6m",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "C",
+     "Em",
+     "D",
+     "G",
+     "C",
+     "Em",
+     "D",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "6m",
+     "5",
+     "1",
+     "4",
+     "6m",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 1
+   },
+   {
+    "shapes": "G",
+    "capo": 3
+   },
+   {
+    "shapes": "E",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.06",
+   "ER.02"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/6333821"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/this-is-amazing-grace-chords/",
+   "chords": "https://worshipchords.com/pdf/this-is-amazing-grace-chords-key-g-4326.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "Tempo listed only as \"Fast\". Bb original = capo 3 with G shapes.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_o_church_arise",
+  "title": "O Church Arise",
+  "artist": "Keith Getty & Stuart Townend",
+  "ccli": null,
+  "original_key": "D",
+  "bpm": 99,
+  "meter": null,
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Verse (A)",
+    "chords_in_chart_key": [
+     "A7sus",
+     "D",
+     "G/B",
+     "A/C#",
+     "D/F#",
+     "G",
+     "Asus",
+     "A",
+     "D"
+    ],
+    "numbers": [
+     "5(7sus)",
+     "1",
+     "4/6",
+     "5/7",
+     "1/3",
+     "4",
+     "5sus",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Verse (B)",
+    "chords_in_chart_key": [
+     "D/F#",
+     "G",
+     "D/F#",
+     "A",
+     "D/F#",
+     "G",
+     "D/F#",
+     "Bm",
+     "A"
+    ],
+    "numbers": [
+     "1/3",
+     "4",
+     "1/3",
+     "5",
+     "1/3",
+     "4",
+     "1/3",
+     "6m",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.06",
+   "ER.06"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://www.weareworship.com/songs/chords/o-church-arise-put-your-armor-on-431/",
+   "chords": "https://worshipchords.com/pdf/o-church-arise-chords-key-d-52261.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "Modern hymn (2005). Lots of slash-chord bass walking: good for D/F# and A/C# practice.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_o_praise_the_name",
+  "title": "O Praise the Name (Anastasis)",
+  "artist": "Hillsong Worship",
+  "ccli": 7037787,
+  "original_key": "C",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "C",
+     "Cmaj7/E",
+     "F"
+    ],
+    "numbers": [
+     "1",
+     "1maj7/3",
+     "4"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "G",
+     "Am",
+     "F",
+     "C/E",
+     "Gadd4",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1/3",
+     "5add4",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "C",
+     "F",
+     "C",
+     "Am",
+     "Gsus",
+     "G",
+     "G/B",
+     "C/E",
+     "F",
+     "Am",
+     "F",
+     "C/G",
+     "G",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "6m",
+     "5sus",
+     "5",
+     "5/7",
+     "1/3",
+     "4",
+     "6m",
+     "4",
+     "1/5",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 0
+   },
+   {
+    "shapes": "A",
+    "capo": 3
+   },
+   {
+    "shapes": "G",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.10",
+   "EL.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7037787"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/o-praise-the-name-chords/",
+   "chords": "https://worshipchords.com/pdf/o-praise-the-name-chords-key-c-14854.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "Tempo listed only as \"Medium slow\".",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_hosanna_praise_is_rising",
+  "title": "Hosanna (Praise Is Rising)",
+  "artist": "Paul Baloche",
+  "ccli": 4662491,
+  "original_key": "G",
+  "bpm": 114,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "C",
+     "G",
+     "C",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "4",
+     "1"
+    ]
+   },
+   {
+    "name": "Pre-Chorus",
+    "chords_in_chart_key": [
+     "D",
+     "C",
+     "G",
+     "D",
+     "C",
+     "G",
+     "D"
+    ],
+    "numbers": [
+     "5",
+     "4",
+     "1",
+     "5",
+     "4",
+     "1",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "Em",
+     "C",
+     "G",
+     "D",
+     "Em",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.06",
+   "ER.02"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/4662491"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/hosanna-praise-is-rising-chords/",
+   "chords": "https://www.worshiptogether.com/songs/hosanna-praise-is-rising/"
+  },
+  "chords_verified": "full",
+  "notes": "Tempo 114 from WeAreWorship.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_made_for_more",
+  "title": "Made for More",
+  "artist": "Josh Baldwin",
+  "ccli": null,
+  "original_key": "C",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "Am",
+     "G",
+     "Am",
+     "G",
+     "F",
+     "C/E",
+     "G",
+     "F"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "5",
+     "6m",
+     "5",
+     "4",
+     "1/3",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "C",
+     "Am",
+     "G",
+     "C/E",
+     "F",
+     "Dm",
+     "C",
+     "Am",
+     "G",
+     "C/E",
+     "F",
+     "Dm",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "5",
+     "1/3",
+     "4",
+     "2m",
+     "1",
+     "6m",
+     "5",
+     "1/3",
+     "4",
+     "2m",
+     "1"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "C/E",
+     "F",
+     "Am",
+     "G"
+    ],
+    "numbers": [
+     "1/3",
+     "4",
+     "6m",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 0
+   },
+   {
+    "shapes": "A",
+    "capo": 3
+   },
+   {
+    "shapes": "G",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.06"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://www.worshiptogether.com/songs/made-for-more-josh-baldwin/",
+   "chords": "https://worshipchords.com/made-for-more-josh-baldwin-chords/"
+  },
+  "chords_verified": "full",
+  "notes": "Key taken from the chart (C); original recording key and tempo not confirmed.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_hear_our_praises",
+  "title": "Hear Our Praises",
+  "artist": "Hillsong (Reuben Morgan)",
+  "ccli": 2543402,
+  "original_key": "C",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "F",
+     "C",
+     "G",
+     "Am",
+     "F",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "C",
+     "G",
+     "F",
+     "Am",
+     "Em",
+     "F",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "4",
+     "6m",
+     "3m",
+     "4",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 0
+   },
+   {
+    "shapes": "A",
+    "capo": 3
+   },
+   {
+    "shapes": "G",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.06",
+   "ER.02"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/2543402"
+  },
+  "sources": {
+   "meta": "https://www.worshiptogether.com/songs/hear-our-praises/",
+   "chords": "https://essentialworship.com/songs/hillsong-worship/hear-our-praises/"
+  },
+  "chords_verified": "full",
+  "notes": "Tempo listed only as \"Fast\"; key taken from the chart.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_here_i_am_lord",
+  "title": "Here I Am, Lord",
+  "artist": "Dan Schutte",
+  "ccli": null,
+  "original_key": "G",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Refrain (end)",
+    "chords_in_chart_key": [
+     "G",
+     "Am7",
+     "D",
+     "G",
+     "C",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "2m7",
+     "5",
+     "1",
+     "4",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.10"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://www.hymnary.org/tune/here_i_am_lord_schutte",
+   "chords": "https://tabs.ultimate-guitar.com/tab/dan-schutte/here-i-am-lord-chords-1854949"
+  },
+  "chords_verified": "partial",
+  "notes": "1981 hymn (OCP, copyrighted). Licensed via OneLicense (#80670), not CCLI. Only the refrain ending was captured.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_graves_into_gardens",
+  "title": "Graves Into Gardens",
+  "artist": "Elevation Worship",
+  "ccli": 7138219,
+  "original_key": "B",
+  "bpm": null,
+  "meter": "6/8",
+  "chart_key": "B",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "B",
+     "E/B",
+     "B"
+    ],
+    "numbers": [
+     "1",
+     "4/1",
+     "1"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "E/B",
+     "B",
+     "G#m",
+     "F#",
+     "E"
+    ],
+    "numbers": [
+     "4/1",
+     "1",
+     "6m",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "B",
+     "G#m",
+     "E",
+     "B"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "4",
+     "1"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "B",
+     "E",
+     "B",
+     "G#m",
+     "E",
+     "B"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "6m",
+     "4",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 2
+   },
+   {
+    "shapes": "G",
+    "capo": 4
+   },
+   {
+    "shapes": "E",
+    "capo": 7
+   }
+  ],
+  "practice_for": [
+   "A.07",
+   "A.08",
+   "ER.08"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7138219"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/graves-into-gardens-chords/",
+   "chords": "https://worshipchords.com/graves-into-gardens-chords/"
+  },
+  "chords_verified": "full",
+  "notes": "Tempo listed only as \"Medium fast\". B = capo 4 with G shapes (G, C/G, Em, D, C).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_here_i_am_to_worship",
+  "title": "Here I Am to Worship",
+  "artist": "Tim Hughes",
+  "ccli": null,
+  "original_key": "D",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D",
+     "A",
+     "Em",
+     "D",
+     "A",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "2m",
+     "1",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "D",
+     "A/C#",
+     "D/F#",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5/7",
+     "1/3",
+     "4"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "A",
+     "D/F#",
+     "G"
+    ],
+    "numbers": [
+     "5",
+     "1/3",
+     "4"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.05",
+   "T.03"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/here-i-am-to-worship-chords/",
+   "chords": "https://worshipchords.com/pdf/here-i-am-to-worship-chords-key-d-1402.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "Key taken from the chart (D); original recording key, tempo and meter not confirmed.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_how_great_is_our_god",
+  "title": "How Great Is Our God",
+  "artist": "Chris Tomlin",
+  "ccli": 4348399,
+  "original_key": "Db",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "Am",
+     "F"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "C",
+     "Am",
+     "F",
+     "G",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "4",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "C",
+     "Am",
+     "F",
+     "G",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "6m",
+     "4",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 1
+   },
+   {
+    "shapes": "A",
+    "capo": 4
+   },
+   {
+    "shapes": "G",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.05",
+   "A.08"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/4348399"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/how-great-is-our-god-chords/",
+   "chords": "https://worshipchords.com/pdf/how-great-is-our-god-chords-key-c-14421.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "Only 4 chords. Db original = capo 1 with C shapes.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_mighty_to_save",
+  "title": "Mighty to Save",
+  "artist": "Hillsong Worship",
+  "ccli": 4591782,
+  "original_key": "A",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "A",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D",
+     "A",
+     "F#m",
+     "E",
+     "D",
+     "A",
+     "F#m",
+     "E",
+     "D",
+     "E",
+     "D",
+     "E"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "6m",
+     "5",
+     "4",
+     "1",
+     "6m",
+     "5",
+     "4",
+     "5",
+     "4",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "A",
+     "E",
+     "D",
+     "A",
+     "F#m",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "4",
+     "1",
+     "6m",
+     "5"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "D",
+     "A",
+     "E",
+     "A/C#"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "5",
+     "1/3"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 0
+   },
+   {
+    "shapes": "G",
+    "capo": 2
+   },
+   {
+    "shapes": "E",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.06",
+   "ER.04"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/4591782"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/mighty-to-save-chords/",
+   "chords": "https://worshipchords.com/mighty-to-save-chords/"
+  },
+  "chords_verified": "full",
+  "notes": "Verse starts on the 4 chord. A = capo 2 with G shapes.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_lead_me_to_the_cross",
+  "title": "Lead Me to the Cross",
+  "artist": "Hillsong (Brooke Fraser)",
+  "ccli": 4785828,
+  "original_key": "D",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Intro/Verse",
+    "chords_in_chart_key": [
+     "Bm",
+     "F#/A#",
+     "G",
+     "D",
+     "A/C#"
+    ],
+    "numbers": [
+     "6m",
+     "3/?A#",
+     "4",
+     "1",
+     "5/7"
+    ]
+   },
+   {
+    "name": "Pre-Chorus",
+    "chords_in_chart_key": [
+     "Em",
+     "A",
+     "Bm",
+     "A",
+     "G"
+    ],
+    "numbers": [
+     "2m",
+     "5",
+     "6m",
+     "5",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "A",
+     "G",
+     "D",
+     "A",
+     "G",
+     "D",
+     "A",
+     "G",
+     "D",
+     "A",
+     "Em",
+     "G",
+     "A",
+     "Bm"
+    ],
+    "numbers": [
+     "4",
+     "5",
+     "4",
+     "1",
+     "5",
+     "4",
+     "1",
+     "5",
+     "4",
+     "1",
+     "5",
+     "2m",
+     "4",
+     "5",
+     "6m"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.12",
+   "ER.06"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/4785828"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/lead-me-to-the-cross-chords/",
+   "chords": "https://worshipchords.com/lead-me-to-the-cross-chords/"
+  },
+  "chords_verified": "full",
+  "notes": "Minor-feel verse in D (6m start). Chart prints F#/A; read as F#/A# (V of Bm), confirm against SongSelect.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_run_to_the_father",
+  "title": "Run to the Father",
+  "artist": "Cody Carnes",
+  "ccli": 7133494,
+  "original_key": "C",
+  "bpm": null,
+  "meter": "6/8",
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Intro/Verse",
+    "chords_in_chart_key": [
+     "C",
+     "Dm7",
+     "Am7",
+     "F2"
+    ],
+    "numbers": [
+     "1",
+     "2m7",
+     "6m7",
+     "4(2)"
+    ]
+   },
+   {
+    "name": "Verse end",
+    "chords_in_chart_key": [
+     "C",
+     "Dm7",
+     "Am7",
+     "G",
+     "F2"
+    ],
+    "numbers": [
+     "1",
+     "2m7",
+     "6m7",
+     "5",
+     "4(2)"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "C",
+     "Dm7",
+     "Am7",
+     "F2"
+    ],
+    "numbers": [
+     "1",
+     "2m7",
+     "6m7",
+     "4(2)"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 0
+   },
+   {
+    "shapes": "A",
+    "capo": 3
+   },
+   {
+    "shapes": "G",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.07",
+   "ER.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7133494"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/run-to-the-father-chords/",
+   "chords": "https://worshipchords.com/pdf/run-to-the-father-chords-key-c-90444.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "One 4-chord loop almost the whole song; tempo listed only as \"Medium slow\".",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_above_all",
+  "title": "Above All",
+  "artist": "Lenny LeBlanc & Paul Baloche",
+  "ccli": null,
+  "original_key": "G",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G/B",
+     "C",
+     "D",
+     "G",
+     "G/B",
+     "C",
+     "D",
+     "G",
+     "D/F#",
+     "Em",
+     "D",
+     "C",
+     "G/B",
+     "C",
+     "Am7",
+     "B7",
+     "D",
+     "G"
+    ],
+    "numbers": [
+     "1/3",
+     "4",
+     "5",
+     "1",
+     "1/3",
+     "4",
+     "5",
+     "1",
+     "5/7",
+     "6m",
+     "5",
+     "4",
+     "1/3",
+     "4",
+     "2m7",
+     "3(7)",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "C",
+     "D",
+     "G",
+     "G",
+     "C",
+     "D",
+     "G",
+     "D/F#",
+     "Em",
+     "D",
+     "C",
+     "G/B",
+     "C",
+     "G/B",
+     "C",
+     "D",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "5",
+     "1",
+     "1",
+     "4",
+     "5",
+     "1",
+     "5/7",
+     "6m",
+     "5",
+     "4",
+     "1/3",
+     "4",
+     "1/3",
+     "4",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.10",
+   "EL.07"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/above-all/",
+   "chords": "https://worshipchords.com/above-all/"
+  },
+  "chords_verified": "full",
+  "notes": "Key taken from the chart (G). B7 = III7 (secondary dominant to Em). Lots of walking slash-chord bass.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_how_deep_the_fathers_love",
+  "title": "How Deep the Father's Love for Us",
+  "artist": "Stuart Townend",
+  "ccli": 1558110,
+  "original_key": "D",
+  "bpm": null,
+  "meter": "3/4",
+  "chart_key": "E",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "E",
+     "F#m",
+     "E/G#",
+     "A",
+     "E/G#",
+     "C#m",
+     "B",
+     "E",
+     "F#m",
+     "E/G#",
+     "A",
+     "E/B",
+     "B",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "2m",
+     "1/3",
+     "4",
+     "1/3",
+     "6m",
+     "5",
+     "1",
+     "2m",
+     "1/3",
+     "4",
+     "1/5",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.07",
+   "A.10",
+   "EL.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/1558110"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/how-deep-the-fathers-love-for-us-chords/",
+   "chords": "https://worshipchords.com/how-deep-the-fathers-love-for-us-chords/"
+  },
+  "chords_verified": "full",
+  "notes": "Modern hymn (1995) in 3/4, tempo \"Slow\". Chart is in E; original key D.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_ancient_words",
+  "title": "Ancient Words",
+  "artist": "Lynn DeShazo",
+  "ccli": null,
+  "original_key": "E",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "E",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "E",
+     "B",
+     "E",
+     "A",
+     "B",
+     "C#m",
+     "B/D#",
+     "E",
+     "E/G#",
+     "F#m",
+     "A",
+     "E",
+     "B",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "1",
+     "4",
+     "5",
+     "6m",
+     "5/7",
+     "1",
+     "1/3",
+     "2m",
+     "4",
+     "1",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus (start)",
+    "chords_in_chart_key": [
+     "A",
+     "E",
+     "E/G#",
+     "B",
+     "F#m",
+     "A",
+     "E/G#",
+     "A"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "1/3",
+     "5",
+     "2m",
+     "4",
+     "1/3",
+     "4"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "E",
+    "capo": 0
+   },
+   {
+    "shapes": "D",
+    "capo": 2
+   },
+   {
+    "shapes": "C",
+    "capo": 4
+   }
+  ],
+  "practice_for": [
+   "A.08",
+   "A.10"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/ancient-words-chords/",
+   "chords": "https://worshipchords.com/ancient-words-chords/"
+  },
+  "chords_verified": "partial",
+  "notes": "Key taken from the chart (E, Robin Mark version); tempo and meter not confirmed.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_lay_me_down",
+  "title": "Lay Me Down",
+  "artist": "Chris Tomlin",
+  "ccli": 6223577,
+  "original_key": "C",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "G/B",
+     "Em7",
+     "D/F#",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5/7",
+     "3m7",
+     "2/?F#",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "C",
+     "G/B",
+     "D/F#",
+     "Em7",
+     "C",
+     "G/B",
+     "D/F#"
+    ],
+    "numbers": [
+     "1",
+     "5/7",
+     "2/?F#",
+     "3m7",
+     "1",
+     "5/7",
+     "2/?F#"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 0
+   },
+   {
+    "shapes": "A",
+    "capo": 3
+   },
+   {
+    "shapes": "G",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.06",
+   "ER.02"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/6223577"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/lay-me-down/",
+   "chords": "https://worshipchords.com/pdf/lay-me-down-chords-key-c-21645.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "Source lists original key C but the chart is marked \"Capo 5\" (would sound in F). Confirm with your SongSelect chart.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_your_grace_is_enough",
+  "title": "Your Grace Is Enough",
+  "artist": "Chris Tomlin / Matt Maher",
+  "ccli": 4477026,
+  "original_key": "A",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "G/B",
+     "C2",
+     "Em7",
+     "D",
+     "C2"
+    ],
+    "numbers": [
+     "1",
+     "1/3",
+     "4(2)",
+     "6m7",
+     "5",
+     "4(2)"
+    ]
+   },
+   {
+    "name": "Pre-Chorus",
+    "chords_in_chart_key": [
+     "Am7",
+     "G/B",
+     "C2",
+     "Dsus",
+     "Em7",
+     "G"
+    ],
+    "numbers": [
+     "2m7",
+     "1/3",
+     "4(2)",
+     "5sus",
+     "6m7",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "Dsus",
+     "Em7",
+     "C2",
+     "G",
+     "Dsus",
+     "C2"
+    ],
+    "numbers": [
+     "1",
+     "5sus",
+     "6m7",
+     "4(2)",
+     "1",
+     "5sus",
+     "4(2)"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 0
+   },
+   {
+    "shapes": "G",
+    "capo": 2
+   },
+   {
+    "shapes": "E",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.06",
+   "ER.04"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/4477026"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/your-grace-is-enough-chords/",
+   "chords": "https://worshipchords.com/pdf/your-grace-is-enough-chords-key-g-21274.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "A original = capo 2 with G shapes.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_the_wonderful_cross",
+  "title": "The Wonderful Cross",
+  "artist": "Chris Tomlin / Matt Redman",
+  "ccli": 3148435,
+  "original_key": "D",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D5"
+    ],
+    "numbers": [
+     "1(5)"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "D",
+     "G",
+     "D/F#",
+     "G",
+     "D/F#",
+     "G",
+     "D/F#",
+     "A"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1/3",
+     "4",
+     "1/3",
+     "4",
+     "1/3",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "ER.02",
+   "ER.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/3148435"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/the-wonderful-cross-chords/",
+   "chords": "https://worshipchords.com/the-wonderful-cross-chords/"
+  },
+  "chords_verified": "full",
+  "notes": "Verses are Isaac Watts (1707, PD) over a D5 drone: a great power-chord/drone exercise.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_thank_you_jesus_for_the_blood",
+  "title": "Thank You Jesus for the Blood",
+  "artist": "Charity Gayle",
+  "ccli": 7172456,
+  "original_key": "Bb",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "G/B",
+     "Am7",
+     "F",
+     "C/E",
+     "Gsus",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5/7",
+     "6m7",
+     "4",
+     "1/3",
+     "5sus",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "C",
+     "G/B",
+     "C",
+     "C/E",
+     "F",
+     "C",
+     "Am",
+     "G/B",
+     "C",
+     "Am",
+     "Gsus",
+     "G",
+     "Am",
+     "G",
+     "F",
+     "C/E",
+     "F",
+     "G",
+     "Am",
+     "F",
+     "C",
+     "Gsus",
+     "G",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "5/7",
+     "1",
+     "1/3",
+     "4",
+     "1",
+     "6m",
+     "5/7",
+     "1",
+     "6m",
+     "5sus",
+     "5",
+     "6m",
+     "5",
+     "4",
+     "1/3",
+     "4",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5sus",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 1
+   },
+   {
+    "shapes": "G",
+    "capo": 3
+   },
+   {
+    "shapes": "E",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.09",
+   "ER.07"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/7172456"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/thank-you-jesus-for-the-blood-chords/",
+   "chords": "https://worshipchords.com/pdf/thank-you-jesus-for-the-blood-chords-key-c-93325.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "Descending bass line (1 - 5/7 - 6m) throughout. Chart in C; Bb original.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_open_the_eyes_of_my_heart",
+  "title": "Open the Eyes of My Heart",
+  "artist": "Paul Baloche",
+  "ccli": 2298355,
+  "original_key": "E",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "C",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "4",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "D",
+     "Em",
+     "C",
+     "D",
+     "Em",
+     "C",
+     "D"
+    ],
+    "numbers": [
+     "5",
+     "6m",
+     "4",
+     "5",
+     "6m",
+     "4",
+     "5"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "C",
+     "D",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "4",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "E",
+    "capo": 0
+   },
+   {
+    "shapes": "D",
+    "capo": 2
+   },
+   {
+    "shapes": "C",
+    "capo": 4
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.06",
+   "ER.02"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/2298355"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/open-the-eyes-of-my-heart-chords/",
+   "chords": "https://worshipchords.com/open-the-eyes-of-my-heart/"
+  },
+  "chords_verified": "full",
+  "notes": "Simplified chart in G. E original = capo 4 with C shapes or capo 2 with D shapes.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_chain_breaker",
+  "title": "Chain Breaker",
+  "artist": "Zach Williams",
+  "ccli": null,
+  "original_key": "C",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C5",
+     "Csus",
+     "C",
+     "Am",
+     "Asus",
+     "Am",
+     "G",
+     "Gsus",
+     "G",
+     "F",
+     "F2",
+     "Gsus",
+     "G"
+    ],
+    "numbers": [
+     "1(5)",
+     "1sus",
+     "1",
+     "6m",
+     "6sus",
+     "6m",
+     "5",
+     "5sus",
+     "5",
+     "4",
+     "4(2)",
+     "5sus",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus (start)",
+    "chords_in_chart_key": [
+     "C",
+     "F/C",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "4/1",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 0
+   },
+   {
+    "shapes": "A",
+    "capo": 3
+   },
+   {
+    "shapes": "G",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "ER.02",
+   "ER.10"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/chain-breaker-chords/",
+   "chords": "https://worshipchords.com/chain-breaker-chords/"
+  },
+  "chords_verified": "partial",
+  "notes": "Bluesy rock; sus-chord embellishments. Original key/tempo not confirmed.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_change_my_heart_oh_god",
+  "title": "Change My Heart Oh God",
+  "artist": "Eddie Espinosa",
+  "ccli": null,
+  "original_key": "C",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "C",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "C",
+     "Am7",
+     "Dm7",
+     "Gsus",
+     "G",
+     "C"
+    ],
+    "numbers": [
+     "1",
+     "6m7",
+     "2m7",
+     "5sus",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "E",
+     "Esus",
+     "E",
+     "Am7",
+     "Dm7",
+     "G",
+     "C",
+     "E",
+     "Am7",
+     "D7",
+     "G",
+     "C"
+    ],
+    "numbers": [
+     "3",
+     "3sus",
+     "3",
+     "6m7",
+     "2m7",
+     "5",
+     "1",
+     "3",
+     "6m7",
+     "2(7)",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "C",
+    "capo": 0
+   },
+   {
+    "shapes": "A",
+    "capo": 3
+   },
+   {
+    "shapes": "G",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.04",
+   "A.10",
+   "T.05"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/change-my-heart-oh-god-chords/",
+   "chords": "https://worshipchords.com/change-my-heart-oh-god-chords/"
+  },
+  "chords_verified": "full",
+  "notes": "E major (III) leading to Am and D7 (II7) leading to G are secondary dominants: great ear-training song.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_come_now_is_the_time",
+  "title": "Come Now Is the Time to Worship",
+  "artist": "Brian Doerksen",
+  "ccli": 2430948,
+  "original_key": "D",
+  "bpm": null,
+  "meter": "4/4",
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D",
+     "Dsus",
+     "D",
+     "A",
+     "Em7",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "1sus",
+     "1",
+     "5",
+     "2m7",
+     "4"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "G",
+     "D",
+     "G",
+     "Bm",
+     "G",
+     "A"
+    ],
+    "numbers": [
+     "4",
+     "1",
+     "4",
+     "1",
+     "4",
+     "6m",
+     "4",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.06"
+  ],
+  "links": {
+   "songselect": "https://songselect.ccli.com/songs/2430948"
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/come-now-is-the-time-to-worship-chords/",
+   "chords": "https://worshipchords.com/pdf/come-now-is-the-time-to-worship-chords-key-d-1654.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "Tempo listed only as \"Medium fast\".",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_come_thou_fount_come_thou_king",
+  "title": "Come Thou Fount, Come Thou King",
+  "artist": "Thomas Miller (Gateway)",
+  "ccli": null,
+  "original_key": "D",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "D",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "D",
+     "Dsus",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "1sus",
+     "1"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "D",
+     "A",
+     "D",
+     "Dsus",
+     "D",
+     "G2",
+     "B",
+     "A/C#",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "1",
+     "1sus",
+     "1",
+     "4(2)",
+     "6",
+     "5/7",
+     "1"
+    ]
+   },
+   {
+    "name": "Chorus (start)",
+    "chords_in_chart_key": [
+     "G",
+     "D/F#",
+     "G",
+     "D/F#"
+    ],
+    "numbers": [
+     "4",
+     "1/3",
+     "4",
+     "1/3"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "D",
+    "capo": 0
+   },
+   {
+    "shapes": "C",
+    "capo": 2
+   },
+   {
+    "shapes": "A",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.06",
+   "EL.07"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/come-thou-fount-come-thou-king-chords/",
+   "chords": "https://worshipchords.com/pdf/come-thou-fount-come-thou-king-chords-key-d-50602.pdf"
+  },
+  "chords_verified": "partial",
+  "notes": "Verses are the 1758 hymn (PD); the \"Come Thou King\" chorus is modern and copyrighted. B = VI major (V of ii).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_shine_jesus_shine",
+  "title": "Shine, Jesus, Shine",
+  "artist": "Graham Kendrick",
+  "ccli": null,
+  "original_key": "G",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "C",
+     "G",
+     "D",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Pre-Chorus",
+    "chords_in_chart_key": [
+     "C",
+     "D",
+     "C",
+     "Bm",
+     "Em",
+     "F",
+     "Dsus",
+     "D"
+    ],
+    "numbers": [
+     "4",
+     "5",
+     "4",
+     "3m",
+     "6m",
+     "b7",
+     "5sus",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "G",
+     "C",
+     "Am",
+     "G",
+     "Dsus",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "1",
+     "4",
+     "2m",
+     "1",
+     "5sus",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.06"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/shine-jesus-shine-chords/",
+   "chords": "https://worshipchords.com/pdf/shine-jesus-shine-chords-key-g-50649.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "1987. F = borrowed bVII in the \"shine on me\" build.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_the_potters_hand",
+  "title": "The Potter's Hand",
+  "artist": "Darlene Zschech (Hillsong)",
+  "ccli": null,
+  "original_key": "G",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "G",
+     "D/F#",
+     "C",
+     "Cm6",
+     "Eb",
+     "Em7",
+     "Asus",
+     "A/C#",
+     "Am7",
+     "D"
+    ],
+    "numbers": [
+     "1",
+     "5/7",
+     "4",
+     "4m6",
+     "b6",
+     "6m7",
+     "2sus",
+     "2/?C#",
+     "2m7",
+     "5"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "EL.09",
+   "T.05"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/the-potters-hand-chords/",
+   "chords": "https://worshipchords.com/the-potters-hand-chords/"
+  },
+  "chords_verified": "verse only",
+  "notes": "Borrowed Cm6 (iv) and Eb (bVI) give the verse its color; A/C# = II major. Intermediate chord vocabulary.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_christ_above_me",
+  "title": "Christ Above Me",
+  "artist": "John Chisum & George Searcy",
+  "ccli": null,
+  "original_key": "G",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "G",
+  "sections": [
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "G",
+     "D",
+     "G",
+     "C",
+     "G",
+     "D",
+     "E",
+     "Em7",
+     "Am7",
+     "C",
+     "D",
+     "G",
+     "D",
+     "G",
+     "D/F#",
+     "Em7",
+     "Am7",
+     "G/B",
+     "Dsus",
+     "D",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "1",
+     "4",
+     "1",
+     "5",
+     "6",
+     "6m7",
+     "2m7",
+     "4",
+     "5",
+     "1",
+     "5",
+     "1",
+     "5/7",
+     "6m7",
+     "2m7",
+     "1/3",
+     "5sus",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "G",
+    "capo": 0
+   },
+   {
+    "shapes": "E",
+    "capo": 3
+   },
+   {
+    "shapes": "D",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.02",
+   "A.10"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/christ-above-me-chords/",
+   "chords": "https://worshipchords.com/christ-above-me-chords/"
+  },
+  "chords_verified": "chorus only",
+  "notes": "Based on the St. Patrick's Breastplate text. E major = VI major (secondary dominant to Am).",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_for_all_youve_done",
+  "title": "For All You've Done",
+  "artist": "Hillsong (Reuben Morgan)",
+  "ccli": null,
+  "original_key": "E",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "E",
+  "sections": [
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "E",
+     "Esus",
+     "E",
+     "Esus"
+    ],
+    "numbers": [
+     "1",
+     "1sus",
+     "1",
+     "1sus"
+    ]
+   },
+   {
+    "name": "Pre-Chorus",
+    "chords_in_chart_key": [
+     "C#m7",
+     "A",
+     "E",
+     "B"
+    ],
+    "numbers": [
+     "6m7",
+     "4",
+     "1",
+     "5"
+    ]
+   },
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "E",
+     "B/D#",
+     "A/C#",
+     "B",
+     "E",
+     "B/D#",
+     "A/C#",
+     "B",
+     "A2",
+     "B",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "5/7",
+     "4/6",
+     "5",
+     "1",
+     "5/7",
+     "4/6",
+     "5",
+     "4(2)",
+     "5",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "E",
+    "capo": 0
+   },
+   {
+    "shapes": "D",
+    "capo": 2
+   },
+   {
+    "shapes": "C",
+    "capo": 4
+   }
+  ],
+  "practice_for": [
+   "A.06",
+   "A.08",
+   "ER.03"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/for-all-youve-done-chords/",
+   "chords": "https://worshipchords.com/for-all-youve-done-chords/"
+  },
+  "chords_verified": "full",
+  "notes": "Chorus is a descending bass line (1 - 5/7 - 4/6 - 5). Key from chart.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_more_like_jesus",
+  "title": "More Like Jesus",
+  "artist": "Passion / Kristian Stanfill",
+  "ccli": null,
+  "original_key": "Bb",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "Bb",
+  "sections": [
+   {
+    "name": "Intro",
+    "chords_in_chart_key": [
+     "Bbmaj7",
+     "Eb"
+    ],
+    "numbers": [
+     "1maj7",
+     "4"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "Bb",
+     "Eb",
+     "Gm",
+     "F6",
+     "Eb"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "6m",
+     "5(6)",
+     "4"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 1
+   },
+   {
+    "shapes": "G",
+    "capo": 3
+   },
+   {
+    "shapes": "E",
+    "capo": 6
+   }
+  ],
+  "practice_for": [
+   "A.08",
+   "ER.07"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/more-like-jesus-chords/",
+   "chords": "https://worshipchords.com/more-like-jesus-chords/"
+  },
+  "chords_verified": "partial",
+  "notes": "Bb = capo 3 with G shapes. Chorus not captured.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ },
+ {
+  "id": "MS_sing_wherever_i_go",
+  "title": "Sing Wherever I Go",
+  "artist": "We The Kingdom",
+  "ccli": null,
+  "original_key": "A",
+  "bpm": null,
+  "meter": null,
+  "chart_key": "A",
+  "sections": [
+   {
+    "name": "Chorus",
+    "chords_in_chart_key": [
+     "A",
+     "D",
+     "A",
+     "E",
+     "F#m",
+     "D",
+     "E",
+     "A"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4",
+     "5",
+     "1"
+    ]
+   },
+   {
+    "name": "Verse",
+    "chords_in_chart_key": [
+     "F#m",
+     "D",
+     "A",
+     "E"
+    ],
+    "numbers": [
+     "6m",
+     "4",
+     "1",
+     "5"
+    ]
+   },
+   {
+    "name": "Bridge",
+    "chords_in_chart_key": [
+     "D",
+     "A"
+    ],
+    "numbers": [
+     "4",
+     "1"
+    ]
+   }
+  ],
+  "capo_options": [
+   {
+    "shapes": "A",
+    "capo": 0
+   },
+   {
+    "shapes": "G",
+    "capo": 2
+   },
+   {
+    "shapes": "E",
+    "capo": 5
+   }
+  ],
+  "practice_for": [
+   "A.03",
+   "A.06",
+   "ER.02"
+  ],
+  "links": {
+   "songselect": null
+  },
+  "sources": {
+   "meta": "https://worshipchords.com/sing-wherever-i-go-chords/",
+   "chords": "https://worshipchords.com/pdf/sing-wherever-i-go-chords-key-c-91890.pdf"
+  },
+  "chords_verified": "full",
+  "notes": "Upbeat folk-pop; key from chart (A). Verse starts on the 6m.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+ }
+]

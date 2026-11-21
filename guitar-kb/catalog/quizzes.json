@@ -1,0 +1,156 @@
+[
+ {
+  "id": "Q_note_names",
+  "lesson": "F.07",
+  "type": "generated",
+  "prompt": "Name the note: string {s}, fret {f}",
+  "params": {
+   "strings": [
+    6,
+    5
+   ],
+   "frets": [
+    0,
+    12
+   ]
+  }
+ },
+ {
+  "id": "Q_intervals",
+  "lesson": "T.01",
+  "type": "generated",
+  "prompt": "How many semitones is a {interval}?",
+  "params": {
+   "intervals": [
+    "m2",
+    "M2",
+    "m3",
+    "M3",
+    "P4",
+    "TT",
+    "P5",
+    "m6",
+    "M6",
+    "m7",
+    "M7",
+    "P8"
+   ]
+  }
+ },
+ {
+  "id": "Q_diatonic",
+  "lesson": "T.02",
+  "type": "generated",
+  "prompt": "In the key of {key}, what is the {degree} chord?",
+  "params": {
+   "keys": [
+    "C",
+    "G",
+    "D",
+    "A",
+    "E",
+    "F",
+    "Bb"
+   ],
+   "degrees": [
+    "ii",
+    "iii",
+    "IV",
+    "V",
+    "vi"
+   ]
+  }
+ },
+ {
+  "id": "Q_nashville",
+  "lesson": "T.03",
+  "type": "generated",
+  "prompt": "Play \"{numbers}\" in {key}: which chords?",
+  "params": {
+   "keys": [
+    "G",
+    "D",
+    "C",
+    "A",
+    "E"
+   ],
+   "progressions": [
+    "1 5 6m 4",
+    "1 4 5",
+    "6m 4 1 5",
+    "1 6m 4 5",
+    "4 1 5 6m"
+   ]
+  }
+ },
+ {
+  "id": "Q_capo",
+  "lesson": "T.04",
+  "type": "generated",
+  "prompt": "Song is in {key}. Using {shapes} shapes, which capo fret?",
+  "params": {
+   "keys": [
+    "C",
+    "C#",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B"
+   ],
+   "shapes": [
+    "G",
+    "C",
+    "D",
+    "E",
+    "A"
+   ]
+  }
+ },
+ {
+  "id": "Q_delay",
+  "lesson": "T.07",
+  "type": "generated",
+  "prompt": "Dotted-eighth delay at {bpm} BPM, in ms?",
+  "params": {
+   "bpm": [
+    60,
+    140
+   ],
+   "formula": "60000/bpm*0.75",
+   "tolerance_ms": 5
+  }
+ },
+ {
+  "id": "Q_ear_quality",
+  "lesson": "T.05",
+  "type": "ear",
+  "prompt": "Major or minor?",
+  "params": {
+   "qualities": [
+    "major",
+    "minor"
+   ],
+   "audio": "synth_chord"
+  }
+ },
+ {
+  "id": "Q_ear_numbers",
+  "lesson": "T.06",
+  "type": "ear",
+  "prompt": "The progression moves from 1 to\u2026?",
+  "params": {
+   "choices": [
+    "4",
+    "5",
+    "6m"
+   ],
+   "audio": "synth_progression"
+  }
+ }
+]
