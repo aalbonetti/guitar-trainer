@@ -52,7 +52,7 @@ The catalog is read-only. Everything the app learns about the player lives in In
 | `practice_session` | `id PK, started_at, ended_at?, day, routine (15\|30\|free), total_s, tuned_at?` | Groups attempts from one sitting. `tuned_at` is set the first time the tuner is used in the session; it drives the "Quick tune" prompt (`06-app-spec.md` §3b) |
 | `attempt` | `id PK, session_id FK, lesson_id?, exercise_id?, song_id?, criterion_type, bpm?, grader_mode (auto\|assisted\|self), input_route, score (0–1), metrics_json, met_target (bool), at_target_tempo (bool), is_review (bool), recording_uri?, at` | `metrics_json` holds type-specific detail: `mean_err_ms`, `hit_ratio`, `cents_dev`, `changes`, `correct/total`, per-answer times |
 | `tempo_state` | `key PK (exercise_id or lesson_id), current_bpm, target_bpm, clean_streak, sloppy_streak, best_bpm, updated_at` | Tempo ladder per exercise |
-| `calibration` | `input_route PK, offset_ms, method (strum\|loopback), measured_at` | Subtracted from timing grades |
+| `calibration` | `key PK (input_route\|posture), input_route, posture (folded\|unfolded), offset_ms, spread_ms, method (strum), measured_at` | Subtracted from timing grades. Click-bleed arrival is re-measured from each attempt's count-in, so no separate loopback row |
 | `quiz_item_stats` | `quiz_id, item_key, seen, correct, last_seen_at` · PK `(quiz_id, item_key)` | e.g. `item_key = "s5f7"`. Weights generated questions toward misses |
 | `imported_chart` | `id PK, title, artist?, ccli?, key, tempo?, time?, capo?, source_filename, raw_text, matched_outline_id?, imported_at` | Raw ChordPro kept locally only |
 | `chart_section` | `chart_id FK, ord, name, chords_json, numbers_json` · PK `(chart_id, ord)` | Parsed sections; numbers computed from `key` |
