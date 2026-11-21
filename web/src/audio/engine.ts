@@ -167,3 +167,23 @@ export async function listInputs(): Promise<MediaDeviceInfo[]> {
   const buf = new Float32Array(2048); for (let i = 0; i < 2048; i++) buf[i] = ring[(wAbs - 2048 + i + RING) % RING];
   return { ctx: ctx?.state, sr: ctx?.sampleRate, framesIn: wAbs, recentPeak: pk, tunerOn: tuner.get().on, yin: ctx ? yin(buf, ctx.sampleRate) : null, state: tuner.get() };
 };
+
+// ---------- plucked-string synth (Karplus-Strong) for ear training and "hear this chord" ----------
+function pluckBuffer(c: AudioContext, midi: number, dur = 2.2): AudioBuffer {
+  const sr = c.sampleRate, n = Math.floor(sr * dur), f = 440 * Math.pow(2, (midi - 69) / 12);
+  const N = Math.max(2, Math.round(sr / f + 0.5)); // this KS variant sounds at sr/(N-0.5)
+  const buf = c.createBuffer(1, n, sr), out = buf.getChannelData(0), ring = new Float32Array(N);
+  for (let i = 0; i < N; i++) ring[i] = Math.random() * 2 - 1;
+  let p = 0; const damp = 0.996 - Math.max(0, midi - 60) * 0.0004;
+  for (let i = 0; i < n; i++) { const q = (p + 1) % N; out[i] = ring[p] * 0.35; ring[p] = damp * 0.5 * (ring[p] + ring[q]); p = q; }
+  return buf;
+}
+/** Strum chords (arrays of MIDI notes), one after another, `gapS` apart. */
+export function playChords(chords: number[][], gapS = 1.1) {
+  const c = audioContext(); const t0 = c.currentTime + 0.05;
+  chords.forEach((notes, ci) => notes.forEach((m, ni) => {
+    const s = c.createBufferSource(); s.buffer = pluckBuffer(c, m);
+    const g = c.createGain(); g.gain.value = 0.6;
+    s.connect(g); g.connect(c.destination); s.start(t0 + ci * gapS + ni * 0.018);
+  }));
+}

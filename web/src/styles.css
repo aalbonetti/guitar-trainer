@@ -90,3 +90,25 @@ svg .fretno { fill:var(--muted); font-size:10px; text-anchor:middle; }
 .metrostrip .dots { display:flex; gap:4px; } .metrostrip .dots i { width:9px; height:9px; border-radius:50%; background:var(--line); } .metrostrip .dots i.on { background:var(--accent); }
 @media (min-width:600px) { .metrostrip { bottom:16px; } }
 .nav2 { margin-top:16px; }
+
+/* lesson content */
+.content .md h3 { color:var(--ink); text-transform:none; letter-spacing:0; font-size:17px; margin:18px 0 6px; }
+.content .md h4 { margin:12px 0 4px; }
+.content .md ul, .content .md ol { padding-left:22px; margin:6px 0; } .content .md li { margin:3px 0; }
+.content .md code { background:var(--card2); padding:1px 5px; border-radius:5px; }
+.content .embed { margin:10px 0; }
+.tip { background:#1f2a24; border:1px solid #2d4a3a; border-left:4px solid var(--ok); padding:8px 12px; border-radius:10px; margin:10px 0; }
+.tablewrap { overflow-x:auto; } table { border-collapse:collapse; width:100%; font-size:14px; margin:8px 0; } th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
+.card.inset { background:var(--card2); margin:10px 0; }
+pre.tab { font:13px/1.35 ui-monospace,Menlo,Consolas,monospace; overflow-x:auto; background:#15171b; padding:10px; border-radius:10px; margin:8px 0 4px; }
+.pdsong h4 { margin:10px 0 4px; } .lyrics { color:var(--muted); font-size:14px; }
+.quiz .qprompt { font-size:20px; font-weight:600; margin:10px 0; }
+.choices { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0; } .choices button { justify-content:center; min-height:52px; font-size:17px; }
+.choices button.right { border-color:var(--ok); color:var(--ok); } .choices button.wrong { border-color:var(--bad); color:var(--bad); }
+.okText { color:var(--ok); }
+.badge { font-size:12px; font-weight:500; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); vertical-align:middle; }
+.b-passed { color:var(--ok); border-color:#2d4a3a; } .b-in_progress { color:var(--accent); border-color:#4a3c17; } .b-due { color:#7cc4ff; border-color:#27435a; }
+.sticon { font-style:normal; display:inline-block; width:22px; color:var(--muted); } .st-passed .sticon { color:var(--ok); } .st-in_progress .sticon { color:var(--accent); } .st-locked a { opacity:.6; }
+.legend { font-size:13px; }
+textarea.backup { width:100%; height:120px; background:#15171b; color:var(--ink); border:1px solid var(--line); border-radius:10px; margin:8px 0; font:12px ui-monospace,monospace; }
+button:disabled { opacity:.55; }

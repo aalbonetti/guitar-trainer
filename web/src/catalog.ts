@@ -7,6 +7,9 @@ export interface Lesson { id: string; track: string; title: string; prereqs: str
 export interface CChord { id: string; name: string; root: string; quality: string; bass?: string; frets: number[]; fingers: number[]; barre?: { fret: number; from: number; to: number } | null; tags: string[] }
 export interface Scale { id: string; name: string; root: string; kind: string; position: number; frets: number[][]; movable: boolean }
 export interface Strum { id: string; name?: string; meter: string; grid: number; steps: string[]; accents: number[]; swing: boolean; palm_mute?: boolean }
+export interface Picking { id: string; name?: string; meter: string; grid: number; steps: Record<string, string | number>[] }
+export interface PdSong { id: string; title: string; words: string; tune: string; key: string; meter: string; tempo: number; sections: { name: string; bars: string[]; numbers: string[]; lyrics: string[] }[] }
+export interface Quiz { id: string; lesson: string; type: string; prompt: string; params: Record<string, unknown> }
 export interface Exercise { id: string; name: string; type: string; meter?: string; tempo?: { start: number; target: number; step: number }; pairs?: string[][] }
 export interface Section { name: string; chords_in_chart_key: string[]; numbers: string[] }
 export interface Outline {
@@ -15,7 +18,7 @@ export interface Outline {
   links: { songselect: string | null }; chords_verified: string; notes: string | null;
 }
 export interface Catalog {
-  tracks: Track[]; lessons: Lesson[]; chords: CChord[]; scales: Scale[]; strums: Strum[]; exercises: Exercise[];
+  tracks: Track[]; lessons: Lesson[]; chords: CChord[]; scales: Scale[]; strums: Strum[]; picking: Picking[]; exercises: Exercise[]; songs: PdSong[]; quizzes: Quiz[];
   outlines: Outline[]; shapes: { movable_chords: { id: string }[]; triads: { id: string; root: string; quality: string; strings: number[]; frets: number[] }[] };
   lessonById: Record<string, Lesson>; outlineById: Record<string, Outline>;
 }
@@ -23,11 +26,11 @@ export interface Catalog {
 const get = (f: string) => fetch(`./catalog/${f}`).then(r => { if (!r.ok) throw new Error(`${f}: ${r.status}`); return r.json(); });
 
 export async function loadCatalog(): Promise<Catalog> {
-  const [tracks, lessons, chords, scales, rhythm, exercises, outlines, shapes, lib] = await Promise.all(
-    ['tracks', 'lessons', 'chords', 'scales', 'rhythm', 'exercises', 'song_outlines', 'shapes', 'chords-lib'].map(n => get(n + '.json')));
+  const [tracks, lessons, chords, scales, rhythm, exercises, outlines, shapes, lib, songs, quizzes] = await Promise.all(
+    ['tracks', 'lessons', 'chords', 'scales', 'rhythm', 'exercises', 'song_outlines', 'shapes', 'chords-lib', 'songs', 'quizzes'].map(n => get(n + '.json')));
   setChordData(lib, chords);
   const cat: Catalog = {
-    tracks: [...tracks].sort((a: Track, b: Track) => a.order - b.order), lessons, chords, scales, strums: rhythm.strumming, exercises,
+    tracks: [...tracks].sort((a: Track, b: Track) => a.order - b.order), lessons, chords, scales, strums: rhythm.strumming, picking: rhythm.picking, exercises, songs, quizzes,
     outlines: [...outlines].sort((a: Outline, b: Outline) => a.title.localeCompare(b.title)), shapes,
     lessonById: Object.fromEntries(lessons.map((l: Lesson) => [l.id, l])),
     outlineById: Object.fromEntries(outlines.map((o: Outline) => [o.id, o])),
