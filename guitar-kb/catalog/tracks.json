@@ -1,0 +1,41 @@
+[
+ {
+  "id": "F",
+  "name": "Foundations",
+  "instrument": "both",
+  "order": 0
+ },
+ {
+  "id": "A",
+  "name": "Acoustic Worship",
+  "instrument": "acoustic",
+  "order": 1,
+  "requires": [
+   "F"
+  ]
+ },
+ {
+  "id": "ER",
+  "name": "Electric Worship Rhythm",
+  "instrument": "electric",
+  "order": 2,
+  "requires": [
+   "F"
+  ]
+ },
+ {
+  "id": "EL",
+  "name": "Electric Worship Lead",
+  "instrument": "electric",
+  "order": 3,
+  "requires": [
+   "F"
+  ]
+ },
+ {
+  "id": "T",
+  "name": "Theory & Ear",
+  "instrument": "both",
+  "order": 4
+ }
+]

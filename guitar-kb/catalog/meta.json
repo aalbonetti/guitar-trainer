@@ -1,0 +1,23 @@
+{
+ "schema_version": 1,
+ "string_order": "6_to_1",
+ "muted": -1,
+ "tuning": {
+  "standard": [
+   "E2",
+   "A2",
+   "D3",
+   "G3",
+   "B3",
+   "E4"
+  ],
+  "midi": [
+   40,
+   45,
+   50,
+   55,
+   59,
+   64
+  ]
+ }
+}

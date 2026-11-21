@@ -1,0 +1,84 @@
+[
+ {
+  "id": "SONG_amazing_grace",
+  "title": "Amazing Grace",
+  "words": "John Newton (1779)",
+  "tune": "NEW BRITAIN (trad., arr. 1835)",
+  "public_domain": true,
+  "meter": "3/4",
+  "key": "G",
+  "tempo": 80,
+  "pickup_beats": 1,
+  "level": "A.11",
+  "capo_options": [
+   {
+    "key": "A",
+    "capo": 2,
+    "shapes": "G"
+   },
+   {
+    "key": "Bb",
+    "capo": 3,
+    "shapes": "G"
+   }
+  ],
+  "sections": [
+   {
+    "name": "Verse",
+    "bars": [
+     "G",
+     "G",
+     "C",
+     "G",
+     "G",
+     "G",
+     "D",
+     "D",
+     "G",
+     "G7",
+     "C",
+     "G",
+     "G",
+     "D",
+     "G",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "1",
+     "4",
+     "1",
+     "1",
+     "1",
+     "5",
+     "5",
+     "1",
+     "1(7)",
+     "4",
+     "1",
+     "1",
+     "5",
+     "1",
+     "1"
+    ],
+    "lyrics": [
+     "Amazing grace! How sweet the sound",
+     "That saved a wretch like me!",
+     "I once was lost, but now am found;",
+     "Was blind, but now I see."
+    ]
+   }
+  ],
+  "chords_used": [
+   "G",
+   "C",
+   "D",
+   "G7"
+  ],
+  "rhythm": [
+   "S4_waltz",
+   "P3_rolling_34"
+  ],
+  "verify": "chart reviewed against standard hymnal harmonization before release"
+ }
+]

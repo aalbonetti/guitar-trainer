@@ -1,0 +1,417 @@
+[
+ {
+  "id": "Am_pent_pos1",
+  "name": "A minor pentatonic, position 1",
+  "root": "A",
+  "kind": "minor_pentatonic",
+  "position": 1,
+  "frets": [
+   [
+    5,
+    8
+   ],
+   [
+    5,
+    7
+   ],
+   [
+    5,
+    7
+   ],
+   [
+    5,
+    7
+   ],
+   [
+    5,
+    8
+   ],
+   [
+    5,
+    8
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "Am_pent_pos2",
+  "name": "A minor pentatonic, position 2",
+  "root": "A",
+  "kind": "minor_pentatonic",
+  "position": 2,
+  "frets": [
+   [
+    8,
+    10
+   ],
+   [
+    7,
+    10
+   ],
+   [
+    7,
+    10
+   ],
+   [
+    7,
+    9
+   ],
+   [
+    8,
+    10
+   ],
+   [
+    8,
+    10
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "Am_pent_pos3",
+  "name": "A minor pentatonic, position 3",
+  "root": "A",
+  "kind": "minor_pentatonic",
+  "position": 3,
+  "frets": [
+   [
+    10,
+    12
+   ],
+   [
+    10,
+    12
+   ],
+   [
+    10,
+    12
+   ],
+   [
+    9,
+    12
+   ],
+   [
+    10,
+    13
+   ],
+   [
+    10,
+    12
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "Am_pent_pos4",
+  "name": "A minor pentatonic, position 4",
+  "root": "A",
+  "kind": "minor_pentatonic",
+  "position": 4,
+  "frets": [
+   [
+    12,
+    15
+   ],
+   [
+    12,
+    15
+   ],
+   [
+    12,
+    14
+   ],
+   [
+    12,
+    14
+   ],
+   [
+    13,
+    15
+   ],
+   [
+    12,
+    15
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "Am_pent_pos5",
+  "name": "A minor pentatonic, position 5",
+  "root": "A",
+  "kind": "minor_pentatonic",
+  "position": 5,
+  "frets": [
+   [
+    15,
+    17
+   ],
+   [
+    15,
+    17
+   ],
+   [
+    14,
+    17
+   ],
+   [
+    14,
+    17
+   ],
+   [
+    15,
+    17
+   ],
+   [
+    15,
+    17
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "G_major_pent_pos1",
+  "name": "G major pentatonic, position 1",
+  "root": "G",
+  "kind": "major_pentatonic",
+  "position": 1,
+  "frets": [
+   [
+    0,
+    3
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    0,
+    3
+   ],
+   [
+    0,
+    3
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "G_major_pent_pos2",
+  "name": "G major pentatonic, position 2",
+  "root": "G",
+  "kind": "major_pentatonic",
+  "position": 2,
+  "frets": [
+   [
+    3,
+    5
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    3,
+    5
+   ],
+   [
+    3,
+    5
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "G_major_pent_pos3",
+  "name": "G major pentatonic, position 3",
+  "root": "G",
+  "kind": "major_pentatonic",
+  "position": 3,
+  "frets": [
+   [
+    5,
+    7
+   ],
+   [
+    5,
+    7
+   ],
+   [
+    5,
+    7
+   ],
+   [
+    4,
+    7
+   ],
+   [
+    5,
+    8
+   ],
+   [
+    5,
+    7
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "G_major_pent_pos4",
+  "name": "G major pentatonic, position 4",
+  "root": "G",
+  "kind": "major_pentatonic",
+  "position": 4,
+  "frets": [
+   [
+    7,
+    10
+   ],
+   [
+    7,
+    10
+   ],
+   [
+    7,
+    9
+   ],
+   [
+    7,
+    9
+   ],
+   [
+    8,
+    10
+   ],
+   [
+    7,
+    10
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "G_major_pent_pos5",
+  "name": "G major pentatonic, position 5",
+  "root": "G",
+  "kind": "major_pentatonic",
+  "position": 5,
+  "frets": [
+   [
+    10,
+    12
+   ],
+   [
+    10,
+    12
+   ],
+   [
+    9,
+    12
+   ],
+   [
+    9,
+    12
+   ],
+   [
+    10,
+    12
+   ],
+   [
+    10,
+    12
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "Am_blues_pos1",
+  "name": "A blues scale, position 1",
+  "root": "A",
+  "kind": "blues",
+  "position": 1,
+  "frets": [
+   [
+    5,
+    8
+   ],
+   [
+    5,
+    6,
+    7
+   ],
+   [
+    5,
+    7
+   ],
+   [
+    5,
+    7,
+    8
+   ],
+   [
+    5,
+    8
+   ],
+   [
+    5,
+    8
+   ]
+  ],
+  "movable": true
+ },
+ {
+  "id": "G_major_pos2",
+  "name": "G major scale (root string 6, fret 3)",
+  "root": "G",
+  "kind": "major",
+  "position": 2,
+  "frets": [
+   [
+    2,
+    3,
+    5
+   ],
+   [
+    2,
+    3,
+    5
+   ],
+   [
+    2,
+    4,
+    5
+   ],
+   [
+    2,
+    4,
+    5
+   ],
+   [
+    3,
+    5
+   ],
+   [
+    2,
+    3,
+    5
+   ]
+  ],
+  "movable": true
+ }
+]
