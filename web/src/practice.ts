@@ -46,7 +46,7 @@ export function buildQueue(q: QueueInput, routine: Routine): Item[] {
   const tracks = [...cat.tracks].sort((a, b) => a.order - b.order).filter(t => q.visibleTrack(t.id));
   const rank = (l: Lesson) => (lp[l.id]?.first_pass_day ? 0 : states[l.id] === 'in_progress' ? 1 : 2);
   const pick = (t: string): Lesson | undefined => {
-    const inTrack = visible.filter(l => l.track === t && !used.has(l.id) && states[l.id] !== 'locked' && states[l.id] !== 'passed');
+    const inTrack = visible.filter(l => l.track === t && !used.has(l.id) && states[l.id] !== 'locked' && states[l.id] !== 'passed' && lp[l.id]?.first_pass_day !== day);
     return inTrack.sort((a, b) => rank(a) - rank(b))[0];
   };
   const cands = tracks.map(t => pick(t.id)).filter((l): l is Lesson => !!l).sort((a, b) => rank(a) - rank(b)).slice(0, P.maxLessons);
@@ -61,7 +61,7 @@ export function buildQueue(q: QueueInput, routine: Routine): Item[] {
   const left = Math.max(cands.length * 3, P.total - fixed);
   cands.forEach((l, i) => {
     const m = timed ? Math.floor(left / cands.length) + (i < left % cands.length ? 1 : 0) : null;
-    items.push({ kind: 'lesson', lessonId: l.id, title: l.title, why: lp[l.id]?.first_pass_day ? 'Passed once: pass it again today to finish it' : states[l.id] === 'in_progress' ? 'Keep going' : 'Next up', minutes: m });
+    items.push({ kind: 'lesson', lessonId: l.id, title: l.title, why: lp[l.id]?.first_pass_day ? 'Passed once on an earlier day: pass it today to complete it' : states[l.id] === 'in_progress' ? 'Keep going' : 'Next up', minutes: m });
   });
   if (song) items.push({ kind: 'song', songId: song.id, title: song.title, why: song.why, minutes: timed ? P.song : null });
   if (ear) items.push({ kind: 'ear', lessonId: ear.id, title: `Ear training: ${ear.title}`, why: 'Two minutes of listening', minutes: P.ear });

@@ -11,6 +11,12 @@ const ok = { met: true, atTarget: true, score: 1, mode: 'auto' as const };
 const fail = { met: false, atTarget: true, score: 0.5, mode: 'auto' as const };
 
 describe('progress rules', () => {
+  it('a first pass opens the next lessons (no waiting a day to move on)', () => {
+    const r = applyAttempt(undefined, L('F.01'), ok, '2026-11-21');
+    const st = computeStates(lessons, tracks, { 'F.01': r.lp });
+    expect(st['F.01']).toBe('in_progress'); expect(st['F.02']).toBe('available'); expect(st['F.04']).toBe('available');
+    expect(computeStates(lessons, tracks, {})['F.02']).toBe('locked');
+  });
   it('passes only on a second, different day', () => {
     let r = applyAttempt(undefined, L('F.01'), ok, '2026-11-21');
     expect(r.event).toBe('first_pass'); expect(r.lp.state).toBe('in_progress');

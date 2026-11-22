@@ -7,7 +7,7 @@ import { xp } from '../xp';
 import { bests, bestKey, loadBests, unlocked, finishRun, markService, type RunOutcome } from '../arcade';
 import { levelFor, comboMult, points, rng, pick, shuffle, positionsOf, pcAt, noteLabel, pretty, callNumberQ, capoQ, hearQ, delayQ, DELAY_NOTES, type Pos, type Zone, type ChoiceQ, type DelayQ, type Rng } from '../games/core';
 import { playChords } from '../audio/engine';
-import { dayOf } from '../progress';
+import { dayOf, computeStates } from '../progress';
 import { getSetList, thisWeekSongs } from '../setlist';
 
 const PLAYABLE = new Set(['G_note_drop', 'G_fret_finder', 'G_call_the_number', 'G_hear_the_change', 'G_capo_quick', 'G_delay_math']);
@@ -31,19 +31,20 @@ export function ArcadeHome({ cat }: { cat: Catalog }) {
       </section>
       <div class="tiles">
         {cat.games.map(g => {
-          const open = unlocked(cat, g), playable = PLAYABLE.has(g.id);
+          const playable = PLAYABLE.has(g.id);
           const lesson = cat.lessonById[g.unlock_lesson];
+          const st = computeStates(cat.lessons, cat.tracks, pr.lp)[g.unlock_lesson];
           return (
-            <section class={`card tile ${open && playable ? '' : 'dim'}`}>
+            <section class={`card tile ${playable ? '' : 'dim'}`}>
               <h2><span class="gicon">{ICON[g.id]}</span> {g.name}</h2>
               <p class="muted small">{g.blurb}</p>
               {!playable ? <p class="muted small">Coming later{g.modes.includes('play') && !g.modes.includes('tap') ? ': you play it on the guitar' : ''}.</p>
-                : !open ? <p class="muted small">🔒 Opens with <a href={`#/lesson/${g.unlock_lesson}`}>{g.unlock_lesson} {lesson?.title}</a></p>
-                  : <ul class="levels">{g.levels.map(l => {
+                : <>{st === 'locked' || st === 'available' ? <p class="muted small">Taught in <a href={`#/lesson/${g.unlock_lesson}`}>{g.unlock_lesson} {lesson?.title}</a></p> : null}
+                  <ul class="levels">{g.levels.map((l, i) => {
                     const lo = unlocked(cat, g, l), best = b.map[bestKey(g.id, l.id)];
                     return <li>{lo ? <a href={`#/arcade/${g.id}/${l.id}`}><span>{l.name}</span><Stars n={best?.best_stars || 0} />{best ? <small>{best.best_score}</small> : null}</a>
-                      : <span class="muted">🔒 {l.name} <small>after {l.unlock_lesson}</small></span>}</li>;
-                  })}</ul>}
+                      : <span class="muted">🔒 {l.name} <small>★★ on level {i} opens it</small></span>}</li>;
+                  })}</ul></>}
             </section>
           );
         })}
@@ -104,7 +105,8 @@ export function GameScreen({ cat, gameId, levelId }: { cat: Catalog; gameId: str
   const [outcome, setOutcome] = useState<(RunOutcome & { score: number; misses: string[] }) | null>(null);
   useEffect(() => { setPhase('ready'); setOutcome(null); }, [gameId, levelId]);
   if (!g || !l) return <div class="page"><p>Game not found. <a href="#/arcade">Arcade</a></p></div>;
-  if (!unlocked(cat, g, l) || !PLAYABLE.has(g.id)) return <div class="page"><p>This level isn't open yet. <a href="#/arcade">Back to the Arcade</a></p></div>;
+  if (!PLAYABLE.has(g.id)) return <div class="page"><p>This game isn't ready yet. <a href="#/arcade">Back to the Arcade</a></p></div>;
+  if (!unlocked(cat, g, l)) return <div class="page"><p>Get ★★ on the previous level to open this one. <a href="#/arcade">Back to the Arcade</a></p></div>;
   const best = b.map[bestKey(g.id, l.id)];
   const next = g.levels[g.levels.indexOf(l) + 1];
   return (

@@ -11,7 +11,8 @@ import { loadBests } from './arcade';
 import { expireIdle, touch, noteTuned } from './practice';
 import { onFirstTune } from './audio/engine';
 import { MetroStrip } from './ui/Tools';
-import { loadProgress } from './progressStore';
+import { loadProgress, saveStatus } from './progressStore';
+import { useStore } from './store';
 
 const NAV = [
   { h: '#/today', label: 'Today', icon: '☀' },
@@ -34,6 +35,7 @@ export function App() {
   const [err, setErr] = useState('');
   const [, bump] = useState(0);
   const hash = useHash();
+  const save = useStore(saveStatus);
   useEffect(() => {
     void expireIdle(); void loadProgress(); void loadCharts(); void loadXp(); void loadBests(); loadCatalog().then(setCat).catch(e => setErr(String(e)));
     onFirstTune(() => noteTuned());
@@ -65,7 +67,7 @@ export function App() {
         <div class="brand">Guitar<span>Trainer</span></div>
         {NAV.map(n => <a href={n.h} class={active === n ? 'on' : ''}><i>{n.icon}{n.label === 'Today' && due ? <b class="navbadge" aria-label={`${due} reviews due`}>{due}</b> : null}</i><span>{n.label}</span></a>)}
       </nav>
-      <main class="main">{body}</main>
+      <main class="main">{save.state === 'error' || save.state === 'blocked' ? <div class="savebanner">⚠ {save.msg} <button class="small" onClick={() => location.reload()}>Retry</button></div> : null}{body}</main>
       <div class="bottombars"><SessionBar /><MetroStrip /></div>
     </div>
   );

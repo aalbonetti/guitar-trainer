@@ -24,11 +24,13 @@ async def main():
         b=await p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--autoplay-policy=no-user-gesture-required']); pg=await b.new_page(viewport={'width':412,'height':880}); errs=[]
         pg.on('pageerror',lambda e: errs.append(str(e))); pg.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade'); await pg.wait_for_selector('text=Note Drop')
-        t=await pg.inner_text('.tiles'); check(t.count('🔒 Opens with')>=5 and 'Coming later' in t, 'new player: G1 games locked to their lessons, later games marked')
+        t=await pg.inner_text('.tiles'); check(t.count('★★ on level')>=10 and 'Coming later' in t and 'Taught in' in t, 'new player: first level of every game open, later levels need ★★, later games marked')
+        await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_capo_quick/cq1'); await pg.wait_for_selector('text=▶ Start'); check(True, 'new player can open level 1')
+        await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_capo_quick/cq2'); await pg.wait_for_selector('text=Get ★★ on the previous level'); check(True, 'level 2 waits for ★★ on level 1')
         await pg.goto(f'http://127.0.0.1:{PORT}/#/settings'); await pg.wait_for_selector('text=Restore from file')
         await pg.set_input_files('section.card:has-text("Backup") input[type=file]', BK); await pg.wait_for_timeout(1500)
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade'); await pg.wait_for_selector('text=Note Drop'); await pg.wait_for_timeout(300)
-        t=await pg.inner_text('.tiles'); check('🔒 Opens with' not in t.split('Triad Hunt')[0], 'F + T passed: all six G1 games open')
+        t=await pg.inner_text('.tiles'); check('Taught in' not in t.split('Triad Hunt')[0], 'F + T passed: no "taught in" tips on the G1 games')
         await pg.screenshot(path='/tmp/g1_home.png', full_page=True)
         # --- Call the Number cn1, a full 60 s round, all correct ---
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_call_the_number/cn1'); await pg.click('text=▶ Start')
@@ -57,6 +59,7 @@ async def main():
             await pg.dispatch_event(f'rect.hit[data-s="{pos[0]}"][data-f="{pos[1]}"]','pointerdown'); await pg.wait_for_timeout(80)
         await pg.wait_for_selector('.result',timeout=10000); res=await pg.inner_text('.result'); print(res.replace('\n',' | '))
         check('87%' in res and 'review for F.07' in res, 'note drop: 20/23, ★★, counted as F.07 review')
+        await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade'); await pg.wait_for_timeout(300); nd=await pg.inner_text('section.tile:has-text("Note Drop")'); check('🔒 Strings 6 & 5, frets 0–12' not in nd and nd.count('★★ on level')==2, 'note drop level 2 opened by the ★★ round')
         # --- Delay Math: answer correctly for a few, then quit ---
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_delay_math/dm1'); await pg.click('text=▶ Start')
         for i in range(4):
@@ -78,8 +81,8 @@ async def main():
             await pg.click(f'.choices button:text-is("{c}")'); await pg.wait_for_timeout(300)
         check(int(await pg.inner_text('.hud div b'))>=400, 'capo quick scoring'); await pg.click('.hud button')
         # --- Hear the Change: plays and accepts answers ---
-        await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_hear_the_change/hc2'); await pg.click('text=▶ Start')
-        await pg.click('.choices button >> nth=1'); await pg.wait_for_timeout(1000); check(await pg.locator('.choices button').count()==4, 'hear the change runs'); await pg.locator('.playarea').screenshot(path='/tmp/g1_hear.png'); await pg.click('.hud button')
+        await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_hear_the_change/hc1'); await pg.click('text=▶ Start')
+        await pg.click('.choices button >> nth=1'); await pg.wait_for_timeout(1000); check(await pg.locator('.choices button').count()==2, 'hear the change (major/minor) runs'); await pg.locator('.playarea').screenshot(path='/tmp/g1_hear.png'); await pg.click('.hud button')
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade'); await pg.wait_for_timeout(400); xp=await pg.inner_text('.xpcard')
         tot=int(re.search(r'(\d+) XP',xp).group(1)); check(tot>=60, f'XP added ({tot}): games + 2 reviews'); await pg.screenshot(path='/tmp/g1_home2.png')
         st=await pg.inner_text('.tiles'); check('★' in st, 'best stars shown on level list')
