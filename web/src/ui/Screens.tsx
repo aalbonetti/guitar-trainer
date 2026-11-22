@@ -13,6 +13,8 @@ import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../pr
 import { exportAll, importAll, downloadBackup } from '../db';
 import { TimingPanel, CalibrationCard } from './Timing';
 import { PracticeCard } from './Practice';
+import { xp } from '../xp';
+import { levelFor } from '../games/core';
 import { MyCharts } from './Charts';
 import { charts, loadCharts, chartFor } from '../charts';
 import { noteSongOpened } from '../practice';
@@ -36,10 +38,11 @@ export function Today({ cat }: { cat: Catalog }) {
   const streak = (() => { let n = 0, d = day; const set = new Set(pr.days); if (!set.has(d)) d = addDaysLocal(d, -1); while (set.has(d)) { n++; d = addDaysLocal(d, -1); } return n; })();
   const passed = Object.values(states).filter(s => s === 'passed').length;
   const vis = (id: string) => trackVisible(cat, id);
+  const x = useStore(xp);
   return (
     <div class="page">
       <h1>Today</h1>
-      <p class="muted">{passed} of {cat.lessons.length} lessons passed{streak ? ` · ${streak}-day streak` : ''} · <a href="#/progress">progress</a></p>
+      <p class="muted">{passed} of {cat.lessons.length} lessons passed{streak ? ` · ${streak}-day streak` : ''} · <a href="#/arcade">level {levelFor(x.total).level}</a> · <a href="#/progress">progress</a></p>
       <div class="two">
         <div><PracticeCard cat={cat} visibleTrack={vis} /></div>
         <div>
