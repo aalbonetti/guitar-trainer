@@ -19,6 +19,10 @@ Walk up the G major scale in 6ths on strings 3 and 1. Each pair is either "same 
 
 {{scale:G_major_pos2}}
 
+{{exercise:EX_sixths_G_major}}
+
+For the graded attempt, play the eight 6ths above from bottom to top at your own pace: pluck both notes together and let each one ring for a moment before you slide to the next.
+
 ### Practice
 Over a slow G – C – D loop, slide a 6th shape into a chord tone on each change.
 

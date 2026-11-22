@@ -12,6 +12,8 @@ import { progress, recordAttempt, saveStatus } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
 import { exportAll, importAll, downloadBackup, shareBackup, canShareBackup } from '../db';
 import { TimingPanel, CalibrationCard, usePracticeTempo } from './Timing';
+import { PitchPanel } from './Pitch';
+import { GRADERS, graderMode, setGraderMode, pitchGraderKey, type GraderMode } from '../grading/modes';
 import { PracticeCard } from './Practice';
 import { xp } from '../xp';
 import { levelFor } from '../games/core';
@@ -222,11 +224,24 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
         <p class="muted">Mark it yourself when you can play it at the goal. Self-marked passes are recorded as such.</p>
         <button disabled={doneToday} onClick={() => mark('self')}>{doneToday ? 'Marked today ✓' : 'I can do this'}</button></details> : null}
     </section>);
+  if (type === 'pitch' && graderMode(pitchGraderKey(l, cat)) !== 'self') return (
+    <section class="card">
+      <h2>Pass it {due ? <small class="badge b-due">review due</small> : null}</h2>
+      {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''}. Practice any time.</p> : null}
+      {doneToday && !(att.lessonId === l.id && att.phase === 'result') ? <p class="okText">Passed once today ✓ Pass it again on another day to complete the lesson.</p> : null}
+      <PitchPanel cat={cat} l={l} reviewDue={due} passed={p?.state === 'passed'} />
+      {msg ? <p class="note">{msg}</p> : null}
+      {p?.state !== 'passed' || due ? <details class="selfmark"><summary>Can't use the mic right now?</summary>
+        <p class="muted">Mark it yourself when you can play it. Self-marked passes are recorded as such.</p>
+        <button disabled={doneToday} onClick={() => mark('self')}>{doneToday ? 'Marked today ✓' : 'I can do this'}</button></details> : null}
+    </section>);
   const graded = type !== 'self_check';
+  const selfByChoice = type === 'pitch';
   return (
     <section class="card">
       <h2>Pass it {due ? <small class="badge b-due">review due</small> : null}</h2>
-      {graded ? <p class="muted">Automatic grading for this lesson ({describePass(l.pass_criteria).split(':')[0].toLowerCase()}) arrives in a later update. Until then, mark it yourself when you can do it at the goal above, on two different days.</p>
+      {selfByChoice ? <p class="muted">Pitch grading is set to self-mark in <a href="#/settings">Settings</a>. Mark it yourself when you can do it, on two different days.</p>
+        : graded ? <p class="muted">Automatic grading for this lesson ({describePass(l.pass_criteria).split(':')[0].toLowerCase()}) arrives in a later update. Until then, mark it yourself when you can do it at the goal above, on two different days.</p>
         : <p class="muted">When it feels solid, mark it. Do that on two different days to pass.</p>}
       {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''}.</p>
         : <button class="primary" disabled={doneToday} onClick={() => mark(graded ? 'self' : 'auto')}>{doneToday ? 'Marked today ✓ (come back another day)' : due ? 'Review: I can still do this' : 'I can do this'}</button>}
@@ -297,6 +312,21 @@ function DelayCalc() {
 }
 
 // ---------- Settings ----------
+/** §6 fallback flag per grader: auto, assisted (you confirm), or self-mark. */
+function GradingModes() {
+  const [, bump] = useState(0);
+  const label: Record<GraderMode, string> = { auto: 'Automatic', assisted: 'Assisted (I confirm)', self: 'Self-mark (no mic)' };
+  return (
+    <section class="card"><h2>Grading mode</h2>
+      <p class="muted">If a grader gets your playing wrong on this phone, switch it to assisted (it shows what it heard and you confirm) or self-mark. Timing grading is always automatic.</p>
+      {GRADERS.map(g => <label class="field">{g.name}
+        <select value={graderMode(g.key)} onChange={e => { setGraderMode(g.key, (e.target as HTMLSelectElement).value as GraderMode); bump(x => x + 1); }}>
+          {(['auto', 'assisted', 'self'] as GraderMode[]).map(m => <option value={m}>{label[m]}{m === g.def ? ' (default)' : ''}</option>)}
+        </select><small>{g.note}</small></label>)}
+    </section>
+  );
+}
+
 export const audioCheckPref = persisted<number | null>('gt_audio_check_done', null);
 /** The real-phone audio check (M0 page) hasn't been done yet: graders are only proven on synthetic audio. */
 function AudioCheckCard() {
@@ -305,7 +335,7 @@ function AudioCheckCard() {
     <section class={`card ${done ? '' : 'attn'}`}>
       <h2>Phone audio check {done ? <small class="okText">done {new Date(done).toLocaleDateString()} ✓</small> : <small class="badge b-due">to do</small>}</h2>
       {!done ? <>
-        <p>The tuner and timing grader have only been tested on synthetic audio. A 15-minute check with your guitar confirms they work on this phone before more grading is built on them.</p>
+        <p>The tuner, timing grader and pitch grader have only been tested on synthetic audio. A 15-minute check with your guitar confirms they work on this phone before more grading is built on them.</p>
         <ol class="small">
           <li>Quiet room, guitar in hand, phone on a stand about an arm's length away.</li>
           <li>Open the check page and run each test, first folded, then unfolded.</li>
@@ -347,6 +377,7 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
       <section class="card"><h2>Audio</h2><InputPicker /></section>
       <AudioCheckCard />
       <section class="card"><h2>Timing calibration</h2><CalibrationCard /></section>
+      <GradingModes />
       <section class="card">
         <h2>Church set list</h2>
         <p class="muted">Import the set-list CSV (Name, new, total, then one column per week). It's stored only on this phone and never uploaded.</p>

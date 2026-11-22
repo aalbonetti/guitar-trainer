@@ -48,7 +48,8 @@ export function describePass(p: PassCriteria): string {
     case 'quiz': return `Quiz: ${Math.round(n('score') * 100)}% correct${p.max_s ? `, under ${n('max_s')} s each` : ''}`;
     case 'self_check': return 'Self check: you decide when it feels solid (2 separate days)';
     case 'timing': return `In time with the click: ${n('bars')} bars at ${n('bpm')} BPM, ${({ 4: 'quarter notes', 6: 'triplet feel', 8: 'eighth notes', 16: 'sixteenth notes' } as Record<number, string>)[n('subdivision')] || n('subdivision') + 'ths'}, average error ≤ ${n('max_err_ms')} ms`;
-    case 'pitch': return p.cents ? `Pitch: within ±${n('cents')} cents` : `Pitch: ${Math.round(n('note_accuracy') * 100)}% of notes right`;
+    case 'pitch': return p.cents ? `Pitch: hold ${p.scope === 'all_strings' ? 'every open string' : 'each bend'} within ±${n('cents')} cents for half a second`
+      : `Notes: ${Math.round(n('note_accuracy') * 100)}% of the exercise's notes right, in order${p.bpm ? `, with the click at ${n('bpm')} BPM` : ', at your own pace'}`;
     case 'chord_accuracy': return `Chords: ${Math.round(n('ratio') * 100)}% of strums ring as the right chord`;
     case 'changes_per_min': return `Chord changes: ${n('target')} a minute${p.pair ? ` (${(p.pair as string[]).join(' ↔ ')})` : ''}`;
     default: return p.type;
