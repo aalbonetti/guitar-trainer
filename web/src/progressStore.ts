@@ -4,6 +4,8 @@ import * as db from './db';
 import { applyAttempt, dayOf, type AttemptResult, type LessonProgress, type Event } from './progress';
 import type { Lesson } from './catalog';
 import { session, noteAttempt } from './practice';
+import { addXp } from './xp';
+import { XP } from './games/core';
 
 export const progress = new Store<{ ready: boolean; lp: Record<string, LessonProgress>; days: string[] }>({ ready: false, lp: {}, days: [] });
 
@@ -26,6 +28,8 @@ export async function recordAttempt(lesson: Lesson, r: AttemptResult): Promise<E
   } catch { /* storage unavailable: progress still updates for this visit */ }
   progress.set({ lp: { ...progress.get().lp, [lesson.id]: lp } });
   noteAttempt(lesson.id, r.met);
+  if (event === 'passed') void addXp('lesson_pass', lesson.id, XP.lessonPass);
+  if (event === 'review_passed' || event === 'mastered') void addXp('review', lesson.id, XP.review);
   return event;
 }
 

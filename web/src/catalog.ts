@@ -17,20 +17,23 @@ export interface Outline {
   chart_key: string; sections: Section[]; capo_options: { shapes: string; capo: number }[]; practice_for: string[];
   links: { songselect: string | null }; chords_verified: string; notes: string | null;
 }
+export interface GameLevel { id: string; name: string; params: Record<string, any>; target_score: number; round_s?: number; lives?: number; unlock_lesson?: string; review_for?: string[] }
+export interface Game { id: string; name: string; blurb: string; unlock_lesson: string; review_for: string[]; modes: string[]; milestone: string; levels: GameLevel[] }
 export interface Catalog {
   tracks: Track[]; lessons: Lesson[]; chords: CChord[]; scales: Scale[]; strums: Strum[]; picking: Picking[]; exercises: Exercise[]; songs: PdSong[]; quizzes: Quiz[];
   outlines: Outline[]; shapes: { movable_chords: { id: string }[]; triads: { id: string; root: string; quality: string; strings: number[]; frets: number[] }[] };
+  games: Game[];
   lessonById: Record<string, Lesson>; outlineById: Record<string, Outline>;
 }
 
 const get = (f: string) => fetch(`./catalog/${f}`).then(r => { if (!r.ok) throw new Error(`${f}: ${r.status}`); return r.json(); });
 
 export async function loadCatalog(): Promise<Catalog> {
-  const [tracks, lessons, chords, scales, rhythm, exercises, outlines, shapes, lib, songs, quizzes] = await Promise.all(
-    ['tracks', 'lessons', 'chords', 'scales', 'rhythm', 'exercises', 'song_outlines', 'shapes', 'chords-lib', 'songs', 'quizzes'].map(n => get(n + '.json')));
+  const [tracks, lessons, chords, scales, rhythm, exercises, outlines, shapes, lib, songs, quizzes, games] = await Promise.all(
+    ['tracks', 'lessons', 'chords', 'scales', 'rhythm', 'exercises', 'song_outlines', 'shapes', 'chords-lib', 'songs', 'quizzes', 'games'].map(n => get(n + '.json')));
   setChordData(lib, chords);
   const cat: Catalog = {
-    tracks: [...tracks].sort((a: Track, b: Track) => a.order - b.order), lessons, chords, scales, strums: rhythm.strumming, picking: rhythm.picking, exercises, songs, quizzes,
+    tracks: [...tracks].sort((a: Track, b: Track) => a.order - b.order), lessons, chords, scales, strums: rhythm.strumming, picking: rhythm.picking, exercises, songs, quizzes, games,
     outlines: [...outlines].sort((a: Outline, b: Outline) => a.title.localeCompare(b.title)), shapes,
     lessonById: Object.fromEntries(lessons.map((l: Lesson) => [l.id, l])),
     outlineById: Object.fromEntries(outlines.map((o: Outline) => [o.id, o])),

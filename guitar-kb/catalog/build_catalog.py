@@ -324,6 +324,62 @@ LESSONS = [
     L('T.07','Tempo, subdivision & delay time',['F.06'],P('quiz',score=0.9),{'quizzes':['Q_delay']}),
 ]
 
+
+# ---------------- games (07-games.md) ----------------
+# G1 ships tap mode for six games; the rest are listed so the Arcade shows what's coming (milestone G2/G3).
+def lvl(id, name, params, target_score, round_s=None, lives=None, unlock_lesson=None, review_for=None):
+    d = dict(id=id, name=name, params=params, target_score=target_score)
+    if round_s: d['round_s'] = round_s
+    if lives: d['lives'] = lives
+    if unlock_lesson: d['unlock_lesson'] = unlock_lesson
+    if review_for: d['review_for'] = review_for
+    return d
+def game(id, name, blurb, unlock_lesson, milestone, levels, review_for=(), modes=('tap',)):
+    return dict(id=id, name=name, blurb=blurb, unlock_lesson=unlock_lesson, review_for=list(review_for), modes=list(modes), milestone=milestone, levels=levels)
+Z = lambda strings, f0, f1: dict(zone=dict(strings=strings, frets=[f0, f1]))
+OPEN_KEYS = ['G', 'D', 'C', 'E', 'A']
+ALL_KEYS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
+GAMES = [
+    game('G_note_drop', 'Note Drop', 'Note names fall toward the neck. Tap where that note lives before it lands. 3 misses end the round.', 'F.07', 'G1', [
+        lvl('nd1', 'Strings 6 & 5, frets 0–5', {**Z([6, 5], 0, 5), 'speed': 1.0}, 2500, lives=3, review_for=['F.07']),
+        lvl('nd2', 'Strings 6 & 5, frets 0–12', {**Z([6, 5], 0, 12), 'speed': 1.0}, 3000, lives=3, review_for=['F.07']),
+        lvl('nd3', 'All strings, frets 0–5', {**Z([6, 5, 4, 3, 2, 1], 0, 5), 'speed': 1.0}, 3000, lives=3),
+        lvl('nd4', 'Whole neck, frets 0–12', {**Z([6, 5, 4, 3, 2, 1], 0, 12), 'speed': 1.2}, 3500, lives=3),
+    ], review_for=['F.07'], modes=('tap', 'play')),
+    game('G_fret_finder', 'Fret Finder', 'One note, 20 seconds: tap every place it appears in the zone.', 'T.01', 'G1', [
+        lvl('ff1', 'Strings 6–4, frets 0–5', Z([6, 5, 4], 0, 5), 2000, round_s=60, review_for=['T.01']),
+        lvl('ff2', 'All strings, frets 0–5', Z([6, 5, 4, 3, 2, 1], 0, 5), 3000, round_s=60, review_for=['T.01']),
+        lvl('ff3', 'All strings, frets 0–12', Z([6, 5, 4, 3, 2, 1], 0, 12), 5000, round_s=60, review_for=['T.01']),
+    ], review_for=['T.01'], modes=('tap', 'play')),
+    game('G_call_the_number', 'Call the Number', 'The band leader calls a number. Tap the chord in this key, fast.', 'T.03', 'G1', [
+        lvl('cn1', 'Key of G: 1 4 5 6m', {'keys': ['G'], 'numbers': ['1', '4', '5', '6m']}, 2500, round_s=60, review_for=['T.03']),
+        lvl('cn2', 'Open keys: 1 2m 3m 4 5 6m', {'keys': OPEN_KEYS, 'numbers': ['1', '2m', '3m', '4', '5', '6m']}, 2500, round_s=60, review_for=['T.03']),
+        lvl('cn3', 'All 12 keys', {'keys': ALL_KEYS, 'numbers': ['1', '2m', '3m', '4', '5', '6m']}, 2000, round_s=60, review_for=['T.03']),
+        lvl('cn4', 'Songs: real progressions', {'songs': True, 'numbers': []}, 2500, round_s=90, review_for=['T.03']),
+    ], review_for=['T.03'], modes=('tap', 'play')),
+    game('G_hear_the_change', 'Hear the Change', 'Hear the 1 chord, then another. Name the number.', 'T.05', 'G1', [
+        lvl('hc1', 'Major or minor?', {'numbers': ['major', 'minor']}, 1500, round_s=60, unlock_lesson='T.05', review_for=['T.05']),
+        lvl('hc2', '1 4 5 6m', {'numbers': ['1', '4', '5', '6m']}, 1500, round_s=60, unlock_lesson='T.06', review_for=['T.06']),
+        lvl('hc3', 'Add 2m and 3m', {'numbers': ['1', '2m', '3m', '4', '5', '6m']}, 1500, round_s=60, unlock_lesson='T.06', review_for=['T.06']),
+    ], review_for=['T.05', 'T.06']),
+    game('G_capo_quick', 'Capo Quick', 'Capo math against the clock: which fret, or what key is it really in?', 'T.04', 'G1', [
+        lvl('cq1', 'Which capo?', {'ask': 'capo', 'keys': ALL_KEYS, 'shapes': OPEN_KEYS}, 2500, round_s=60, review_for=['T.04']),
+        lvl('cq2', 'Real key?', {'ask': 'key', 'keys': ALL_KEYS, 'shapes': OPEN_KEYS}, 2500, round_s=60, review_for=['T.04']),
+        lvl('cq3', 'Mixed', {'ask': 'mixed', 'keys': ALL_KEYS, 'shapes': OPEN_KEYS}, 2500, round_s=60, review_for=['T.04']),
+    ], review_for=['T.04']),
+    game('G_delay_math', 'Delay Math', 'A BPM appears: enter the delay time in ms (within ±10).', 'T.07', 'G1', [
+        lvl('dm1', 'Dotted eighths, 60–90 BPM', {'bpm': [60, 90], 'notes': ['dotted8']}, 1500, round_s=60, review_for=['T.07']),
+        lvl('dm2', 'Dotted eighths, 60–140 BPM', {'bpm': [60, 140], 'notes': ['dotted8']}, 1500, round_s=60, review_for=['T.07']),
+        lvl('dm3', 'Quarter, eighth, dotted eighth', {'bpm': [60, 140], 'notes': ['quarter', 'eighth', 'dotted8']}, 1500, round_s=60, review_for=['T.07']),
+    ], review_for=['T.07']),
+    game('G_triad_hunt', 'Triad Hunt', 'Find the triad on a string set, any inversion.', 'ER.04', 'G3', [], modes=('tap', 'play')),
+    game('G_octave_jump', 'Octave Jump', 'Play the octave of a note on string 6 or 5, against the clock.', 'EL.04', 'G2', [], modes=('play',)),
+    game('G_box_runner', 'Box Runner', 'Run the pentatonic box in time with the click.', 'EL.01', 'G2', [], modes=('play',)),
+    game('G_in_the_pocket', 'In the Pocket', 'Strum to the click, then keep time when the click drops out.', 'A.05', 'G2', [], modes=('play',)),
+    game('G_change_sprint', 'Change Sprint', '60 seconds of chord changes. Race your best run.', 'A.01', 'G3', [], modes=('play',)),
+    game('G_song_run', 'Song Run', 'The boss level: play a set-list song bar by bar at its tempo.', 'A.05', 'G3', [], modes=('play',)),
+]
+
 # ---------------- reference validation ----------------
 ids = {
     'chords': {c['id'] for c in C}, 'shapes': {s['id'] for s in shapes_out}, 'triads': {t['id'] for t in TRIADS},
@@ -341,6 +397,24 @@ for e in EXERCISES:
     for pair in e.get('pairs', []):
         for c in pair:
             if c not in ids['chords']: errors.append(f"{e['id']}: unknown chord {c}")
+
+# games: lesson refs, keys, numbers
+NUMS = {'1', '2m', '3m', '4', '5', '6m', 'major', 'minor'}
+gids = set()
+for g in GAMES:
+    if g['id'] in gids: errors.append(f"duplicate game {g['id']}")
+    gids.add(g['id'])
+    for ref in [g['unlock_lesson'], *g['review_for'], *[l.get('unlock_lesson') for l in g['levels']], *[r for l in g['levels'] for r in l.get('review_for', [])]]:
+        if ref and ref not in lesson_ids: errors.append(f"{g['id']}: unknown lesson {ref}")
+    if g['milestone'] == 'G1' and not g['levels']: errors.append(f"{g['id']}: G1 game without levels")
+    for l in g['levels']:
+        p = l['params']
+        for k in p.get('keys', []) + p.get('shapes', []):
+            if k not in PC: errors.append(f"{g['id']}/{l['id']}: bad key {k}")
+        for n in p.get('numbers', []):
+            if n not in NUMS: errors.append(f"{g['id']}/{l['id']}: bad number {n}")
+        z = p.get('zone')
+        if z and (not set(z['strings']) <= {1, 2, 3, 4, 5, 6} or not 0 <= z['frets'][0] < z['frets'][1] <= 15): errors.append(f"{g['id']}/{l['id']}: bad zone")
 # cycle check
 state = {}
 def visit(n):
@@ -358,7 +432,7 @@ meta = dict(schema_version=1, string_order='6_to_1', muted=-1, tuning=dict(stand
 files = {'meta.json': meta, 'tracks.json': TRACKS, 'lessons.json': LESSONS, 'chords.json': C,
          'shapes.json': dict(movable_chords=shapes_out, triads=TRIADS, octaves=[dict(low_string=a, high_string=b, fret_offset=d) for a, b, d in OCTAVES]),
          'scales.json': SCALES, 'rhythm.json': dict(strumming=RHYTHM, picking=PICKING),
-         'exercises.json': EXERCISES, 'songs.json': SONGS, 'quizzes.json': QUIZZES}
+         'exercises.json': EXERCISES, 'songs.json': SONGS, 'quizzes.json': QUIZZES, 'games.json': GAMES}
 for name, data in files.items():
     with open(os.path.join(OUT, name), 'w') as fh:
         json.dump(data, fh, indent=1)

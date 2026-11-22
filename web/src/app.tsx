@@ -5,6 +5,9 @@ import { SessionBar, useDueCount } from './ui/Practice';
 import { Progress } from './ui/Progress';
 import { ImportView, ChartView } from './ui/Charts';
 import { loadCharts } from './charts';
+import { ArcadeHome, GameScreen } from './ui/Arcade';
+import { loadXp } from './xp';
+import { loadBests } from './arcade';
 import { expireIdle, touch, noteTuned } from './practice';
 import { onFirstTune } from './audio/engine';
 import { MetroStrip } from './ui/Tools';
@@ -14,6 +17,7 @@ const NAV = [
   { h: '#/today', label: 'Today', icon: '☀' },
   { h: '#/path', label: 'Path', icon: '🧭' },
   { h: '#/songs', label: 'Songs', icon: '♪' },
+  { h: '#/arcade', label: 'Arcade', icon: '🎮' },
   { h: '#/progress', label: 'Progress', icon: '📈' },
   { h: '#/tools/tuner', label: 'Tools', icon: '🎚' },
   { h: '#/settings', label: 'Settings', icon: '⚙' },
@@ -31,7 +35,7 @@ export function App() {
   const [, bump] = useState(0);
   const hash = useHash();
   useEffect(() => {
-    void expireIdle(); void loadProgress(); void loadCharts(); loadCatalog().then(setCat).catch(e => setErr(String(e)));
+    void expireIdle(); void loadProgress(); void loadCharts(); void loadXp(); void loadBests(); loadCatalog().then(setCat).catch(e => setErr(String(e)));
     onFirstTune(() => noteTuned());
     const vis = () => { if (document.visibilityState === 'visible') void expireIdle(); };
     document.addEventListener('visibilitychange', vis);
@@ -51,6 +55,7 @@ export function App() {
   else if (route === 'chart') body = <ChartView cat={cat} id={decodeURIComponent(arg || '')} />;
   else if (route === 'song') body = <Songs cat={cat} selected={decodeURIComponent(arg || '')} />;
   else if (route === 'tools') body = <Tools which={arg} />;
+  else if (route === 'arcade') body = arg ? <GameScreen cat={cat} gameId={decodeURIComponent(arg)} levelId={decodeURIComponent(hash.split('/')[3] || '')} /> : <ArcadeHome cat={cat} />;
   else if (route === 'progress') body = <Progress cat={cat} />;
   else if (route === 'settings') body = <Settings cat={cat} onChange={() => bump(x => x + 1)} />;
   else body = <Today cat={cat} />;
