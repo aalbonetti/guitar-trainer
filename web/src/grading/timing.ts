@@ -16,6 +16,7 @@ export interface TimingResult {
   extras: number;           // strums in rest slots
   expected: number; hits: number; onsets: number;
   met: boolean; clean: boolean; sloppy: boolean;
+  great: boolean;           // well inside the target: the ladder jumps instead of waiting for 3 in a row
   slots: SlotResult[];
 }
 
@@ -67,16 +68,18 @@ export function gradeTiming(onsets: number[], plan: Plan, offsetMs: number, maxE
   const met = maeMs <= maxErrMs && slotsRight >= 0.9;
   const sloppy = maeMs > 1.5 * maxErrMs || hitRatio < 0.8;
   return { maeMs, biasMs: errs.length ? mean(errs) : 0, spreadMs: errs.length > 1 ? std(errs) : 0, hitRatio, slotsRight, extras,
-    expected: exp.length, hits: hitS.length, onsets: adj.length, met, clean: met, sloppy, slots };
+    expected: exp.length, hits: hitS.length, onsets: adj.length, met, clean: met, sloppy, great: met && maeMs <= maxErrMs / 2 && slotsRight >= 0.97, slots };
 }
 
 // ---------- tempo ladder (§5) ----------
 export interface Ladder { bpm: number; clean: number; sloppy: number }
 export function ladderStart(target: number): Ladder { return { bpm: Math.round(0.65 * target), clean: 0, sloppy: 0 }; }
-/** Apply one attempt. +4 BPM after 3 clean in a row (cap target); −8 after 2 sloppy in a row (floor 50%). */
-export function ladderStep(l: Ladder, target: number, r: { clean: boolean; sloppy: boolean }): Ladder {
+/** Apply one attempt. +4 BPM after 3 clean in a row (cap target); −8 after 2 sloppy in a row (floor 50%).
+ *  Fast track: a *great* attempt (average error ≤ half the target, ≥ 97% right) jumps +8 straight away. */
+export function ladderStep(l: Ladder, target: number, r: { clean: boolean; sloppy: boolean; great?: boolean }): Ladder {
   const n = { ...l };
-  if (r.clean) { n.clean++; n.sloppy = 0; if (n.clean >= 3) { n.bpm = Math.min(target, n.bpm + 4); n.clean = 0; } }
+  if (r.great) { n.bpm = Math.min(target, n.bpm + 8); n.clean = 0; n.sloppy = 0; }
+  else if (r.clean) { n.clean++; n.sloppy = 0; if (n.clean >= 3) { n.bpm = Math.min(target, n.bpm + 4); n.clean = 0; } }
   else if (r.sloppy) { n.sloppy++; n.clean = 0; if (n.sloppy >= 2) { n.bpm = Math.max(Math.round(target * 0.5), n.bpm - 8); n.sloppy = 0; } }
   else { n.clean = 0; n.sloppy = 0; }
   return n;
