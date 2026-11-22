@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
-import { buildQueue, totalMinutes, sessionRow, normRoutine, type QueueInput } from '../src/practice';
+import { buildQueue, totalMinutes, sessionRow, normRoutine, songWeekStart, songOfWeek, type QueueInput } from '../src/practice';
 import { weekDate, thisWeekIndex, thisWeekSongs } from '../src/setlist';
 import { computeStates, type LessonProgress } from '../src/progress';
 
@@ -45,18 +45,31 @@ describe('practice queue', () => {
   });
   const ids = outlines.slice(0, 5).map((o: any) => o.id);
   const sl = (weeks: string[], played: string[][]) => ({ weeks, importedAt: '', songs: ids.map((id: string, i: number) => ({ name: 'x' + i, plays: 1, isNew: false, weeks: played[i] || [], last: null, lastIndex: -1, outlineId: id })) });
-  it('song is a random pick from this week’s set, stable for the day', () => {
-    const setlist = sl(['Nov 8', 'Nov 15', 'Nov 22'], [['Nov 8'], ['Nov 15'], ['Nov 15'], ['Nov 15'], ['Nov 22']]);
-    const at = (day: string) => buildQueue(input({}, { setlist, day, today: new Date(day + 'T12:00') }), 10).find(i => i.kind === 'song')!;
-    // Sat Nov 21: this week = Sunday Nov 22
-    expect(at('2026-11-21').songId).toBe(ids[4]); expect(at('2026-11-21').why).toMatch(/this week/);
-    // a list that ends Nov 15: every day that week picks among the three Nov 15 songs
-    const w15 = sl(['Nov 8', 'Nov 15'], [['Nov 8'], ['Nov 15'], ['Nov 15'], ['Nov 15'], []]);
-    const picks = new Set(['2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20', '2026-11-21', '2026-11-22'].map(d => buildQueue(input({}, { setlist: w15, day: d, today: new Date(d + 'T12:00') }), 10).find(i => i.kind === 'song')!.songId));
-    expect([...picks].every(id => [ids[1], ids[2], ids[3]].includes(id!))).toBe(true);
-    expect(picks.size).toBeGreaterThan(1);
-    const again = buildQueue(input({}, { setlist: w15, day: '2026-11-18', today: new Date('2026-11-18T12:00') }), 10).find(i => i.kind === 'song')!.songId;
-    expect(buildQueue(input({}, { setlist: w15, day: '2026-11-18', today: new Date('2026-11-18T18:00') }), 20).find(i => i.kind === 'song')!.songId).toBe(again);
+  it('song of the week: from the whole church list, fixed all week, rolls over Monday 12:01 am Central', () => {
+    const setlist = sl(['Nov 8', 'Nov 15'], [['Nov 8'], ['Nov 15'], [], [], []]);
+    const song = (iso: string) => buildQueue(input({}, { setlist, day: iso.slice(0, 10), today: new Date(iso) }), 10).find(i => i.kind === 'song')!;
+    // Mon Nov 23 12:01 am CST = 06:01 UTC
+    const week = ['2026-11-23T06:01:00Z', '2026-11-25T18:00:00Z', '2026-11-29T23:00:00Z', '2026-11-30T06:00:30Z'].map(t => song(t).songId);
+    expect(new Set(week).size).toBe(1);                                   // same song Mon 12:01 am → Mon 12:00 am next week
+    expect(song('2026-11-30T06:01:00Z').songId).not.toBe(week[0]);        // new pick at 12:01 am, never a repeat
+    expect(song('2026-11-23T06:00:30Z').songId).toBe(song('2026-11-21T12:00:00Z').songId); // 12:00 am Monday is still last week
+    expect(ids).toContain(week[0]); expect(song('2026-11-25T18:00:00Z').why).toMatch(/Song of the week/);
+  });
+  it('week start is the Monday in Central time, across DST', () => {
+    expect(songWeekStart(new Date('2026-11-23T06:01:00Z'))).toBe('2026-11-23');
+    expect(songWeekStart(new Date('2026-11-23T05:59:00Z'))).toBe('2026-11-16');
+    expect(songWeekStart(new Date('2026-03-09T05:01:00Z'))).toBe('2026-03-09'); // CDT: 12:01 am = 05:01 UTC
+    expect(songWeekStart(new Date('2026-03-09T04:59:00Z'))).toBe('2026-03-02');
+  });
+  it('picks vary across weeks and never repeat back to back', () => {
+    const pool = outlines.slice(0, 50).map((o: any) => o.id);
+    const picks: string[] = []; for (let w = 0; w < 52; w++) picks.push(songOfWeek(pool, new Date(Date.UTC(2026, 0, 6 + 7 * w, 18)))!);
+    expect(new Set(picks).size).toBeGreaterThan(25);
+    picks.forEach((p, i) => { if (i) expect(p).not.toBe(picks[i - 1]); });
+    const five = outlines.slice(0, 5).map((o: any) => o.id), seq: string[] = [];
+    for (let w = 0; w < 40; w++) seq.push(songOfWeek(five, new Date(Date.UTC(2026, 0, 6 + 7 * w, 18)))!);
+    seq.forEach((p, i) => { if (i) expect(p).not.toBe(seq[i - 1]); });
+    expect(new Set(seq.slice(0, 10)).size).toBe(5);               // everyone gets a turn
   });
   it('reads week labels and finds this week', () => {
     const t = new Date('2026-11-21T12:00');
