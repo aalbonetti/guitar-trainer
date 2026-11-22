@@ -123,7 +123,7 @@ export function TimingPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Le
           <p>{coachLine(r, crit.max_err_ms)}</p>
           {r.met && !atGoal ? <p class="muted">Practice tempo builds you up to {crit.bpm} BPM; only attempts at {crit.bpm} count toward passing.</p> : null}
           {a.event && EVENT_TEXT[a.event] ? <p class="note">{EVENT_TEXT[a.event]}</p> : null}
-          {a.ladder && !goalOnly && a.prevLadderBpm !== undefined && a.ladder.bpm !== a.prevLadderBpm ? <p class="note">Practice tempo {a.ladder.bpm > a.prevLadderBpm ? 'up' : 'down'}: next attempt at {a.ladder.bpm} BPM.</p> : null}
+          {a.ladder && !goalOnly && a.prevLadderBpm !== undefined && a.ladder.bpm !== a.prevLadderBpm ? <p class="note">{a.ladder.bpm > a.prevLadderBpm ? (r.great ? 'Really tight! Fast track: ' : 'Practice tempo up: ') : 'Practice tempo down: '}next attempt at {a.ladder.bpm} BPM.</p> : null}
         </div>
       ) : mine && a.phase === 'error' ? <p class="error">{a.message}</p> : null}
 
@@ -131,7 +131,7 @@ export function TimingPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Le
         <div class="quicktune">{tune ? <TunerPanel compact /> : <p class="muted">Not tuned yet this session. <button class="small" onClick={() => setTune(true)}>Quick tune</button> <button class="small" onClick={() => setSkipTune(true)}>Skip</button></p>}</div>
       ) : null}
       {a.kind === 'calibration' && a.phase === 'result' && a.cal ? <p class="okText">Calibrated: {a.cal.offsetMs.toFixed(0)} ms offset. Ready when you are.</p> : null}
-      <p class="muted">{goalOnly || ladderBpm >= crit.bpm ? `${reviewDue ? 'Review' : 'Play'} at the goal tempo, ${crit.bpm} BPM.` : `Practice tempo ${ladderBpm} BPM, working up to ${crit.bpm}. The app raises it after 3 clean attempts in a row.`} Prop the phone near the guitar; one bar of count-in.</p>
+      <p class="muted">{goalOnly || ladderBpm >= crit.bpm ? `${reviewDue ? 'Review' : 'Play'} at the goal tempo, ${crit.bpm} BPM.` : `Practice tempo ${ladderBpm} BPM, working up to ${crit.bpm}. It goes up after 3 clean attempts in a row, or straight away after a really tight one.`} Prop the phone near the guitar; one bar of count-in.</p>
       <div class="row wrap">
         <button class="primary" onClick={() => start(ladderBpm)}>{r ? 'Go again' : 'Start'} at {ladderBpm} BPM</button>
       </div>
