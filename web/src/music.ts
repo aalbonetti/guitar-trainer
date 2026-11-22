@@ -71,6 +71,13 @@ function powerChord(rootPc: number): Shape {
 }
 const lowestPc = (s: Shape) => { const i = s.frets.findIndex(f => f >= 0); return i < 0 ? -1 : (OPEN_MIDI[i] + s.frets[i]) % 12; };
 
+/** Chord library browsing (Tools → Chords): every chords-db voicing for a root + chords-db suffix. */
+export const libRoot = (root: string) => DB_KEY[root] || root;
+export function libSuffixes(root: string): string[] { return Object.keys(LIB[libRoot(root)] || {}); }
+export function voicings(root: string, suffix: string): Shape[] { return (LIB[libRoot(root)] || {})[suffix] || []; }
+/** MIDI notes a shape sounds (for "hear it"), low string first. */
+export const shapeMidi = (s: Shape, capo = 0) => s.frets.map((f, i) => (f < 0 ? -1 : OPEN_MIDI[i] + f + capo)).filter(m => m >= 0);
+
 /** Best diagram for a chord name, or null. Curated voicings win; then chords-db; slash chords prefer a voicing with that bass. */
 export function shapeFor(name: string): Shape | null {
   if (CURATED[name]) return CURATED[name];

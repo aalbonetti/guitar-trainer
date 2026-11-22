@@ -1,8 +1,8 @@
 // Screens: Today, Path, Lesson, Songs, Song, Tools, Settings.
-import { useEffect, useMemo, useState } from 'preact/hooks';
-import type { Catalog, Lesson, Outline } from '../catalog';
+import { useEffect, useState } from 'preact/hooks';
+import type { Catalog, Lesson } from '../catalog';
 import { describePass, lessonTempo } from '../catalog';
-import { shapeFor, transposeChord, keyUsesFlats, pcOf, keyName, KEY_NAMES, capoOptions, type Shape } from '../music';
+import type { Shape } from '../music';
 import { ChordDiagram, ScaleDiagram, StrumGrid } from './Diagrams';
 import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
 import { getSetList, importSetList, clearSetList, thisWeekSongs, thisWeekIndex } from '../setlist';
@@ -10,14 +10,17 @@ import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
 import { progress, recordAttempt, saveStatus } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
-import { exportAll, importAll, downloadBackup } from '../db';
-import { TimingPanel, CalibrationCard } from './Timing';
+import { exportAll, importAll, downloadBackup, shareBackup, canShareBackup } from '../db';
+import { TimingPanel, CalibrationCard, usePracticeTempo } from './Timing';
 import { PracticeCard } from './Practice';
 import { xp } from '../xp';
 import { levelFor } from '../games/core';
 import { MyCharts } from './Charts';
-import { charts, loadCharts, chartFor } from '../charts';
-import { noteSongOpened, songPool, songOfWeek } from '../practice';
+import { SongView, songSettings } from './Song';
+import { ChordLibrary, ScaleViewer, CapoCalc } from './ToolsExtra';
+import { fitLine } from '../songfit';
+import { charts, loadCharts } from '../charts';
+import { songPool, songOfWeek } from '../practice';
 import { attempt } from '../grading/runner';
 
 export const trackVisibleFor = (cat: Catalog) => (id: string) => trackVisible(cat, id);
@@ -51,12 +54,37 @@ export function Today({ cat }: { cat: Catalog }) {
               <button class="primary" onClick={() => go('#/tools/metronome')}>⏱ Metronome</button>
             </div>
           </section>
+          <BackupNudge />
           {(() => { const pool = songPool({ cat, setlist: sl }); const id = songOfWeek(pool.ids, new Date()); const o = id ? cat.outlineById[id] : null;
             return o ? <a class="card tap-card" href={`#/song/${o.id}`} aria-label={`Song of the week: ${o.title}`}><h2>Song of the week <span class="chev" aria-hidden="true">›</span></h2><p><span class="big-link">{o.title}</span> <small class="muted">{o.artist}</small></p>
+              <p class="small fit">{(() => { const st = songSettings(cat, o, pr.lp); return st.suggested || st.capo === st.fit.capo ? fitLine(st.fit) : `Capo ${st.capo}${st.key !== o.chart_key ? `, key of ${st.key}` : ''} (your choice).`; })()}</p>
               <p class="muted small">Picked at random from {pool.fromList ? 'your church’s song list' : 'the song library'}. A new one every Monday at 12:01 am.</p></a> : null; })()}
         </div>
       </div>
     </div>
+  );
+}
+/** Reminder on Today when there's progress worth protecting and no backup in 14 days. "Later" hides it for a week. */
+const snoozePref = persisted<number>('gt_backup_snooze', 0);
+function BackupNudge() {
+  const pr = useStore(progress);
+  const [, bump] = useState(0);
+  const [msg, setMsg] = useState('');
+  const last = persisted<number | null>('gt_last_backup', null).get();
+  const has = pr.days.length > 0 || Object.keys(pr.lp).length > 0;
+  const days = last ? Math.floor((Date.now() - last) / 86400000) : null;
+  if (msg) return <section class="card nudge"><p class="okText">{msg}</p></section>;
+  if (!has || (days !== null && days < 14) || Date.now() < snoozePref.get()) return null;
+  const share = canShareBackup();
+  return (
+    <section class="card nudge">
+      <h2>💾 Back up your progress</h2>
+      <p class="muted small">{days === null ? 'You haven’t saved a backup yet.' : `Last backup ${days} days ago.`} If Chrome data is ever cleared, a backup brings everything back.</p>
+      <div class="row wrap">
+        <button class="primary" onClick={async () => { if (share) { const r = await shareBackup(); if (r.how !== 'cancelled') setMsg(r.how === 'shared' ? 'Backup shared ✓' : `Saved ${r.name} to Downloads ✓`); } else { const n = await downloadBackup(); setMsg(`Saved ${n} to Downloads ✓`); } }}>{share ? 'Share to Drive…' : 'Save backup file'}</button>
+        <button class="small" onClick={() => { snoozePref.set(Date.now() + 7 * 86400000); bump(x => x + 1); }}>Later</button>
+      </div>
+    </section>
   );
 }
 function addDaysLocal(day: string, n: number) { const [y, m, d] = day.split('-').map(Number); return dayOf(new Date(y, m - 1, d + n)); }
@@ -109,7 +137,9 @@ export function LessonView({ cat, id }: { cat: Catalog; id: string }) {
   const strums = [...(a.rhythm || [])].map(rid => cat.strums.find(s => s.id === rid)).filter(Boolean);
   const triads = (a.triads || []).map(tid => cat.shapes.triads.find(t => t.id === tid)).filter(Boolean);
   const exercises = (a.exercises || []).map(eid => cat.exercises.find(e => e.id === eid)).filter(Boolean);
-  const tempo = lessonTempo(l, cat);
+  const base = lessonTempo(l, cat);
+  const pt = usePracticeTempo(l);
+  const tempo = pt ? { ...base, bpm: pt.bpm } : base;
   const [md, setMd] = useState<string | null>(null);
   useEffect(() => {
     let live = true; setMd(null); // ignore a slower response for a lesson we've already left
@@ -120,29 +150,29 @@ export function LessonView({ cat, id }: { cat: Catalog; id: string }) {
     <div class="page lesson">
       <div class="crumbs"><a href="#/path">Path</a> › {cat.tracks.find(t => t.id === l.track)?.name}</div>
       <h1><span class="lid">{l.id}</span> {l.title} <StateBadge cat={cat} id={l.id} /></h1>
-      <ToolBar preset={tempo} label="lesson tempo" />
-      <div class="two">
-        <div>
-          <section class="card">
-            <h2>Goal</h2>
-            <p>{describePass(l.pass_criteria)}</p>
-            {l.prereqs.length ? <p class="muted">After: {l.prereqs.map((p, i) => <span>{i ? ', ' : ''}<a href={`#/lesson/${p}`}>{p} {cat.lessonById[p]?.title}</a></span>)}</p> : null}
-          </section>
+      <ToolBar preset={tempo} label={pt && !pt.atGoal ? 'your practice tempo' : pt ? 'goal tempo' : 'lesson tempo'} goal={pt && !pt.atGoal ? pt.goal : undefined} />
+      <div class="lessongrid">
+        <div class="lmain">
           <section class="card">
             <h2>Lesson</h2>
             {md === null ? <p class="muted">Loading…</p> : md ? <LessonContent md={md} cat={cat} lessonId={l.id} />
               : <p class="muted">The written lesson for {l.id} is being drafted. Use the diagrams, patterns and tools on this page to practice in the meantime.</p>}
           </section>
-          <PassPanel cat={cat} l={l} />
-          {exercises.length ? <section class="card"><h2>Exercises</h2><ul class="list">{exercises.map(e => <li><b>{e!.name}</b>{e!.tempo ? <small>start {e!.tempo.start} → target {e!.tempo.target} BPM</small> : null}{e!.pairs ? <small>{e!.pairs.map(p => p.join(' ↔ ')).join(' · ')}</small> : null}</li>)}</ul></section> : null}
-          {songs.length ? <section class="card"><h2>Songs that use this</h2><ul class="list">{songs.map(o => <li><a href={`#/song/${o.id}`}>{o.title}</a> <small class="muted">{o.artist}</small></li>)}</ul></section> : null}
         </div>
-        <div>
+        <aside class="lside">
+          <section class="card lgoal">
+            <h2>Goal</h2>
+            <p>{describePass(l.pass_criteria)}</p>
+            {l.prereqs.length ? <p class="muted">After: {l.prereqs.map((p, i) => <span>{i ? ', ' : ''}<a href={`#/lesson/${p}`}>{p} {cat.lessonById[p]?.title}</a></span>)}</p> : null}
+          </section>
+          <div class="lpass"><PassPanel cat={cat} l={l} /></div>
           {chords.length ? <section class="card"><h2>Chords</h2><div class="chords">{chords.map(c => <ChordDiagram name={c!.name} shape={{ frets: c!.frets, fingers: c!.fingers, barre: c!.barre ? c!.barre.fret : null }} />)}</div></section> : null}
           {triads.length ? <section class="card"><h2>Triads</h2><div class="chords">{triads.map(t => <ChordDiagram name={`${t!.root}${t!.quality === 'minor' ? 'm' : ''} (${t!.strings.join('-')})`} shape={triadShape(t!)} />)}</div></section> : null}
           {scales.length ? <section class="card"><h2>Scales</h2>{scales.map(s => <ScaleDiagram scale={s!} />)}</section> : null}
           {strums.length ? <section class="card"><h2>Rhythm</h2>{strums.map(s => <StrumGrid strum={s!} />)}</section> : null}
-        </div>
+          {exercises.length ? <section class="card"><h2>Exercises</h2><ul class="list">{exercises.map(e => <li><b>{e!.name}</b>{e!.tempo ? <small>start {e!.tempo.start} → target {e!.tempo.target} BPM</small> : null}{e!.pairs ? <small>{e!.pairs.map(p => p.join(' ↔ ')).join(' · ')}</small> : null}</li>)}</ul></section> : null}
+          {songs.length ? <section class="card"><h2>Songs that use this</h2><ul class="list">{songs.map(o => <li><a href={`#/song/${o.id}`}>{o.title}</a> <small class="muted">{o.artist}</small></li>)}</ul></section> : null}
+        </aside>
       </div>
       <div class="row between nav2">
         {prev ? <a class="btn" href={`#/lesson/${prev.id}`}>← {prev.id}</a> : <span />}
@@ -237,65 +267,25 @@ export function Songs({ cat, selected, initialTab }: { cat: Catalog; selected?: 
   );
 }
 
-const songKeyPref = persisted<Record<string, string>>('gt_song_keys', {});
-export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
-  const [key, setKeyState] = useState(songKeyPref.get()[o.id] || o.chart_key);
-  useEffect(() => { noteSongOpened(o.id); }, [o.id]);
-  useStore(charts); const myChart = chartFor(o.id);
-  const [nash, setNash] = useState(false);
-  const [capo, setCapo] = useState(0);
-  const setKey = (k: string) => { setKeyState(k); setCapo(0); const all = songKeyPref.get(); all[o.id] = k; songKeyPref.set(all); };
-  const semis = (pcOf(key) - pcOf(o.chart_key) + 12) % 12;
-  const shapeKey = keyName(pcOf(key) - capo);
-  const flats = keyUsesFlats(shapeKey);
-  const show = (ch: string) => transposeChord(ch, semis - capo, flats);
-  const used = useMemo(() => [...new Set(o.sections.flatMap(s => s.chords_in_chart_key))].map(show), [o.id, key, capo]);
-  const beats = o.meter && o.meter.startsWith('3') ? 3 : o.meter === '6/8' ? 2 : 4;
-  const sub = o.meter === '6/8' ? 3 : 1;
-  return (
-    <div class="song">
-      <h2 class="title">{o.title}</h2>
-      <p class="muted">{o.artist}{o.ccli ? ` · CCLI ${o.ccli}` : ''} · original key {o.original_key}{o.bpm ? ` · ${o.bpm} BPM` : ''}{o.meter ? ` · ${o.meter}` : ''}</p>
-      <ToolBar preset={{ bpm: o.bpm || 72, beats, sub }} label={o.bpm ? 'song tempo' : 'tap to set'} />
-      <div class="row wrap">
-        <label class="field inline">Key <select value={key} onChange={e => setKey((e.target as HTMLSelectElement).value)}>{KEY_NAMES.map(k => <option value={k}>{k}{k === o.chart_key ? ' (chart)' : ''}</option>)}</select></label>
-        <label class="field inline">Capo <select value={capo} onChange={e => setCapo(+(e.target as HTMLSelectElement).value)}>
-          <option value={0}>none</option>{capoOptions(key).filter(c => c.capo > 0).map(c => <option value={c.capo}>{c.capo} → {c.shapes} shapes</option>)}
-        </select></label>
-        <button class={nash ? 'sel' : ''} onClick={() => setNash(!nash)}>{nash ? 'Numbers' : 'Chords'}</button>
-      </div>
-      {capo ? <p class="note">Capo {capo}, play <b>{shapeKey}</b> shapes; it sounds in <b>{key}</b>.</p> : null}
-      {o.sections.map(s => (
-        <section class="section">
-          <h3>{s.name}</h3>
-          <div class="chordline">{(nash ? s.numbers : s.chords_in_chart_key.map(show)).map(c => <span>{c}</span>)}</div>
-        </section>
-      ))}
-      {myChart ? <p><a class="btn primary" href={`#/chart/${myChart.id}`}>Open your full chart</a></p>
-        : o.chords_verified !== 'full' ? <p class="muted">Main sections only. <a href="#/import">Import your SongSelect chart</a> for the full song with words.</p> : <p class="muted small"><a href="#/import">Import your chart</a> to see the words with the chords.</p>}
-      {o.notes ? <p class="note">{o.notes}</p> : null}
-      <h3>Chords{capo ? ` (shapes with capo ${capo})` : ''}</h3>
-      <div class="chords">{used.map(c => <ChordDiagram name={c} shape={shapeFor(c)} size={0.9} />)}</div>
-      {o.practice_for.length ? <p class="muted">Practices: {o.practice_for.map((id, i) => <span>{i ? ' · ' : ''}<a href={`#/lesson/${id}`}>{id} {cat.lessonById[id]?.title}</a></span>)}</p> : null}
-      {o.links.songselect ? <p><a href={o.links.songselect} target="_blank" rel="noopener">Open in SongSelect ↗</a></p> : null}
-    </div>
-  );
-}
-
 // ---------- Tools ----------
-export function Tools({ which }: { which?: string }) {
+const TOOL_TABS = [['tuner', 'Tuner'], ['metronome', 'Metronome'], ['chords', 'Chords'], ['scales', 'Scales'], ['capo', 'Capo']] as const;
+export function Tools({ which, cat }: { which?: string; cat: Catalog }) {
+  const w = TOOL_TABS.some(t => t[0] === which) ? which! : 'tuner';
+  const tm = w === 'tuner' || w === 'metronome';
   return (
     <div class="page tools">
       <h1>Tools</h1>
-      <div class="tabs">
-        <a class={`btn ${which !== 'metronome' ? 'sel' : ''}`} href="#/tools/tuner">Tuner</a>
-        <a class={`btn ${which === 'metronome' ? 'sel' : ''}`} href="#/tools/metronome">Metronome</a>
-      </div>
-      <div class="two">
-        <section class={`card ${which === 'metronome' ? 'hide-narrow' : ''}`}><h2>Tuner</h2><TunerPanel /></section>
-        <section class={`card ${which !== 'metronome' ? 'hide-narrow' : ''}`}><h2>Metronome</h2><MetronomePanel /></section>
-      </div>
-      <section class="card"><h2>Dotted-eighth delay</h2><DelayCalc /></section>
+      <div class="tabs scroll">{TOOL_TABS.map(([id, name]) => <a class={`btn ${w === id ? 'sel' : ''}`} href={`#/tools/${id}`}>{name}</a>)}</div>
+      {tm ? <>
+        <div class="two">
+          <section class={`card ${w === 'metronome' ? 'hide-narrow' : ''}`}><h2>Tuner</h2><TunerPanel /></section>
+          <section class={`card ${w !== 'metronome' ? 'hide-narrow' : ''}`}><h2>Metronome</h2><MetronomePanel /></section>
+        </div>
+        <section class="card"><h2>Dotted-eighth delay</h2><DelayCalc /></section>
+      </> : null}
+      {w === 'chords' ? <section class="card"><h2>Chord library</h2><ChordLibrary /></section> : null}
+      {w === 'scales' ? <section class="card"><h2>Scale viewer</h2><ScaleViewer cat={cat} /></section> : null}
+      {w === 'capo' ? <section class="card"><h2>Capo & transpose</h2><CapoCalc cat={cat} /></section> : null}
     </div>
   );
 }
@@ -307,6 +297,30 @@ function DelayCalc() {
 }
 
 // ---------- Settings ----------
+export const audioCheckPref = persisted<number | null>('gt_audio_check_done', null);
+/** The real-phone audio check (M0 page) hasn't been done yet: graders are only proven on synthetic audio. */
+function AudioCheckCard() {
+  const [done, setDone] = useState(audioCheckPref.get());
+  return (
+    <section class={`card ${done ? '' : 'attn'}`}>
+      <h2>Phone audio check {done ? <small class="okText">done {new Date(done).toLocaleDateString()} ✓</small> : <small class="badge b-due">to do</small>}</h2>
+      {!done ? <>
+        <p>The tuner and timing grader have only been tested on synthetic audio. A 15-minute check with your guitar confirms they work on this phone before more grading is built on them.</p>
+        <ol class="small">
+          <li>Quiet room, guitar in hand, phone on a stand about an arm's length away.</li>
+          <li>Open the check page and run each test, first folded, then unfolded.</li>
+          <li>If you have the Kemper's USB cable, plug it in and repeat the input tests.</li>
+          <li>Tap <b>Copy results</b> at the end and paste them to Claude.</li>
+        </ol>
+      </> : <p class="muted small">Run it again after a phone or Chrome update, or with a new input.</p>}
+      <div class="row wrap">
+        <a class={`btn ${done ? '' : 'primary'}`} href="./m0/">Open the audio check</a>
+        {!done ? <button onClick={() => { const t = Date.now(); audioCheckPref.set(t); setDone(t); }}>I've done it</button> : <button class="small" onClick={() => { audioCheckPref.set(null); setDone(null); }}>Mark as not done</button>}
+      </div>
+    </section>
+  );
+}
+
 export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void }) {
   const [msg, setMsg] = useState('');
   const [inst, setInst] = useState(instrumentPref.get());
@@ -331,21 +345,23 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
         <p class="muted">Hides the tracks you don't play on the Path. You can switch any time.</p>
       </section>
       <section class="card"><h2>Audio</h2><InputPicker /></section>
+      <AudioCheckCard />
       <section class="card"><h2>Timing calibration</h2><CalibrationCard /></section>
       <section class="card">
         <h2>Church set list</h2>
         <p class="muted">Import the set-list CSV (Name, new, total, then one column per week). It's stored only on this phone and never uploaded.</p>
-        <input type="file" accept=".csv,text/csv" onChange={onFile} />
+        <label class="btn">📄 Choose set-list CSV<input type="file" accept=".csv,text/csv" hidden onChange={onFile} /></label>
         {sl ? <p>Current: {sl.songs.length} songs, imported {new Date(sl.importedAt).toLocaleDateString()}. <button class="small" onClick={() => { clearSetList(); setMsg('Set list removed.'); onChange(); }}>Remove</button></p> : null}
         {msg ? <p class="note">{msg}</p> : null}
       </section>
       <section class="card">
         <h2>Saving & backup</h2>
-        <p>Progress saves automatically on this phone after every quiz, attempt and game. {keepOk === true ? <span class="okText">Chrome has marked it as permanent storage ✓</span> : keepOk === false ? <span class="muted">Chrome may clear it if the phone runs low on space; installing the app to the home screen helps, and backups protect you.</span> : null}</p>
-        <p class="muted">Your progress lives in Chrome on this phone. Save a backup file now and then (it lands in Downloads; drop it in Google Drive or email it to yourself). It includes progress, calibration, tempo ladders, settings and your imported set list.</p>
+        <p>Progress saves on this phone after every quiz, attempt and game. {keepOk === true ? <span class="okText">Chrome has marked it as permanent storage ✓</span> : keepOk === false ? <span class="muted">Chrome may clear it if the phone runs low on space; installing the app to the home screen helps.</span> : null}</p>
+        <p class="muted">A backup file protects it if Chrome data is ever cleared. It holds progress, calibration, tempo ladders, settings and your set list. Share it to Google Drive (or email it to yourself) every couple of weeks.</p>
         <p class="muted small">{lastBackup ? `Last backup: ${new Date(lastBackup).toLocaleDateString()}` : 'No backup saved yet.'}</p>
-        <div class="row">
-          <button class="primary" onClick={async () => { const n = await downloadBackup(); setBMsg(`Saved ${n}.`); }}>Save backup file</button>
+        <div class="row wrap">
+          {canShareBackup() ? <button class="primary" onClick={async () => { const r = await shareBackup(); setBMsg(r.how === 'shared' ? `Shared ${r.name}.` : r.how === 'downloaded' ? `Saved ${r.name} to Downloads.` : ''); }}>Share backup (Drive…)</button> : null}
+          <button class={canShareBackup() ? '' : 'primary'} onClick={async () => { const n = await downloadBackup(); setBMsg(`Saved ${n} to Downloads.`); }}>Save backup file</button>
           <label class="btn">Restore from file<input type="file" accept=".json,application/json" hidden onChange={async e => {
             const f = (e.target as HTMLInputElement).files?.[0]; if (!f) return;
             try { const data = JSON.parse(await f.text()); if (!confirm('Replace everything on this phone with this backup?')) return; await importAll(data); location.reload(); }
@@ -360,7 +376,6 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
       <section class="card">
         <h2>About</h2>
         <p class="muted">Guitar Trainer v{__APP_VERSION__} · personal use. Song outlines are facts only (keys, chords, numbers); no lyrics. Chord library: chords-db, MIT License, Copyright (c) 2016 David Rubert.</p>
-        <p><a href="./m0/">Audio test (M0)</a></p>
       </section>
     </div>
   );

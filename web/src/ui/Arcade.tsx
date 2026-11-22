@@ -30,8 +30,8 @@ export function ArcadeHome({ cat }: { cat: Catalog }) {
         {sunday || !practicedToday ? <button class="small" disabled={practicedToday} onClick={() => void markService()}>{practicedToday ? 'Today counts ✓' : '⛪ Played a service today'}</button> : null}
       </section>
       <div class="tiles">
-        {cat.games.map(g => {
-          const playable = PLAYABLE.has(g.id);
+        {cat.games.filter(g => PLAYABLE.has(g.id)).map(g => {
+          const playable = true;
           const lesson = cat.lessonById[g.unlock_lesson];
           const st = computeStates(cat.lessons, cat.tracks, pr.lp)[g.unlock_lesson];
           return (
@@ -49,6 +49,11 @@ export function ArcadeHome({ cat }: { cat: Catalog }) {
           );
         })}
       </div>
+      {(() => { const later = cat.games.filter(g => !PLAYABLE.has(g.id)); return later.length ? (
+        <details class="card later">
+          <summary><b>Coming later</b> <span class="muted small">{later.length} games you play on the guitar</span></summary>
+          <ul class="list">{later.map(g => <li><span><span class="gicon">{ICON[g.id]}</span> <b>{g.name}</b><small class="muted"> · {g.blurb}</small></span></li>)}</ul>
+        </details>) : null; })()}
     </div>
   );
 }

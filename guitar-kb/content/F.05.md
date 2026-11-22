@@ -11,12 +11,14 @@ It's a warm-up that trains every finger to press its own fret, cleanly, in time.
 {{exercise:EX_spider}}
 
 ### Tempo plan
-Start slow enough that every note is clean, then let the metronome push you:
-1. Start around **50 BPM** playing eighth notes (two notes per click).
-2. After 3 clean runs, add 4 BPM.
-3. If two runs in a row get sloppy, drop back 8.
+Start slow enough that every note is clean, then let the app push you up the tempo ladder:
+1. You start at **39 BPM** playing eighth notes (two notes per click). That's two-thirds of the goal.
+2. After 3 clean runs in a row, the app adds 4 BPM. A really tight run jumps 8 at once.
+3. If two runs in a row get sloppy, it drops back 8.
 
-{{tool:metronome:bpm=50,beats=4,sub=2}}
+The button below always clicks at your current ladder tempo.
+
+{{tool:metronome:bpm=ladder,beats=4,sub=2}}
 
 > Clean beats fast. If a note buzzes or dies, the tempo is too high.
 

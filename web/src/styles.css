@@ -11,6 +11,7 @@ button.sel, .btn.sel { border-color:var(--accent); color:var(--accent); }
 button.small { min-height:36px; padding:6px 10px; }
 button.round { width:56px; height:56px; border-radius:50%; justify-content:center; font-size:26px; padding:0; }
 button.chip { border-radius:999px; }
+button.chip.ghost { background:transparent; }
 input[type=search] { width:100%; margin:6px 0 10px; }
 input[type=range] { width:100%; accent-color:var(--accent); }
 .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:8px 0; } .row.center { justify-content:center; } .row.between { justify-content:space-between; }
@@ -39,14 +40,14 @@ ul.list li.sel a { color:var(--accent); }
   .main { margin-left:var(--navw); padding:18px 22px 40px; }
   .page .two { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start; }
   .hide-narrow { display:block !important; }
-  .tools .tabs { display:none; }
+  .tools .tabs a[href="#/tools/metronome"] { display:none; } /* tuner and metronome sit side by side here */
 }
 @media (max-width:599px) { .hide-narrow { display:none; } }
 
 /* songs: list + detail side by side when unfolded */
 .songs .songdetail .hint { display:none; }
-@media (max-width:899px) { .songs.has-sel .songlist { display:none; } }
-@media (min-width:900px) { .songs { display:grid; grid-template-columns:minmax(260px, 1fr) 2fr; gap:18px; align-items:start; } .songs .songlist { position:sticky; top:10px; max-height:calc(100vh - 20px); overflow:auto; } .songs .songdetail .hint { display:block; margin-top:60px; text-align:center; } }
+@media (max-width:1199px) { .songs.has-sel .songlist { display:none; } }
+@media (min-width:1200px) { .back-narrow { display:none; } .songs { display:grid; grid-template-columns:minmax(260px, 1fr) 2fr; gap:18px; align-items:start; } .songs .songlist { position:sticky; top:10px; max-height:calc(100vh - 20px); overflow:auto; } .songs .songdetail .hint { display:block; margin-top:60px; text-align:center; } }
 .tabs { display:flex; gap:8px; margin:6px 0 4px; }
 .song .title { font-size:24px; margin:4px 0; }
 .section { margin:6px 0; }
@@ -204,3 +205,54 @@ a.tap-card:focus-visible { outline:2px solid var(--accent); outline-offset:2px; 
 
 .savebanner { background:#3a1717; border:1px solid var(--bad); color:#ffd9d8; border-radius:12px; padding:10px 12px; margin-bottom:12px; }
 .savedtick { color:var(--ok); font-size:13px; }
+.updatebanner { display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--card2); border:1px solid var(--accent); border-radius:12px; padding:8px 12px; margin-bottom:12px; font-weight:600; }
+
+/* song view: two panes when the song has room (inner screen), play-along */
+.back-narrow { display:inline-block; margin-bottom:4px; font-size:15px; }
+.song { container-type:inline-size; }
+.song .fit { margin:4px 0 8px; }
+@container (min-width:640px) {
+  .songcols { display:grid; grid-template-columns:minmax(0, 1.35fr) minmax(0, 1fr); gap:18px; align-items:start; }
+  .songside { position:sticky; top:10px; max-height:calc(100vh - 20px); overflow:auto; }
+}
+.playalong { display:flex; align-items:center; gap:10px; flex-wrap:wrap; position:sticky; top:0; z-index:3; background:var(--bg); padding:6px 0; margin:6px 0; }
+.playalong .now { flex:1; display:flex; align-items:baseline; gap:12px; background:var(--card2); border:1px solid var(--accent); border-radius:12px; padding:8px 14px; min-height:52px; }
+.playalong .now b { font-size:30px; color:var(--accent); }
+.playalong .now .count { font-size:30px; font-weight:700; color:var(--muted); }
+.chordline span.now { background:var(--accent); color:#1b1406; border-color:var(--accent); transform:scale(1.08); transition:transform .08s; }
+
+/* lesson: one column on the cover screen (goal → lesson → pass it → the rest); unfolded, lesson text on the left
+   and goal, attempt and diagrams in a pinned right pane */
+.page.lesson { container-type:inline-size; }
+.lessongrid { display:flex; flex-direction:column; }
+.lessongrid .lside { display:contents; }
+.lessongrid .lgoal { order:0; } .lessongrid .lmain { order:1; } .lessongrid .lpass { order:2; } .lessongrid .lside > section:not(.lgoal) { order:3; }
+@container (min-width:640px) {
+  .lessongrid { display:grid; grid-template-columns:minmax(0, 1.15fr) minmax(0, 1fr); gap:14px; align-items:start; }
+  .lessongrid .lmain { order:0; } .lessongrid .lside { order:1; }
+  .lessongrid .lside { display:block; position:sticky; top:10px; max-height:calc(100vh - 20px); overflow:auto; overscroll-behavior:contain; padding-bottom:90px; }
+}
+
+/* tools: chord library, scales, capo */
+.tabs.scroll { flex-wrap:wrap; gap:6px; }
+.tabs.scroll .btn { padding-left:11px; padding-right:11px; white-space:nowrap; }
+.chordtitle { margin:10px 0 6px; } .chordtitle b { font-size:22px; }
+.chordlib .keys { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+.chordlib .keys button { min-width:44px; }
+button.ghost { background:transparent; }
+button.chordbtn { background:none; border:0; padding:0; min-height:0; cursor:pointer; }
+button.chordbtn:active { transform:scale(.97); }
+.capocalc h3 { margin-top:16px; }
+.capocalc .big { font-size:26px; color:var(--accent); }
+.capocalc .transin { width:100%; font-size:17px; background:#14161a; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:8px 10px; }
+.capocalc .spot { padding:9px 2px; display:flex; flex-direction:column; gap:2px; } .capocalc .spot small { color:var(--muted); }
+.capocalc .transout { font-size:20px; font-weight:700; letter-spacing:.5px; white-space:pre-wrap; }
+
+/* Today backup reminder, Settings audio check, Arcade "coming later" */
+.card.nudge { border-color:var(--accent); }
+.card.attn { border-color:var(--accent); }
+details.card.later summary { cursor:pointer; list-style:none; display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; }
+details.card.later summary::-webkit-details-marker { display:none; }
+details.card.later summary::after { content:'›'; margin-left:auto; color:var(--muted); transition:transform .15s; }
+details.card.later[open] summary::after { transform:rotate(90deg); }
+details.card.later ul.list li > span { font-weight:400; }

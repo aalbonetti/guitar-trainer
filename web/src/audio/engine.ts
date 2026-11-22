@@ -263,6 +263,16 @@ export async function bluetoothOutputLikely(): Promise<boolean> {
   });
   return true;
 };
+/** Soft two-note bell for "time's up" on a practice item. Quiet enough not to startle, clear over a strummed guitar. */
+export function chime() {
+  const c = audioContext(), t0 = c.currentTime + 0.02;
+  [[1046.5, 0], [1568, 0.16]].forEach(([f, dt]) => {
+    const o = c.createOscillator(), g = c.createGain(), t = t0 + dt;
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.35 * metro.get().volume, t + 0.01); g.gain.setTargetAtTime(0, t + 0.03, 0.35);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 2);
+  });
+}
 /** Plucked reference tone (for tuning by ear). */
 export function playReference(freq: number) {
   const c = audioContext(), t = c.currentTime + 0.02;

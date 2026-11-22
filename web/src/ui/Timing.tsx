@@ -8,10 +8,26 @@ import type { Ladder } from '../grading/timing';
 import { bluetoothOutputLikely, tunedThisSession, capture } from '../audio/engine';
 import { inputPref, TunerPanel } from './Tools';
 import { EVENT_TEXT } from '../progress';
-import { saveStatus } from '../progressStore';
+import { saveStatus, progress } from '../progressStore';
+import { isReviewDue, dayOf } from '../progress';
 import { StrumGrid } from './Diagrams';
 
 const dev = () => inputPref.get() || undefined;
+
+/** The tempo a timing lesson is practiced at right now: the tempo-ladder BPM, or the goal once passed or when a review is due.
+ *  Null for lessons without a tempo ladder. Used by the lesson tool bar and the lesson's click buttons, so every number agrees. */
+export function usePracticeTempo(l: Lesson): { bpm: number; goal: number; atGoal: boolean } | null {
+  const a = useStore(attempt); const pr = useStore(progress);
+  const [ladder, setLadder] = useState<Ladder | null>(null);
+  const timing = l.pass_criteria.type === 'timing';
+  useEffect(() => { if (timing) void getLadder(l).then(setLadder); }, [l.id, a.phase]);
+  if (!timing) return null;
+  const goal = (l.pass_criteria as unknown as TimingCriteria).bpm;
+  const p = pr.lp[l.id];
+  const atGoal = p?.state === 'passed' || isReviewDue(p, dayOf());
+  const bpm = atGoal ? goal : Math.min(goal, ladder?.bpm ?? Math.round(goal * 0.65));
+  return { bpm, goal, atGoal: atGoal || bpm >= goal };
+}
 
 function Beats({ n, on, count }: { n: number; on: number; count: boolean }) {
   return <div class={`attbeats ${count ? 'count' : ''}`}>{Array.from({ length: n }, (_, i) => <i class={`${on === i ? 'on' : ''} ${i === 0 ? 'one' : ''}`} />)}</div>;

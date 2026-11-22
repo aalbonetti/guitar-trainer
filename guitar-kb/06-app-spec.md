@@ -17,7 +17,7 @@ This is the build brief. The **content** is defined in `catalog/` (see `catalog/
 | UI | **Preact** + Vite (small, fast, React-style components) | Light enough for a phone; no heavy framework |
 | App shell | Web app manifest + service worker (Workbox) | Home-screen install, full-screen, works offline |
 | Storage | **IndexedDB** via Dexie, plus `navigator.storage.persist()` so Chrome won't evict it; settings in IndexedDB too | Replaces Room/DataStore. Same tables (`catalog/SCHEMA.md`) |
-| Catalog | JSON fetched from `/catalog/*.json`, cached by the service worker | Same generated files, unchanged |
+| Catalog | JSON fetched from `/catalog/*.json`, served cache-first by the service worker with the app (one versioned cache; new versions wait for an "Update ready" tap) | Never waits on church Wi-Fi; never mixes versions |
 | Audio | **Web Audio API**: clicks scheduled on the `AudioContext` clock; input captured by an `AudioWorklet` that stamps every block with its context frame | Sample-accurate click; timing measured on one clock |
 | DSP | `dsp.ts` (YIN pitch, spectral-flux onsets, peak-based chroma + chord verify), proven in M0; runs on the main thread or a Worker | Shared by graders, tuner and games |
 | Markdown | marked + custom token renderer | `content/{lesson}.md` with embed tokens (§8) |
@@ -45,13 +45,13 @@ guitar-trainer/                 (GitHub repo, public)
 ## 3. Screens
 | Screen | What it does |
 |---|---|
-| **Today** (home) | Builds today's queue: reviews due → current lesson(s) → a song from this month's set list. Offers 15- and 30-minute routine templates (`01-curriculum.md`). One "Start practice" button |
+| **Today** (home) | Builds today's queue: warm-up → reviews due → current lesson(s) (→ ear quiz). 10 / 20 min / free routines. One "Start practice" button. A separate Song of the week box (random from the church list, new every Monday 12:01 am Central) opens the song in the capo spot that fits the chords you know. Backup reminder after 14 days |
 | **Path** | Track map (F → A / ER / EL, T alongside). Lesson nodes show locked / available / in progress / passed / review due |
 | **Lesson** | Renders the lesson markdown with embedded chord diagrams, tab, strum grids and tool launchers. Shows the pass target and "Attempt" button. **Tuner and metronome always available** (§3b) |
 | **Attempt runner** | Count-in → play → live feedback → result card (score vs target, tempo used, retry/next). One layout per grader type |
 | **Tools** | Tuner · Metronome (meter, subdivision, accents, tap tempo) · Dotted-eighth delay calculator · Capo/transpose calculator · Chord library (curated + full chords-db) · Scale viewer |
 | **Songs** | Tabs: *This month* (from `setlist.json` play dates) · *All outlines* · *My charts* (imports). Search by title/CCLI |
-| **Song view** | Sections with chords in a chosen key **or** Nashville numbers; capo suggestions; click at chart BPM (tap tempo when BPM is null); linked lessons from `practice_for`; SongSelect link-out; "drill this song's changes" builds a chord-change exercise from its progressions |
+| **Song view** | Sections with chords in a chosen key **or** Nashville numbers; key and capo remembered per song, defaulting to the capo spot that uses the chords you've learned; play-along (current chord lit on the click); click at chart BPM (tap tempo when BPM is null); linked lessons from `practice_for`; SongSelect link-out; "drill this song's changes" builds a chord-change exercise from its progressions |
 | **Import** | File picker for `.cho/.chordpro/.pro/.txt`, or paste text. Preview → match to outline by CCLI, then title → save |
 | **Arcade** | The game section: short skill games, XP, streak, Daily Challenge and badges. Full design in `07-games.md` |
 | **Progress** | Streak, minutes per week, lessons passed per track, tempo ladder per exercise, attempt history charts |
