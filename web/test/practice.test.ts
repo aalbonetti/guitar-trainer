@@ -19,6 +19,14 @@ describe('practice queue', () => {
     expect(q.filter(i => i.kind === 'lesson').map(i => i.lessonId)).toEqual(['F.01']);
     expect(q.some(i => i.kind === 'song')).toBe(true);
   });
+  it('after passing F.01 today the plan moves on to the next lesson, not F.01 again', () => {
+    const lp = { 'F.01': { lesson_id: 'F.01', state: 'in_progress', first_pass_day: '2026-11-21', review_index: 0, mastered: false, updated_at: 0 } as LessonProgress };
+    const q = buildQueue(input(lp), 10);
+    expect(q.some(i => i.lessonId === 'F.01')).toBe(false);
+    expect(q.find(i => i.kind === 'lesson')!.lessonId).toBe('F.02');
+    const tomorrow = buildQueue(input(lp, { day: '2026-11-22' }), 10).find(i => i.kind === 'lesson')!;
+    expect(tomorrow.lessonId).toBe('F.01'); expect(tomorrow.why).toMatch(/earlier day/);
+  });
   it('reviews come first (oldest due first): 1 in 10 min, 2 in 20, 3 in free', () => {
     const lp = { ...allF, 'F.01': passed('F.01', { next_review_day: '2026-11-20' }), 'F.02': passed('F.02', { next_review_day: '2026-11-18' }), 'F.03': passed('F.03', { next_review_day: '2026-11-21' }), 'F.04': passed('F.04', { next_review_day: '2026-11-19' }) };
     const q10 = buildQueue(input(lp), 10);

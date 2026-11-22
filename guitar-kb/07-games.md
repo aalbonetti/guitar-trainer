@@ -16,7 +16,7 @@ A **game** section that turns the curriculum's skills into short replayable roun
 Each game remembers the mode you last used. Play-mode scores are kept apart from tap scores, because they're different skills.
 
 ## 2. Games
-Each game unlocks when its **unlock lesson** becomes *available* (not passed), so you can play while learning.
+Every game's **first level is open from the start**; each next level opens with ★★ on the level before it (decided 2026-11-21). The game's `unlock_lesson` is shown as "Taught in …", a pointer, not a lock.
 
 | ID | Game | How it works | Skill / unlock lesson |
 |---|---|---|---|

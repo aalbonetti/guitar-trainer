@@ -8,7 +8,7 @@ import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
 import { getSetList, importSetList, clearSetList, thisWeekSongs, thisWeekIndex } from '../setlist';
 import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
-import { progress, recordAttempt } from '../progressStore';
+import { progress, recordAttempt, saveStatus } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
 import { exportAll, importAll, downloadBackup } from '../db';
 import { TimingPanel, CalibrationCard } from './Timing';
@@ -171,7 +171,7 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
   const doneToday = p?.first_pass_day === today && p.state !== 'passed';
   const states = computeStates(cat.lessons, cat.tracks, pr.lp);
   const att = useStore(attempt);
-  const mark = async (mode: 'auto' | 'self') => { const ev = await recordAttempt(l, { met: true, atTarget: true, score: 1, mode }); setMsg(EVENT_TEXT[ev] || 'Logged. It counts once per day.'); };
+  const mark = async (mode: 'auto' | 'self') => { const ev = await recordAttempt(l, { met: true, atTarget: true, score: 1, mode }); setMsg((EVENT_TEXT[ev] || 'Logged. It counts once per day.') + (saveStatus.get().state === 'saved' ? ' ✓ Saved on this phone.' : '')); };
   if (states[l.id] === 'locked') {
     const need = l.prereqs.filter(id => states[id] !== 'passed');
     const t = cat.tracks.find(x => x.id === l.track);
@@ -184,7 +184,11 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
       </section>);
   }
   if (type === 'quiz') return (
-    <section class="card"><h2>Pass it</h2><p class="muted">Pass the quiz on this page on two different days. {due ? 'A review is due: take the quiz again today.' : ''}</p>
+    <section class="card"><h2>Pass it</h2>
+      {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''} ✓</p>
+        : doneToday ? <p class="okText">Passed once today ✓ The next lessons are open. Pass the quiz again tomorrow or later to complete this one.</p>
+        : p?.first_pass_day ? <p class="note">Passed once on {p.first_pass_day}. Pass the quiz today to complete the lesson.</p> : null}
+      <p class="muted">Pass the quiz on this page on two different days. {due ? 'A review is due: take the quiz again today.' : ''}</p>
       {states[l.id] === 'locked' ? <p class="muted">Tip: finish the earlier lessons first ({l.prereqs.join(', ')}).</p> : null}</section>);
   if (type === 'timing') return (
     <section class="card">
@@ -317,6 +321,8 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
   const [inst, setInst] = useState(instrumentPref.get());
   const [backup, setBackup] = useState<string | null>(null);
   const [bmsg, setBMsg] = useState('');
+  const [keepOk, setKeepOk] = useState<boolean | null>(null);
+  useEffect(() => { void (async () => { try { let ok = await navigator.storage?.persisted?.(); if (!ok) ok = await navigator.storage?.persist?.(); setKeepOk(!!ok); } catch { setKeepOk(null); } })(); }, []);
   const lastBackup = persisted<number | null>('gt_last_backup', null).get();
   const sl = getSetList();
   const onFile = async (e: Event) => {
@@ -343,7 +349,8 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
         {msg ? <p class="note">{msg}</p> : null}
       </section>
       <section class="card">
-        <h2>Backup</h2>
+        <h2>Saving & backup</h2>
+        <p>Progress saves automatically on this phone after every quiz, attempt and game. {keepOk === true ? <span class="okText">Chrome has marked it as permanent storage ✓</span> : keepOk === false ? <span class="muted">Chrome may clear it if the phone runs low on space; installing the app to the home screen helps, and backups protect you.</span> : null}</p>
         <p class="muted">Your progress lives in Chrome on this phone. Save a backup file now and then (it lands in Downloads; drop it in Google Drive or email it to yourself). It includes progress, calibration, tempo ladders, settings and your imported set list.</p>
         <p class="muted small">{lastBackup ? `Last backup: ${new Date(lastBackup).toLocaleDateString()}` : 'No backup saved yet.'}</p>
         <div class="row">

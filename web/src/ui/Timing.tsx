@@ -8,6 +8,7 @@ import type { Ladder } from '../grading/timing';
 import { bluetoothOutputLikely, tunedThisSession, capture } from '../audio/engine';
 import { inputPref, TunerPanel } from './Tools';
 import { EVENT_TEXT } from '../progress';
+import { saveStatus } from '../progressStore';
 import { StrumGrid } from './Diagrams';
 
 const dev = () => inputPref.get() || undefined;
@@ -71,6 +72,7 @@ export function TimingChart({ r, maxErrMs, slotMs }: { r: TimingResult; maxErrMs
 export function TimingPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Lesson; reviewDue: boolean; passed: boolean }) {
   const a = useStore(attempt);
   const cap = useStore(capture);
+  const save = useStore(saveStatus);
   const crit = l.pass_criteria as unknown as TimingCriteria;
   const feel = lessonFeel(l, cat);
   const [ladder, setLadder] = useState<Ladder | null>(null);
@@ -123,6 +125,7 @@ export function TimingPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Le
           <p>{coachLine(r, crit.max_err_ms)}</p>
           {r.met && !atGoal ? <p class="muted">Practice tempo builds you up to {crit.bpm} BPM; only attempts at {crit.bpm} count toward passing.</p> : null}
           {a.event && EVENT_TEXT[a.event] ? <p class="note">{EVENT_TEXT[a.event]}</p> : null}
+          {save.state === 'saved' ? <p class="savedtick">✓ Saved on this phone</p> : null}
           {a.ladder && !goalOnly && a.prevLadderBpm !== undefined && a.ladder.bpm !== a.prevLadderBpm ? <p class="note">{a.ladder.bpm > a.prevLadderBpm ? (r.great ? 'Really tight! Fast track: ' : 'Practice tempo up: ') : 'Practice tempo down: '}next attempt at {a.ladder.bpm} BPM.</p> : null}
         </div>
       ) : mine && a.phase === 'error' ? <p class="error">{a.message}</p> : null}
