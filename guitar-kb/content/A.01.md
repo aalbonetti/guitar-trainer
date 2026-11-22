@@ -15,7 +15,9 @@ The middle finger barely moves: from string 5 fret 2 (Em) to string 6 fret 3 (G)
 
 1. Place Em. Lift all fingers 1 cm. Place G. Repeat 10 times **without strumming**, just training the shapes.
 2. Now strum: 4 downstrums of Em, 4 of G, with the click at 60 BPM.
-3. **One-minute changes:** count how many clean Em ↔ G switches you make in 60 seconds. Write it down.
+3. **One-minute changes:** count how many clean Em ↔ G switches you make in 60 seconds. The app counts them for you below (either G works).
+
+{{exercise:EX_changes_em_g}}
 
 {{tool:metronome:bpm=60,beats=4,sub=1}}
 
