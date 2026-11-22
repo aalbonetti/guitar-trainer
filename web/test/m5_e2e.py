@@ -1,6 +1,6 @@
 # M5 end-to-end: restore a backup file (seeded progress + set list), then run the daily loop:
 # due badge → queue → Start practice → session bar → Next through items → Finish → summary → Progress → backup download.
-import asyncio, http.server, threading, functools, sys, json, datetime, tempfile, os
+import asyncio, http.server, threading, functools, sys, json, datetime, tempfile, os, re
 from playwright.async_api import async_playwright
 PORT=8776
 srv=http.server.ThreadingHTTPServer(('127.0.0.1',PORT),functools.partial(http.server.SimpleHTTPRequestHandler,directory='dist')); threading.Thread(target=srv.serve_forever,daemon=True).start()
@@ -58,11 +58,22 @@ async def main():
         await pg.goto(f'http://127.0.0.1:{PORT}/#/lesson/A.09'); await pg.wait_for_selector('text=Not unlocked yet')
         check(await pg.locator('text=Start at').count()==0, 'locked lesson A.09 has no attempt button')
         await pg.goto(f'http://127.0.0.1:{PORT}/#/progress'); await pg.wait_for_selector('text=Minutes per week'); await pg.wait_for_timeout(300)
-        # 07-games §4: a day counts with 5 minutes of practice. A short session today keeps the streak (2 days) without counting yet.
-        pt=await pg.inner_text('.page'); check('2-day streak' in pt and 'Today:' in pt and 'min ✓' not in pt, 'short session: streak kept at 2 days, today not counted yet')
+        # 07-games §4: a day counts with 5 minutes of practice. The activity clock logged today's minutes while
+        # the items were worked through; a short session keeps the streak (2 days) without counting today yet.
+        await pg.click('h1'); await pg.wait_for_timeout(11000)  # the clock ticks every 10 s while you're using the app
+        PD="(async()=>{const r=indexedDB.open('guitar-trainer');await new Promise(x=>r.onsuccess=x);return await new Promise(x=>{const q=r.result.transaction('practice_day').objectStore('practice_day').getAll();q.onsuccess=()=>x(q.result)})})()"
+        row=next((d for d in await pg.evaluate(PD) if d['day']==D(0)), None)
+        check(row is not None and row.get('active_s',0)>0 and row['active_s']<300, f"today's practice_day row has the minutes so far ({row})")
+        pt=await pg.inner_text('.page'); row2=next((d for d in await pg.evaluate(PD) if d['day']==D(0)), row)
+        m=re.search(r'Today: (\d+) min', pt)
+        check(m and int(m.group(1)) in (row['active_s']//60, row2['active_s']//60), f"Progress shows today's minutes ({m and m.group(0)}, row {row['active_s']} s)")
+        check('2-day streak' in pt and 'min ✓' not in pt, 'short session: streak kept at 2 days, today not counted yet')
+        # 5 minutes today: written on a fresh page load (the clock's first 10 s tick hasn't run, so it can't overwrite it), then reloaded
+        await pg.goto(f'http://127.0.0.1:{PORT}/#/settings'); await pg.reload(); await pg.wait_for_selector('text=Save backup file')
         await pg.evaluate(f"(async()=>{{const r=indexedDB.open('guitar-trainer');await new Promise(x=>r.onsuccess=x);await new Promise(x=>{{const q=r.result.transaction('practice_day','readwrite').objectStore('practice_day').put({{day:'{D(0)}',active_s:300}});q.onsuccess=x}})}})()")
-        await pg.reload(); await pg.wait_for_selector('text=Minutes per week'); await pg.wait_for_timeout(300)
-        pt=await pg.inner_text('.page'); check('3-day streak' in pt, '5 minutes today: 3-day streak'); await pg.screenshot(path='/tmp/m5_progress.png', full_page=True)
+        await pg.goto(f'http://127.0.0.1:{PORT}/#/progress'); await pg.reload(); await pg.wait_for_selector('text=Minutes per week'); await pg.wait_for_timeout(300)
+        pt=await pg.inner_text('.page'); check('3-day streak' in pt and 'Today: 5 min ✓' in pt, '5 minutes today: 3-day streak, today counts')
+        await pg.screenshot(path='/tmp/m5_progress.png', full_page=True)
         await pg.goto(f'http://127.0.0.1:{PORT}/#/settings'); await pg.wait_for_selector('text=Save backup file')
         async with pg.expect_download() as dl: await pg.click('text=Save backup file')
         d=await dl.value; path=await d.path(); data=json.load(open(path))

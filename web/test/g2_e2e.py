@@ -156,6 +156,20 @@ async def run_width(b, W):
     res=await result(pg, 30000); run=await last_run(pg,'G_in_the_pocket')
     check(f'{W}: Gap Click: no clicks in the gap bar (16 of 20), strums through it all count', len(plan['clicks'])==16 and len(plan['slots'])==32 and run['level_id']=='pk3' and run['accuracy']==1, (len(plan['clicks']), len(plan['slots']), run))
     check(f'{W}: Gap Click shows the gap and the landing', seen_gap and seen_back, (seen_gap, seen_back))
+    if W==380:
+        # ---- unfold after calibrating folded: In the Pocket asks again (no false "Calibrated"), then the round starts ----
+        await pg.set_viewport_size({'width':760,'height':860})
+        await open_game(pg, 'G_in_the_pocket', 'pk1'); await pg.click('text=▶ Start')
+        await pg.wait_for_selector('text=strum calibration', timeout=10000); await pg.wait_for_timeout(800)
+        txt=await pg.inner_text('.page')
+        check('fold change: In the Pocket asks for a new calibration, no stale "Calibrated"', 'Calibrated ✓' not in txt and await pg.locator('.calib button:has-text("Calibrate")').count()==1, txt)
+        await pg.click('.calib button:has-text("Calibrate")'); await pg.wait_for_selector('text=Calibrated ✓', timeout=40000)
+        await pg.click('text=▶ Start'); ok_start=True
+        try: await pg.wait_for_selector('.pocketmeter', timeout=8000)
+        except Exception: ok_start=False
+        check('fold change: after calibrating, the round starts', ok_start)
+        await pg.click('.hud button[aria-label=Pause]'); await pg.click('.pausemenu button:has-text("Quit")')
+        await pg.set_viewport_size({'width':380,'height':860})
     # ---- practice minutes for the streak were logged while playing ----
     days=await pg.evaluate(DB+"('practice_day')")
     check(f'{W}: today has practice minutes logged (activity clock)', any(d.get('active_s',0)>=30 for d in days), days)
@@ -164,9 +178,28 @@ async def run_width(b, W):
 
 async def _lives_lt(pg, l0): return await lives(pg) < l0
 
+async def slow_mic(b):
+    # the mic takes 1.5 s to open (a permission prompt); pausing or quitting meanwhile must not leave it open
+    print('===== slow mic open =====')
+    ctx=await b.new_context(viewport={'width':380,'height':860}); pg=await ctx.new_page(); errs=[]
+    pg.on('pageerror',lambda e: errs.append(str(e)))
+    await pg.goto(f'http://127.0.0.1:{PORT}/?sim&simdelay=1500#/arcade/G_note_drop/nd1'); await pg.wait_for_selector('text=▶ Start')
+    await pg.click('.segmented button:has-text("Play")'); await pg.click('text=▶ Start'); await pg.wait_for_selector('.playarea')
+    await pg.wait_for_timeout(300); await pg.click('.hud button[aria-label=Pause]'); await pg.wait_for_timeout(2500)
+    paused_on=await pg.evaluate('__gtAudio().capture.on')
+    await pg.click('.pausemenu button:has-text("Resume")'); await pg.wait_for_timeout(2500)
+    resumed_on=await pg.evaluate('__gtAudio().capture.on')
+    await pg.click('.hud button[aria-label=Pause]'); await pg.click('.pausemenu button:has-text("Resume")'); await pg.wait_for_timeout(300)
+    await pg.click('.hud button[aria-label=Pause]'); await pg.click('.pausemenu button:has-text("Quit")'); await pg.wait_for_timeout(2500)
+    quit_on=await pg.evaluate('__gtAudio().capture.on')
+    check('slow mic: pause while opening leaves it closed; resume opens it; quit while opening closes it', not paused_on and resumed_on and not quit_on, (paused_on, resumed_on, quit_on))
+    check('slow mic: no page errors', not errs, errs)
+    await ctx.close()
+
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--autoplay-policy=no-user-gesture-required'])
+        await slow_mic(b)
         for W in (380, 760): await run_width(b, W)
         await b.close()
     print('E2E', 'PASS' if ok else 'FAIL'); sys.exit(0 if ok else 1)
