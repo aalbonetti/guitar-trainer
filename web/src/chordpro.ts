@@ -21,8 +21,16 @@ export function toNumber(chord: string, key: string): string {
   let suffix = minor ? 'm' + q.slice(1) : q;
   if (/^\d/.test(suffix)) suffix = `(${suffix})`;
   let out = num + suffix;
-  if (c.bass) { const b = ((pcOf(c.bass) - k) % 12 + 12) % 12; out += '/' + (DEG[b] !== undefined ? DEG[b] : `?${c.bass}`); }
+  if (c.bass) { const b = ((pcOf(c.bass) - k) % 12 + 12) % 12; out += '/' + (DEG[b] !== undefined ? DEG[b] : spelledDegree(c.bass, key)); }
   return out;
+}
+
+const MAJOR_STEPS = [0, 2, 4, 5, 7, 9, 11];
+/** Degree of a non-diatonic note, spelled from its letter name: F# in C → #4, A# in D → #5, Bb in C → b7. */
+function spelledDegree(note: string, key: string): string {
+  const L = 'CDEFGAB', deg = ((L.indexOf(note[0]) - L.indexOf(key[0])) % 7 + 7) % 7 + 1;
+  const diff = ((((pcOf(note) - pcOf(key)) - MAJOR_STEPS[deg - 1]) % 12 + 18) % 12) - 6;
+  return (diff > 0 ? '#'.repeat(diff) : 'b'.repeat(-diff)) + deg;
 }
 
 const CHORD_TOKEN = /^[A-G][#b]?(?:maj|min|m|M|dim|aug|sus|add|no|omit|alt|°|ø|\+|\d|\(|\)|b|#)*(?:\/[A-G][#b]?)?$/;

@@ -24,8 +24,8 @@ def to_number(chord, key):
     iv = (PC[root] - PC[key]) % 12
     minor = qual.startswith('m') and not qual.startswith('maj')
     if iv not in DEG:
-        warnings.append(f'{chord} in {key}: non-diatonic root (b{iv})')
         num = {1: 'b2', 3: 'b3', 6: 'b5', 8: 'b6', 10: 'b7'}[iv]
+        warnings.append(f'{chord} in {key}: non-diatonic root ({num})')
         deg = None
     else:
         deg = DEG[iv]; num = str(deg)
@@ -41,8 +41,15 @@ def to_number(chord, key):
     out = num + suffix
     if bass:
         biv = (PC[bass] - PC[key]) % 12
-        out += '/' + (str(DEG[biv]) if biv in DEG else f'?{bass}')
+        out += '/' + (str(DEG[biv]) if biv in DEG else spelled_degree(bass, key))
     return out
+
+MAJOR_STEPS = [0, 2, 4, 5, 7, 9, 11]
+def spelled_degree(note, key):
+    """Degree of a non-diatonic note, spelled from its letter name: F# in C -> #4, A# in D -> #5, Bb in C -> b7."""
+    deg = ('CDEFGAB'.index(note[0]) - 'CDEFGAB'.index(key[0])) % 7 + 1
+    diff = ((PC[note] - PC[key]) - MAJOR_STEPS[deg - 1] + 6) % 12 - 6
+    return ('#' * diff if diff > 0 else 'b' * -diff) + str(deg)
 
 def song(id, title, artist, ccli, key, bpm, meter, chart_key, sections, practice_for,
          sources, notes=None, chords_verified='full'):
