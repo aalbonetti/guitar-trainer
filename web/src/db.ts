@@ -1,6 +1,9 @@
 // Minimal promise wrapper over IndexedDB. Tables follow guitar-kb/catalog/SCHEMA.md (on-device data).
 const NAME = 'guitar-trainer', VERSION = 5;
 let dbp: Promise<IDBDatabase> | null = null;
+let blockedHook: (() => void) | null = null;
+/** Called when the database upgrade is blocked by another open copy of the app. */
+export function onBlocked(f: () => void) { blockedHook = f; }
 function open(): Promise<IDBDatabase> {
   if (dbp) return dbp;
   dbp = new Promise((res, rej) => {
@@ -23,8 +26,15 @@ function open(): Promise<IDBDatabase> {
       d.createObjectStore('quiz_item_stats', { keyPath: ['quiz_id', 'item_key'] });
       d.createObjectStore('kv', { keyPath: 'key' });
     };
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
+    r.onsuccess = () => {
+      const d = r.result;
+      // A newer version of the app opened in another tab/window: let it upgrade, then reload into it.
+      d.onversionchange = () => { d.close(); dbp = null; location.reload(); };
+      res(d);
+    };
+    r.onerror = () => { dbp = null; rej(r.error); };
+    // An older copy of the app is still open and holding the database: tell the user instead of hanging forever.
+    r.onblocked = () => { blockedHook?.(); };
   });
   return dbp;
 }

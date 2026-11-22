@@ -3,7 +3,7 @@ import { useState } from 'preact/hooks';
 import type { Catalog } from '../catalog';
 import { makeQuestion, rng, type Question } from '../quiz';
 import { playChords } from '../audio/engine';
-import { recordAttempt, bumpQuizItem, quizWeights, progress } from '../progressStore';
+import { recordAttempt, bumpQuizItem, quizWeights, progress, saveStatus } from '../progressStore';
 import { computeStates } from '../progress';
 import { EVENT_TEXT } from '../progress';
 import { ChordDiagram } from './Diagrams';
@@ -50,7 +50,8 @@ export function QuizCard({ id, lessonId, cat }: { id: string; lessonId: string; 
     if (grades && lesson && locked) msg += 'Practice round: this lesson isn’t unlocked yet, so it doesn’t count.';
     else if (grades && lesson) {
       const ev = await recordAttempt(lesson, { met, atTarget: true, score, mode: 'auto', metrics: { correct, total: log.length, meanS } });
-      msg += met ? (EVENT_TEXT[ev] || 'Target met.') : `Target is ${Math.round((pass?.score ?? 0.9) * 100)}%${pass?.max_s ? ` and ≤ ${pass.max_s} s per answer` : ''}. Try again.`;
+      msg += met ? (EVENT_TEXT[ev] || 'Target met. (Only one pass per day counts.)') : `Target is ${Math.round((pass?.score ?? 0.9) * 100)}%${pass?.max_s ? ` and ≤ ${pass.max_s} s per answer` : ''}. Try again.`;
+      if (saveStatus.get().state === 'saved') msg += ' ✓ Saved on this phone.';
     } else msg += 'Practice round.';
     setResult(msg); setQs(null);
   };

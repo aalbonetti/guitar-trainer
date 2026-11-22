@@ -4,7 +4,7 @@ import { Store } from './store';
 import { addXp } from './xp';
 import { XP, xpForScore, stars as starsFor } from './games/core';
 import { progress, recordAttempt, markPracticed } from './progressStore';
-import { isReviewDue, dayOf, computeStates } from './progress';
+import { isReviewDue, dayOf } from './progress';
 import { session, touch } from './practice';
 import type { Catalog, Game, GameLevel } from './catalog';
 
@@ -15,12 +15,15 @@ export async function loadBests() {
   try { const rows = await db.getAll<Best>('game_best'); bests.set({ ready: true, map: Object.fromEntries(rows.map(r => [r.key, r])) }); } catch { bests.set({ ready: true }); }
 }
 
-/** A game is open once its unlock lesson is available (not locked); a level can need its own lesson. */
-export function unlocked(cat: Catalog, g: Game, l?: GameLevel): boolean {
-  const st = computeStates(cat.lessons, cat.tracks, progress.get().lp);
-  const open = (id?: string) => !id || st[id] !== 'locked';
-  return open(g.unlock_lesson) && open(l?.unlock_lesson);
+/** Every G1 game's first level is open from the start; each next level opens with ★★ on the one before it. */
+export function unlocked(_cat: Catalog, g: Game, l?: GameLevel): boolean {
+  if (!l) return true;
+  const i = g.levels.indexOf(l);
+  if (i <= 0) return true;
+  return (bests.get().map[bestKey(g.id, g.levels[i - 1].id)]?.best_stars || 0) >= 2;
 }
+/** Lesson that teaches this game's skill (shown as a tip, not a lock). */
+export const lessonFor = (g: Game, l?: GameLevel) => l?.unlock_lesson || g.unlock_lesson;
 
 export interface RunResult { score: number; correct: number; total: number; maxCombo: number; finished: boolean; durationS: number; misses: string[]; ghost: [number, number][] }
 export interface RunOutcome { stars: number; accuracy: number; xp: number; pb: boolean; prevBest: number; reviewed: string[] }

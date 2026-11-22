@@ -95,7 +95,7 @@ Every Lesson screen (and the Song view) has a **tool bar** with two buttons: **T
 
 ## 5. Progress rules (exact)
 **Lesson states:** `locked → available → in_progress → passed`. "Review due" is a flag on a passed lesson, not a state.
-- **Unlock:** all `prereqs[]` are `passed`. Tracks A/ER/EL unlock after all of F passes. Track choice in Settings hides the tracks you didn't pick (they stay unlockable). T lessons follow their own `prereqs`.
+- **Unlock:** every `prereqs[]` lesson is passed **or passed once** (decided 2026-11-21: waiting a day after a first pass stalled day one). Tracks A/ER/EL unlock once every F lesson is passed at least once. The second-day pass still completes a lesson and starts its reviews. Lessons passed once *today* drop out of today's queue. Track choice in Settings hides the tracks you didn't pick (they stay unlockable). T lessons follow their own `prereqs`.
 - **Pass:** the criterion is met **at target tempo** in **2 practice sessions on different calendar days**. The first success sets `first_pass_at`; the second sets `passed_at`.
 - **Reviews:** scheduled at `passed_at + review_days[i]` (1, 3, 7, 14, 30). Passing a review advances to the next interval. Failing a review restarts the schedule at 1 day. The lesson stays passed and dependents stay unlocked. After the 30-day review the lesson is "mastered" and has no more reviews.
 - **Tempo ladder** (for `timing`, and for `pitch` exercises that have a tempo):

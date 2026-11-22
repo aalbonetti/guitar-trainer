@@ -195,3 +195,6 @@ svg.fretboard { display:block; max-height:300px; margin:0 auto; touch-action:man
 .center { text-align:center; } ul.misses { margin:4px 0 10px; padding-left:20px; font-size:14px; }
 
 a.big-link { font-size:20px; font-weight:700; }
+
+.savebanner { background:#3a1717; border:1px solid var(--bad); color:#ffd9d8; border-radius:12px; padding:10px 12px; margin-bottom:12px; }
+.savedtick { color:var(--ok); font-size:13px; }
