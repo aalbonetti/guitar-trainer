@@ -55,13 +55,30 @@ export function describePass(p: PassCriteria): string {
   }
 }
 
-/** Metronome preset for a lesson: BPM, beats per bar, clicks per beat. */
-export function lessonTempo(l: Lesson, cat: Catalog): { bpm: number; beats: number; sub: number } {
+/** Meter for a lesson's click: its exercise, else the rhythm/picking pattern it grades (grid matching the
+ *  subdivision first), else its song, else 3/4 for subdivision 6 and 4/4 otherwise. */
+export function lessonMeter(l: Lesson, cat: Pick<Catalog, 'exercises' | 'strums' | 'picking' | 'songs'>): string {
+  const p = l.pass_criteria;
+  const ex = (l.assets.exercises || []).map(id => cat.exercises.find(e => e.id === id)).find(e => e && e.meter);
+  if (ex?.meter) return ex.meter;
+  const pats: { meter: string; grid: number }[] = [...(l.assets.rhythm || []).map(id => cat.strums.find(s => s.id === id)), ...(l.assets.picking || []).map(id => cat.picking.find(s => s.id === id))].filter((x): x is Strum | Picking => !!x);
+  const pat = pats.find(x => x.grid === p.subdivision) || pats[0];
+  if (pat) return pat.meter;
+  const song = (l.assets.songs || []).map(id => cat.songs.find(s => s.id === id)).find(Boolean);
+  if (song?.meter) return song.meter;
+  return p.subdivision === 6 ? '3/4' : '4/4';
+}
+
+/** Metronome preset for a lesson: BPM, meter, beats per bar (pulses; 2 in 6/8), clicks per beat. */
+export function lessonTempo(l: Lesson, cat: Pick<Catalog, 'exercises' | 'strums' | 'picking' | 'songs'>): { bpm: number; beats: number; sub: number; meter: string } {
   const p = l.pass_criteria;
   const ex = (l.assets.exercises || []).map(id => cat.exercises.find(e => e.id === id)).find(e => e && e.tempo);
-  const bpm = (p.bpm as number) || (ex && ex.tempo ? ex.tempo.start : 0) || 80;
-  // subdivision 6 = the 3/4 waltz lesson (eighths in 3); 8 = eighths; 16 = sixteenths
-  const sub = p.subdivision === 16 ? 4 : p.subdivision === 8 || p.subdivision === 6 ? 2 : 1;
-  const beats = p.subdivision === 6 ? 3 : 4;
-  return { bpm, beats, sub };
+  const song = (l.assets.songs || []).map(id => cat.songs.find(s => s.id === id)).find(Boolean);
+  const bpm = (p.bpm as number) || (ex && ex.tempo ? ex.tempo.start : 0) || song?.tempo || 80;
+  const meter = lessonMeter(l, cat);
+  const compound = meter === '6/8';
+  const beats = compound ? 2 : Math.max(1, parseInt(meter, 10) || 4);
+  // subdivision 8 = eighths, 16 = sixteenths, 6 = eighths in 3/4 (or the three eighths of a 6/8 beat)
+  const sub = compound ? (p.subdivision === 16 ? 6 : 3) : p.subdivision === 16 ? 4 : p.subdivision === 8 || p.subdivision === 6 ? 2 : 1;
+  return { bpm, beats, sub, meter };
 }
