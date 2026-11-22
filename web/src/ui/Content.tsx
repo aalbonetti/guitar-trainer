@@ -9,6 +9,7 @@ import { ChordDiagram, ScaleDiagram, StrumGrid } from './Diagrams';
 import { startMetronome, setMetro } from '../audio/engine';
 import { QuizCard } from './Quiz';
 import { TOKEN_RE } from '../tokens';
+import { usePracticeTempo } from './Timing';
 
 const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 function inline(s: string): string {
@@ -81,6 +82,16 @@ function curated(cat: Catalog, id: string): { name: string; shape: Shape } | nul
   return s ? { name: id, shape: s } : null;
 }
 
+const SUBS = ['', '', 'eighths', 'triplets', 'sixteenths'];
+function ClickButton({ preset, note }: { preset: { bpm: number; beats: number; sub: number }; note?: string }) {
+  return <p><button class="chip" onClick={() => { setMetro(preset); startMetronome(preset); }}>▶ Click at {preset.bpm} BPM{preset.sub > 1 ? ` (${SUBS[preset.sub]})` : ''}{note ? ` · ${note}` : ''}</button></p>;
+}
+/** {{tool:metronome:bpm=ladder}}: clicks at the lesson's current practice tempo. */
+function LadderClick({ l, base }: { l: import('../catalog').Lesson; base: { bpm: number; beats: number; sub: number } }) {
+  const t = usePracticeTempo(l);
+  return <ClickButton preset={{ ...base, bpm: t ? t.bpm : base.bpm }} note={t ? (t.atGoal ? 'goal tempo' : 'your practice tempo') : undefined} />;
+}
+
 function Embed({ kind, arg, cat, lessonId }: { kind: string; arg: string; cat: Catalog; lessonId: string }) {
   switch (kind) {
     case 'chord': case 'chords': {
@@ -117,9 +128,10 @@ function Embed({ kind, arg, cat, lessonId }: { kind: string; arg: string; cat: C
     case 'tool': {
       const [name, params] = arg.split(':');
       if (name === 'metronome') {
-        const p = Object.fromEntries((params || '').split(',').filter(Boolean).map(kv => kv.split('=').map(x => x.trim())).map(([k, v]) => [k, +v]));
-        const preset = { bpm: p.bpm || 80, beats: p.beats || 4, sub: p.sub || 1 };
-        return <p><button class="chip" onClick={() => { setMetro(preset); startMetronome(preset); }}>▶ Click at {preset.bpm} BPM{preset.sub > 1 ? ` (${['', '', 'eighths', 'triplets', 'sixteenths'][preset.sub]})` : ''}</button></p>;
+        const raw: Record<string, string> = Object.fromEntries((params || '').split(',').filter(Boolean).map(kv => kv.split('=').map(x => x.trim())));
+        const p = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, +v]));
+        const base = { bpm: p.bpm || 80, beats: p.beats || 4, sub: p.sub || 1 };
+        return raw.bpm === 'ladder' && cat.lessonById[lessonId] ? <LadderClick l={cat.lessonById[lessonId]} base={base} /> : <ClickButton preset={base} />;
       }
       if (name === 'tuner') return <p><a class="btn" href="#/tools/tuner">🎚 Open the tuner</a> <small class="muted">or use the Tuner button at the top of this lesson</small></p>;
       if (name === 'delay') return <p><a class="btn" href="#/tools/metronome">⏱ Delay calculator (Tools)</a></p>;
