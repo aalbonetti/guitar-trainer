@@ -1,0 +1,632 @@
+[
+ {
+  "id": "G_note_drop",
+  "name": "Note Drop",
+  "blurb": "Note names fall toward the neck. Tap where that note lives before it lands. 3 misses end the round.",
+  "unlock_lesson": "F.07",
+  "review_for": [
+   "F.07"
+  ],
+  "modes": [
+   "tap",
+   "play"
+  ],
+  "milestone": "G1",
+  "levels": [
+   {
+    "id": "nd1",
+    "name": "Strings 6 & 5, frets 0\u20135",
+    "params": {
+     "zone": {
+      "strings": [
+       6,
+       5
+      ],
+      "frets": [
+       0,
+       5
+      ]
+     },
+     "speed": 1.0
+    },
+    "target_score": 2500,
+    "lives": 3,
+    "review_for": [
+     "F.07"
+    ]
+   },
+   {
+    "id": "nd2",
+    "name": "Strings 6 & 5, frets 0\u201312",
+    "params": {
+     "zone": {
+      "strings": [
+       6,
+       5
+      ],
+      "frets": [
+       0,
+       12
+      ]
+     },
+     "speed": 1.0
+    },
+    "target_score": 3000,
+    "lives": 3,
+    "review_for": [
+     "F.07"
+    ]
+   },
+   {
+    "id": "nd3",
+    "name": "All strings, frets 0\u20135",
+    "params": {
+     "zone": {
+      "strings": [
+       6,
+       5,
+       4,
+       3,
+       2,
+       1
+      ],
+      "frets": [
+       0,
+       5
+      ]
+     },
+     "speed": 1.0
+    },
+    "target_score": 3000,
+    "lives": 3
+   },
+   {
+    "id": "nd4",
+    "name": "Whole neck, frets 0\u201312",
+    "params": {
+     "zone": {
+      "strings": [
+       6,
+       5,
+       4,
+       3,
+       2,
+       1
+      ],
+      "frets": [
+       0,
+       12
+      ]
+     },
+     "speed": 1.2
+    },
+    "target_score": 3500,
+    "lives": 3
+   }
+  ]
+ },
+ {
+  "id": "G_fret_finder",
+  "name": "Fret Finder",
+  "blurb": "One note, 20 seconds: tap every place it appears in the zone.",
+  "unlock_lesson": "T.01",
+  "review_for": [
+   "T.01"
+  ],
+  "modes": [
+   "tap",
+   "play"
+  ],
+  "milestone": "G1",
+  "levels": [
+   {
+    "id": "ff1",
+    "name": "Strings 6\u20134, frets 0\u20135",
+    "params": {
+     "zone": {
+      "strings": [
+       6,
+       5,
+       4
+      ],
+      "frets": [
+       0,
+       5
+      ]
+     }
+    },
+    "target_score": 2000,
+    "round_s": 60,
+    "review_for": [
+     "T.01"
+    ]
+   },
+   {
+    "id": "ff2",
+    "name": "All strings, frets 0\u20135",
+    "params": {
+     "zone": {
+      "strings": [
+       6,
+       5,
+       4,
+       3,
+       2,
+       1
+      ],
+      "frets": [
+       0,
+       5
+      ]
+     }
+    },
+    "target_score": 3000,
+    "round_s": 60,
+    "review_for": [
+     "T.01"
+    ]
+   },
+   {
+    "id": "ff3",
+    "name": "All strings, frets 0\u201312",
+    "params": {
+     "zone": {
+      "strings": [
+       6,
+       5,
+       4,
+       3,
+       2,
+       1
+      ],
+      "frets": [
+       0,
+       12
+      ]
+     }
+    },
+    "target_score": 5000,
+    "round_s": 60,
+    "review_for": [
+     "T.01"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "G_call_the_number",
+  "name": "Call the Number",
+  "blurb": "The band leader calls a number. Tap the chord in this key, fast.",
+  "unlock_lesson": "T.03",
+  "review_for": [
+   "T.03"
+  ],
+  "modes": [
+   "tap",
+   "play"
+  ],
+  "milestone": "G1",
+  "levels": [
+   {
+    "id": "cn1",
+    "name": "Key of G: 1 4 5 6m",
+    "params": {
+     "keys": [
+      "G"
+     ],
+     "numbers": [
+      "1",
+      "4",
+      "5",
+      "6m"
+     ]
+    },
+    "target_score": 2500,
+    "round_s": 60,
+    "review_for": [
+     "T.03"
+    ]
+   },
+   {
+    "id": "cn2",
+    "name": "Open keys: 1 2m 3m 4 5 6m",
+    "params": {
+     "keys": [
+      "G",
+      "D",
+      "C",
+      "E",
+      "A"
+     ],
+     "numbers": [
+      "1",
+      "2m",
+      "3m",
+      "4",
+      "5",
+      "6m"
+     ]
+    },
+    "target_score": 2500,
+    "round_s": 60,
+    "review_for": [
+     "T.03"
+    ]
+   },
+   {
+    "id": "cn3",
+    "name": "All 12 keys",
+    "params": {
+     "keys": [
+      "C",
+      "Db",
+      "D",
+      "Eb",
+      "E",
+      "F",
+      "F#",
+      "G",
+      "Ab",
+      "A",
+      "Bb",
+      "B"
+     ],
+     "numbers": [
+      "1",
+      "2m",
+      "3m",
+      "4",
+      "5",
+      "6m"
+     ]
+    },
+    "target_score": 2000,
+    "round_s": 60,
+    "review_for": [
+     "T.03"
+    ]
+   },
+   {
+    "id": "cn4",
+    "name": "Songs: real progressions",
+    "params": {
+     "songs": true,
+     "numbers": []
+    },
+    "target_score": 2500,
+    "round_s": 90,
+    "review_for": [
+     "T.03"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "G_hear_the_change",
+  "name": "Hear the Change",
+  "blurb": "Hear the 1 chord, then another. Name the number.",
+  "unlock_lesson": "T.05",
+  "review_for": [
+   "T.05",
+   "T.06"
+  ],
+  "modes": [
+   "tap"
+  ],
+  "milestone": "G1",
+  "levels": [
+   {
+    "id": "hc1",
+    "name": "Major or minor?",
+    "params": {
+     "numbers": [
+      "major",
+      "minor"
+     ]
+    },
+    "target_score": 1500,
+    "round_s": 60,
+    "unlock_lesson": "T.05",
+    "review_for": [
+     "T.05"
+    ]
+   },
+   {
+    "id": "hc2",
+    "name": "1 4 5 6m",
+    "params": {
+     "numbers": [
+      "1",
+      "4",
+      "5",
+      "6m"
+     ]
+    },
+    "target_score": 1500,
+    "round_s": 60,
+    "unlock_lesson": "T.06",
+    "review_for": [
+     "T.06"
+    ]
+   },
+   {
+    "id": "hc3",
+    "name": "Add 2m and 3m",
+    "params": {
+     "numbers": [
+      "1",
+      "2m",
+      "3m",
+      "4",
+      "5",
+      "6m"
+     ]
+    },
+    "target_score": 1500,
+    "round_s": 60,
+    "unlock_lesson": "T.06",
+    "review_for": [
+     "T.06"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "G_capo_quick",
+  "name": "Capo Quick",
+  "blurb": "Capo math against the clock: which fret, or what key is it really in?",
+  "unlock_lesson": "T.04",
+  "review_for": [
+   "T.04"
+  ],
+  "modes": [
+   "tap"
+  ],
+  "milestone": "G1",
+  "levels": [
+   {
+    "id": "cq1",
+    "name": "Which capo?",
+    "params": {
+     "ask": "capo",
+     "keys": [
+      "C",
+      "Db",
+      "D",
+      "Eb",
+      "E",
+      "F",
+      "F#",
+      "G",
+      "Ab",
+      "A",
+      "Bb",
+      "B"
+     ],
+     "shapes": [
+      "G",
+      "D",
+      "C",
+      "E",
+      "A"
+     ]
+    },
+    "target_score": 2500,
+    "round_s": 60,
+    "review_for": [
+     "T.04"
+    ]
+   },
+   {
+    "id": "cq2",
+    "name": "Real key?",
+    "params": {
+     "ask": "key",
+     "keys": [
+      "C",
+      "Db",
+      "D",
+      "Eb",
+      "E",
+      "F",
+      "F#",
+      "G",
+      "Ab",
+      "A",
+      "Bb",
+      "B"
+     ],
+     "shapes": [
+      "G",
+      "D",
+      "C",
+      "E",
+      "A"
+     ]
+    },
+    "target_score": 2500,
+    "round_s": 60,
+    "review_for": [
+     "T.04"
+    ]
+   },
+   {
+    "id": "cq3",
+    "name": "Mixed",
+    "params": {
+     "ask": "mixed",
+     "keys": [
+      "C",
+      "Db",
+      "D",
+      "Eb",
+      "E",
+      "F",
+      "F#",
+      "G",
+      "Ab",
+      "A",
+      "Bb",
+      "B"
+     ],
+     "shapes": [
+      "G",
+      "D",
+      "C",
+      "E",
+      "A"
+     ]
+    },
+    "target_score": 2500,
+    "round_s": 60,
+    "review_for": [
+     "T.04"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "G_delay_math",
+  "name": "Delay Math",
+  "blurb": "A BPM appears: enter the delay time in ms (within \u00b110).",
+  "unlock_lesson": "T.07",
+  "review_for": [
+   "T.07"
+  ],
+  "modes": [
+   "tap"
+  ],
+  "milestone": "G1",
+  "levels": [
+   {
+    "id": "dm1",
+    "name": "Dotted eighths, 60\u201390 BPM",
+    "params": {
+     "bpm": [
+      60,
+      90
+     ],
+     "notes": [
+      "dotted8"
+     ]
+    },
+    "target_score": 1500,
+    "round_s": 60,
+    "review_for": [
+     "T.07"
+    ]
+   },
+   {
+    "id": "dm2",
+    "name": "Dotted eighths, 60\u2013140 BPM",
+    "params": {
+     "bpm": [
+      60,
+      140
+     ],
+     "notes": [
+      "dotted8"
+     ]
+    },
+    "target_score": 1500,
+    "round_s": 60,
+    "review_for": [
+     "T.07"
+    ]
+   },
+   {
+    "id": "dm3",
+    "name": "Quarter, eighth, dotted eighth",
+    "params": {
+     "bpm": [
+      60,
+      140
+     ],
+     "notes": [
+      "quarter",
+      "eighth",
+      "dotted8"
+     ]
+    },
+    "target_score": 1500,
+    "round_s": 60,
+    "review_for": [
+     "T.07"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "G_triad_hunt",
+  "name": "Triad Hunt",
+  "blurb": "Find the triad on a string set, any inversion.",
+  "unlock_lesson": "ER.04",
+  "review_for": [],
+  "modes": [
+   "tap",
+   "play"
+  ],
+  "milestone": "G3",
+  "levels": []
+ },
+ {
+  "id": "G_octave_jump",
+  "name": "Octave Jump",
+  "blurb": "Play the octave of a note on string 6 or 5, against the clock.",
+  "unlock_lesson": "EL.04",
+  "review_for": [],
+  "modes": [
+   "play"
+  ],
+  "milestone": "G2",
+  "levels": []
+ },
+ {
+  "id": "G_box_runner",
+  "name": "Box Runner",
+  "blurb": "Run the pentatonic box in time with the click.",
+  "unlock_lesson": "EL.01",
+  "review_for": [],
+  "modes": [
+   "play"
+  ],
+  "milestone": "G2",
+  "levels": []
+ },
+ {
+  "id": "G_in_the_pocket",
+  "name": "In the Pocket",
+  "blurb": "Strum to the click, then keep time when the click drops out.",
+  "unlock_lesson": "A.05",
+  "review_for": [],
+  "modes": [
+   "play"
+  ],
+  "milestone": "G2",
+  "levels": []
+ },
+ {
+  "id": "G_change_sprint",
+  "name": "Change Sprint",
+  "blurb": "60 seconds of chord changes. Race your best run.",
+  "unlock_lesson": "A.01",
+  "review_for": [],
+  "modes": [
+   "play"
+  ],
+  "milestone": "G3",
+  "levels": []
+ },
+ {
+  "id": "G_song_run",
+  "name": "Song Run",
+  "blurb": "The boss level: play a set-list song bar by bar at its tempo.",
+  "unlock_lesson": "A.05",
+  "review_for": [],
+  "modes": [
+   "play"
+  ],
+  "milestone": "G3",
+  "levels": []
+ }
+]

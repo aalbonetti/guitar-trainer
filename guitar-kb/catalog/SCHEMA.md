@@ -59,6 +59,7 @@ The catalog is read-only. Everything the app learns about the player lives in In
 | `song_practice` | `song_ref PK (outline id or "chart:<id>"), preferred_key?, preferred_capo?, last_practiced_at?, times_practiced` | Per-song personal settings |
 
 The Arcade adds `games.json` to the catalog and seven game tables (`game_run`, `game_best`, `xp_ledger`, `streak`, `service_day`, `badge`, `daily_challenge`). They're defined in `07-games.md` §7.
+**Built in G1:** `games.json` (all 12 games, levels for the six G1 tap games; `build_catalog.py` checks lesson refs, keys, numbers and zones), `game_run` (auto id), `game_best` (PK `key` = `game|level|mode`, `ghost` = `[[second, score], …]`), `xp_ledger` (auto id), `service_day`. The streak is computed from `practice_day` (game rounds and "Played a service" add the day), so there's no `streak` row yet; `badge` and `daily_challenge` arrive with G3.
 
 **Catalog updates:** on startup, if `meta.schema_version` or the catalog checksum changed, add `lesson_progress` rows for new lessons and recompute `locked/available` from prereqs. Never delete history: rows for IDs that disappear are kept and hidden. Backup/restore exports and imports all tables as one JSON file.
 
