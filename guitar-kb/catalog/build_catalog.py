@@ -118,6 +118,22 @@ triad('tri_321_Gm_inv2', 'G', 'minor', [3,2,1], [7,8,6])
 triad('tri_432_G_root', 'G', 'major', [4,3,2], [5,4,3])
 triad('tri_432_G_inv1', 'G', 'major', [4,3,2], [9,7,8])
 triad('tri_432_G_inv2', 'G', 'major', [4,3,2], [12,12,12])
+# M8: the nearest-voicing triads of 1–5–6m–4 in G that ER.04's tab exercise plays (3-2-1, around fret 7) and
+# that ER.05 asks for on 4-3-2 within frets 2–7. Chord graders build their templates from these exact frets.
+triad('tri_321_D_root', 'D', 'major', [3,2,1], [7,7,5])
+triad('tri_321_Em_root', 'E', 'minor', [3,2,1], [9,8,7])
+triad('tri_321_C_inv1', 'C', 'major', [3,2,1], [9,8,8])
+triad('tri_432_D_inv1', 'D', 'major', [4,3,2], [4,2,3])
+triad('tri_432_Em_inv1', 'E', 'minor', [4,3,2], [5,4,5])
+triad('tri_432_C_inv2', 'C', 'major', [4,3,2], [5,5,5])
+# the inversion in a triad's id must match its lowest note (root / 3rd / 5th)
+for t in TRIADS:
+    full = [-1] * 6
+    for s, f in zip(t['strings'], t['frets']): full[6 - s] = f
+    low = next(OPEN[i] + f for i, f in enumerate(full) if f >= 0) % 12
+    want = {'root': 0, 'inv1': 1, 'inv2': 2}[t['id'].split('_')[-1]]
+    if low != (PC[t['root']] + FORMULAS[t['quality']][want]) % 12:
+        errors.append(f"{t['id']}: lowest note {NOTES[low]} doesn't match its inversion")
 
 # octave shapes: (low string, high string, fret offset)
 OCTAVES = [(6,4,2), (5,3,2), (4,2,3), (3,1,3)]
@@ -301,6 +317,129 @@ SONGS = [dict(
     chords_used=['G','C','D','G7'], rhythm=['S4_waltz','P3_rolling_34'],
     verify='chart reviewed against standard hymnal harmonization before release')]
 
+# ---------------- chord-graded exercises (M8) ----------------
+# A chord ref is a curated chord id ('Cadd9'), a triad id ('tri_321_D_root') or a movable shape at a root fret
+# ('A_shape_minor@7'). 'G|G_4f' means either voicing counts (the 3- and 4-finger G). Every ref is resolved here
+# to exact frets and written into the exercise as `voicings`, so the chord graders build their templates from
+# the voicing the lesson teaches and never have to guess.
+CH_BY_ID = {c['id']: c for c in C}
+TRI_BY_ID = {t['id']: t for t in TRIADS}
+SHAPE_BY_ID = {s[0]: s for s in SHAPES}
+QSUF = {'major': '', 'minor': 'm'}
+def resolve_one(ref):
+    """(name, frets[6], root pc, quality) for one voicing ref, or None."""
+    if ref in CH_BY_ID:
+        c = CH_BY_ID[ref]
+        return c['name'].split(' (')[0], c['frets'], PC[c['root']], c['quality']
+    if ref in TRI_BY_ID:
+        t = TRI_BY_ID[ref]; full = [-1] * 6
+        for s, f in zip(t['strings'], t['frets']): full[6 - s] = f
+        return t['root'] + QSUF.get(t['quality'], t['quality']), full, PC[t['root']], t['quality']
+    if '@' in ref and ref.split('@')[0] in SHAPE_BY_ID:
+        sid, n = ref.split('@'); n = int(n); _, q, rs, off = SHAPE_BY_ID[sid]
+        if not 1 <= n <= 12: return None
+        root = (OPEN[6 - rs] + n) % 12
+        return NOTES[root] + QSUF.get(q, q), [n + o if o != M else -1 for o in off], root, q
+    return None
+def where_of(frets): return ''.join('x' if f < 0 else (str(f) if f < 10 else f'({f})') for f in frets)
+def resolve(ref):
+    """Voicing record: display name, every accepted fingering's frets, root and quality."""
+    alts = [resolve_one(r) for r in ref.split('|')]
+    if any(a is None for a in alts): errors.append(f"chord ref {ref}: unknown voicing"); return None
+    if len({(a[2], QCLASS.get(a[3], a[3])) for a in alts}) != 1: errors.append(f"chord ref {ref}: alternatives are different chords")
+    name, frets, root, q = alts[0]
+    return dict(name=name, frets=[a[1] for a in alts], where=' or '.join(where_of(a[1]) for a in alts), root=NOTES[root], quality=q)
+# A number's chord may be played with colour tones that keep its 3rd (Cadd9 or Fmaj7 for a major 4, Em7 for 6m);
+# sus chords have no 3rd and only stand in for a major chord (the worship G-family Dsus4 as the 5).
+QCLASS = {'major': 'major', 'add9': 'major', 'maj7': 'major', 'sus2': 'major', 'sus4': 'major', 'minor': 'minor', 'm7': 'minor', '7': '7', '7sus4': '7'}
+NUM_DEG = {'1': (0, 'major'), '2m': (2, 'minor'), '3m': (4, 'minor'), '4': (5, 'major'), '5': (7, 'major'), '6m': (9, 'minor'), '5(7)': (7, '7'), '1(7)': (0, '7')}
+
+def changes(xid, name, pairs, target):
+    return dict(id=xid, name=name, type='chord_changes', pairs=pairs, duration_s=60, target_per_min=target)
+def progression(xid, name, meter, pace, variants, bpm=None, tempo=None, beats_per_chord=None, strums_per_chord=None, pick='only', show='chords', decoys=(), notes=None):
+    d = dict(id=xid, name=name, type='chord_progression', meter=meter, pace=pace, pick=pick, show=show, variants=variants)
+    for k, v in dict(bpm=bpm, tempo=tempo, beats_per_chord=beats_per_chord, strums_per_chord=strums_per_chord, notes=notes).items():
+        if v is not None: d[k] = v
+    if decoys: d['decoys'] = list(decoys)
+    return d
+def variant(key, capo, chords, numbers=None, shapes=None):
+    v = dict(key=key, capo=capo, chords=chords)
+    if numbers: v['numbers'] = numbers
+    if shapes: v['shapes'] = shapes
+    v['label'] = f"Key of {key}" + (f", capo {capo}, {shapes} shapes" if capo else (f", {shapes} shapes" if shapes else ''))
+    return v
+
+G_SH = dict(shapes='G', chords=['G|G_4f', 'D', 'Em', 'C|Cadd9'])      # 1 5 6m 4 played as G shapes
+C_SH = dict(shapes='C', chords=['C', 'G|G_4f', 'Am', 'Fmaj7'])
+D_SH = dict(shapes='D', chords=['D', 'A', 'Bm_partial', 'G|G_4f'])
+CAPO_KEYS = [('A', 2, G_SH), ('Bb', 3, G_SH), ('B', 4, G_SH), ('Db', 1, C_SH), ('Eb', 1, D_SH), ('F', 3, D_SH), ('Ab', 1, G_SH)]
+FIVE_SIX_FOUR = ['1', '5', '6m', '4']
+# ER.11 neck map (content/ER.11.md): 1 = E-shape on string 6, 4 = A-shape at the same fret, 5 = A-shape 2 frets up,
+# 6m = A-shape minor 4 frets up, 2m = E-shape minor 2 frets up.
+NECK = {'1': ('E_shape_major', 0), '4': ('A_shape_major', 0), '5': ('A_shape_major', 2), '6m': ('A_shape_minor', 4), '2m': ('E_shape_minor', 2)}
+CHART = ['1', '5', '6m', '4', '1', '4', '2m', '5']
+def neck_variant(key):
+    r6 = (PC[key] - OPEN[0]) % 12 or 12
+    return variant(key, 0, [f"{NECK[n][0]}@{r6 + NECK[n][1]}" for n in CHART], numbers=CHART)
+AG = SONGS[0]
+M8_EXERCISES = [
+    changes('EX_changes_em_g', 'Em ↔ G one-minute changes', [['Em', 'G|G_4f']], 30),
+    changes('EX_changes_dfamily', 'D-family one-minute changes', [['D', 'A'], ['D', 'Bm_partial']], 25),
+    changes('EX_changes_cfamily', 'C-family one-minute changes', [['C', 'Am'], ['C', 'Fmaj7']], 25),
+    changes('EX_changes_triads_G', 'Triad changes on strings 3-2-1, 1–5–6m–4 in G',
+            [['tri_321_G_inv2', 'tri_321_D_root'], ['tri_321_D_root', 'tri_321_Em_root'], ['tri_321_Em_root', 'tri_321_C_inv1'], ['tri_321_C_inv1', 'tri_321_G_inv2']], 20),
+    changes('EX_changes_drone', 'Drone-voicing one-minute changes (keys of E and D)',
+            [['E', 'Bsus4_drone'], ['Csharpm7_drone', 'Asus2'], ['D', 'G_over_B'], ['Em7', 'A7sus4']], 25),
+    progression('EX_capo_keys', 'Capo to the leader’s key: 1–5–6m–4 twice', '4/4', 'own',
+                [variant(k, c, sh['chords'] * 2, numbers=FIVE_SIX_FOUR * 2, shapes=sh['shapes']) for k, c, sh in CAPO_KEYS],
+                strums_per_chord=4, pick='random', notes='The leader names a key; put the capo on and play the shapes shown.'),
+    progression('EX_amazing_grace_chords', 'Amazing Grace chords (waltz strum, one bar per chord)', AG['meter'], 'timed',
+                [variant(k, c, list(AG['sections'][0]['bars']), numbers=AG['sections'][0]['numbers'], shapes='G')
+                 for k, c in [('G', 0), ('A', 2), ('Bb', 3)]],
+                tempo=dict(start=52, target=80, step=4), beats_per_chord=3, pick='choose'),
+    progression('EX_barre_F_Bm', 'F and Bm barres in context: C–Am–F–G, then D–Bm–G–A', '4/4', 'own',
+                [variant('C', 0, ['C', 'Am', 'F', 'G', 'D', 'Bm', 'G', 'A'])], strums_per_chord=4, decoys=['Fmaj7'],
+                notes='Fmaj7 is the stand-in you learned first; here it counts as the wrong chord.'),
+    progression('EX_triads_432_G', 'Triads on strings 4-3-2: 1–5–6m–4 in G', '4/4', 'timed',
+                [variant('G', 0, ['tri_432_G_root', 'tri_432_D_inv1', 'tri_432_Em_inv1', 'tri_432_C_inv2'] * 2, numbers=FIVE_SIX_FOUR * 2)],
+                bpm=70, beats_per_chord=4),
+    progression('EX_barre_progression_G', 'Barre chords: 1–5–6m–4 in G (G E-shape 3, D A-shape 5, Em A-shape 7, C A-shape 3)', '4/4', 'timed',
+                [variant('G', 0, ['E_shape_major@3', 'A_shape_major@5', 'A_shape_minor@7', 'A_shape_major@3'] * 2, numbers=FIVE_SIX_FOUR * 2)],
+                bpm=80, beats_per_chord=4),
+    progression('EX_number_chart', 'Number chart in a key named on the spot (barre shapes)', '4/4', 'own',
+                [neck_variant(k) for k in ['G', 'A', 'Bb', 'B', 'C', 'F']], strums_per_chord=4, pick='random', show='numbers',
+                notes='Only the numbers and the key are shown. Play them as barre chords from the neck map.'),
+]
+# resolve every voicing and check the music: chords of a variant are the numbers in its key, as they sound with
+# the capo on (shape root + capo), and the shapes played are the ones the variant names
+EXERCISES.extend(M8_EXERCISES)
+for x in [e for e in EXERCISES if e['type'] in ('chord_changes', 'chord_progression')]:
+    refs = [r for p in x.get('pairs', []) for r in p] + [r for v in x.get('variants', []) for r in v['chords']] + list(x.get('decoys', []))
+    x['voicings'] = {r: v for r in dict.fromkeys(refs) for v in [resolve(r)] if v}
+    for v in x.get('variants', []):
+        if v.get('numbers') and len(v['numbers']) != len(v['chords']): errors.append(f"{x['id']} {v['key']}: numbers and chords differ in length")
+        for i, r in enumerate(v['chords']):
+            vo = x['voicings'].get(r)
+            if not vo: continue
+            if v.get('numbers'):
+                deg, q = NUM_DEG[v['numbers'][i]]
+                sounding = (PC[vo['root']] + v['capo']) % 12
+                if sounding != (PC[v['key']] + deg) % 12 or QCLASS.get(vo['quality']) != q:
+                    errors.append(f"{x['id']} key {v['key']} capo {v['capo']}: {r} sounds {NOTES[sounding]}{vo['quality']}, but {v['numbers'][i]} is {NOTES[(PC[v['key']] + deg) % 12]}{q}")
+            if v.get('shapes') and v['capo'] and vo['root'] not in ({'G': ['G', 'C', 'D', 'E', 'B'], 'C': ['C', 'G', 'A', 'F'], 'D': ['D', 'A', 'B', 'G']}[v['shapes']]):
+                errors.append(f"{x['id']}: {r} isn't one of the {v['shapes']} shapes")
+    if x['type'] == 'chord_progression':
+        if x['pace'] == 'timed' and (('bpm' in x) == ('tempo' in x) or not x.get('beats_per_chord')): errors.append(f"{x['id']}: timed needs beats_per_chord and either bpm (fixed) or tempo (ladder)")
+        if x['pace'] == 'own' and not x.get('strums_per_chord'): errors.append(f"{x['id']}: own pace needs strums_per_chord")
+        if x['pace'] not in ('timed', 'own') or x['pick'] not in ('only', 'random', 'choose') or x['show'] not in ('chords', 'numbers'): errors.append(f"{x['id']}: bad pace/pick/show")
+        if x['pick'] == 'only' and len(x['variants']) != 1: errors.append(f"{x['id']}: pick 'only' needs one variant")
+        if x['show'] == 'numbers' and not all(v.get('numbers') for v in x['variants']): errors.append(f"{x['id']}: a number chart needs numbers")
+        for d in x.get('decoys', []):
+            if d in [r for v in x['variants'] for r in v['chords']]: errors.append(f"{x['id']}: decoy {d} is also in the progression")
+# Amazing Grace's chord exercise is the song's own bars
+if [b for b in M8_EXERCISES if b['id'] == 'EX_amazing_grace_chords'][0]['variants'][0]['chords'] != AG['sections'][0]['bars']:
+    errors.append('Amazing Grace chord exercise: bars differ from the song')
+
 # ---------------- quiz generators ----------------
 QUIZZES = [
     dict(id='Q_open_strings', lesson='F.01', type='generated', prompt='Open string {n} is which note? / Which string is the open {note}?', params=dict(strings=[1,2,3,4,5,6])),
@@ -337,29 +476,29 @@ LESSONS = [
     L('F.05','Spider warm-up',['F.03'],P('timing',bpm=60,subdivision=8,max_err_ms=50,bars=4),{'exercises':['EX_spider']}),
     L('F.06','Playing with a click',['F.03'],P('timing',bpm=70,subdivision=4,max_err_ms=50,bars=8),{'rhythm':['S1_quarters']}),
     L('F.07','Note names on strings 6 & 5',['F.04'],P('quiz',score=0.9,max_s=3),{'quizzes':['Q_note_names']}),
-    L('A.01','Em & G',['F.06'],P('changes_per_min',target=30,pair=['Em','G']),{'chords':['Em','G','G_4f']}),
+    L('A.01','Em & G',['F.06'],P('changes_per_min',target=30,pair=['Em','G']),{'chords':['Em','G','G_4f'],'exercises':['EX_changes_em_g']}),
     L('A.02','The G family',['A.01'],P('changes_per_min',target=30),{'chords':['G_4f','Cadd9','Dsus4','Em7'],'exercises':['EX_changes_gfamily']}),
-    L('A.03','D family',['A.01'],P('changes_per_min',target=25),{'chords':['D','A','Asus4','A7sus4','Bm_partial']}),
-    L('A.04','C family',['A.01'],P('changes_per_min',target=25),{'chords':['C','Am','Fmaj7','G'],'exercises':['EX_changes_open']}),
+    L('A.03','D family',['A.01'],P('changes_per_min',target=25),{'chords':['D','A','Asus4','A7sus4','Bm_partial'],'exercises':['EX_changes_dfamily']}),
+    L('A.04','C family',['A.01'],P('changes_per_min',target=25),{'chords':['C','Am','Fmaj7','G'],'exercises':['EX_changes_cfamily']}),
     L('A.05','Eighth-note strum, accents on 2 & 4',['A.02'],P('timing',bpm=80,subdivision=8,max_err_ms=40,bars=8),{'rhythm':['S2_eighths']}),
     L('A.06','Worship strum pattern',['A.05'],P('timing',bpm=90,subdivision=8,max_err_ms=40,bars=8),{'rhythm':['S3_worship']}),
     L('A.07','Hymn meters: 3/4 & 6/8',['A.05'],P('timing',bpm=90,subdivision=6,max_err_ms=40,bars=8),{'rhythm':['S4_waltz','S5_six_eight']}),
-    L('A.08','Capo & keys',['A.04','T.04'],P('chord_accuracy',ratio=0.9)),
+    L('A.08','Capo & keys',['A.04','T.04'],P('chord_accuracy',ratio=0.9),{'exercises':['EX_capo_keys']}),
     L('A.09','Dynamics & percussive chunk',['A.06'],P('self_check'),{'rhythm':['S9_whole','S10_half','S6_chunk']}),
     L('A.10','Arpeggio picking for intros',['A.04'],P('timing',bpm=70,subdivision=8,max_err_ms=50,bars=4),{'picking':['P2_pima','P3_rolling_34']}),
-    L('A.11','First hymns',['A.07','A.08'],P('chord_accuracy',ratio=0.9),{'songs':['SONG_amazing_grace']}),
-    L('A.12','Intro to barre chords',['A.06'],P('chord_accuracy',ratio=0.8),{'chords':['F','Bm'],'shapes':['E_shape_major','A_shape_minor']}),
+    L('A.11','First hymns',['A.07','A.08'],P('chord_accuracy',ratio=0.9,bpm=80),{'songs':['SONG_amazing_grace'],'chords':['G','C','D','G7'],'exercises':['EX_amazing_grace_chords']}),
+    L('A.12','Intro to barre chords',['A.06'],P('chord_accuracy',ratio=0.8),{'chords':['F','Bm'],'shapes':['E_shape_major','A_shape_minor'],'exercises':['EX_barre_F_Bm']}),
     L('ER.01','Electric basics: tone, attack, muting',['F.06'],P('self_check')),
     L('ER.02','Power chords & palm-muted chug',['ER.01','F.07'],P('timing',bpm=90,subdivision=8,max_err_ms=40,bars=8),{'shapes':['power_r6','power_r5'],'rhythm':['S7_chug']}),
     L('ER.03','Root pulse + dotted-eighth delay',['ER.02','T.07'],P('timing',bpm=100,subdivision=8,max_err_ms=30,bars=16),{'exercises':['EX_root_pulse_G']}),
-    L('ER.04','Triads on strings 3-2-1',['ER.02'],P('changes_per_min',target=20),{'triads':['tri_321_G_root','tri_321_G_inv1','tri_321_G_inv2','tri_321_Gm_root','tri_321_Gm_inv1','tri_321_Gm_inv2'],'exercises':['EX_triads_I_V_vi_IV_G']}),
-    L('ER.05','Triads on strings 4-3-2',['ER.04'],P('chord_accuracy',ratio=0.9),{'triads':['tri_432_G_root','tri_432_G_inv1','tri_432_G_inv2']}),
-    L('ER.06','Drone voicings (keys of E & D)',['ER.04'],P('changes_per_min',target=25),{'chords':['E','Asus2','Bsus4_drone','Csharpm7_drone','D','Dsus2','A7sus4','G_over_B','Em7']}),
+    L('ER.04','Triads on strings 3-2-1',['ER.02'],P('changes_per_min',target=20),{'triads':['tri_321_G_root','tri_321_G_inv1','tri_321_G_inv2','tri_321_Gm_root','tri_321_Gm_inv1','tri_321_Gm_inv2'],'exercises':['EX_triads_I_V_vi_IV_G','EX_changes_triads_G']}),
+    L('ER.05','Triads on strings 4-3-2',['ER.04'],P('chord_accuracy',ratio=0.9),{'triads':['tri_432_G_root','tri_432_G_inv1','tri_432_G_inv2','tri_432_D_inv1','tri_432_Em_inv1','tri_432_C_inv2'],'exercises':['EX_triads_432_G']}),
+    L('ER.06','Drone voicings (keys of E & D)',['ER.04'],P('changes_per_min',target=25),{'chords':['E','Asus2','Bsus4_drone','Csharpm7_drone','D','Dsus2','A7sus4','G_over_B','Em7'],'exercises':['EX_changes_drone']}),
     L('ER.07','Swells & pads',['ER.01'],P('self_check')),
     L('ER.08','Song dynamics map',['ER.03','ER.04'],P('self_check')),
-    L('ER.09','Full barre chords for big choruses',['ER.02'],P('chord_accuracy',ratio=0.9),{'shapes':['E_shape_major','E_shape_minor','A_shape_major','A_shape_minor']}),
+    L('ER.09','Full barre chords for big choruses',['ER.02'],P('chord_accuracy',ratio=0.9),{'shapes':['E_shape_major','E_shape_minor','A_shape_major','A_shape_minor'],'exercises':['EX_barre_progression_G']}),
     L('ER.10','Sixteenth muted groove',['ER.03'],P('timing',bpm=90,subdivision=16,max_err_ms=30,bars=8),{'rhythm':['S8_sixteenths']}),
-    L('ER.11','Playing from number charts',['ER.04','T.03'],P('chord_accuracy',ratio=0.9),{'quizzes':['Q_nashville']}),
+    L('ER.11','Playing from number charts',['ER.04','T.03'],P('chord_accuracy',ratio=0.9),{'quizzes':['Q_nashville'],'exercises':['EX_number_chart']}),
     L('EL.01','Major pentatonic, position 1',['F.07'],P('timing',bpm=80,subdivision=8,max_err_ms=40,bars=4),{'scales':['G_major_pent_pos2']}),
     L('EL.02','Relative minor pentatonic + positions 2 & 5',['EL.01'],P('timing',bpm=80,subdivision=8,max_err_ms=40,bars=4),{'scales':['Am_pent_pos1','Am_pent_pos2','Am_pent_pos5']}),
     L('EL.03','Hammer-ons, pull-offs, slides',['EL.01'],P('timing',bpm=70,subdivision=8,max_err_ms=50,bars=4)),
@@ -498,8 +637,33 @@ for l in LESSONS:
             if e.get('tech') == 'harmonic' and e['fret'] not in HARMONIC_UP: errors.append(f"{x['id']}: harmonic at fret {e['fret']}")
 for e in EXERCISES:
     for pair in e.get('pairs', []):
+        if len(pair) != 2: errors.append(f"{e['id']}: a pair needs two chords")
         for c in pair:
-            if c not in ids['chords']: errors.append(f"{e['id']}: unknown chord {c}")
+            if resolve(c) is None: errors.append(f"{e['id']}: unknown chord {c}")
+    # every chord the grader verifies against has a resolved voicing
+    if e['type'] in ('chord_changes', 'chord_progression'):
+        refs = [r for p in e.get('pairs', []) for r in p] + [r for v in e.get('variants', []) for r in v['chords']] + list(e.get('decoys', []))
+        missing = [r for r in refs if r not in e.get('voicings', {})]
+        if missing: errors.append(f"{e['id']}: no voicing for {missing}")
+# Chord-graded lessons (M8): exactly one exercise of the grader's kind, so the grader knows what to verify against.
+# changes_per_min: the chord_changes exercise (its target and 60 s window match the lesson; a lesson `pair` is one of
+# its pairs). chord_accuracy: one chord_progression; with a lesson bpm it's played to a tempo ladder (65% → bpm).
+for l in LESSONS:
+    pc = l['pass_criteria']
+    if pc['type'] not in ('changes_per_min', 'chord_accuracy'): continue
+    kind = 'chord_changes' if pc['type'] == 'changes_per_min' else 'chord_progression'
+    exs = [EX_BY_ID[x] for x in l['assets'].get('exercises', []) if EX_BY_ID.get(x, {}).get('type') == kind]
+    if len(exs) != 1: errors.append(f"{l['id']}: a {pc['type']} lesson needs exactly one {kind} exercise"); continue
+    x = exs[0]
+    if kind == 'chord_changes':
+        if x['target_per_min'] != pc['target'] or x['duration_s'] != 60: errors.append(f"{l['id']}: {x['id']} target {x['target_per_min']}/{x['duration_s']} s, lesson wants {pc['target']} a minute")
+        if 'pair' in pc and not any([r.split('|')[0] for r in p] == pc['pair'] for p in x['pairs']): errors.append(f"{l['id']}: pair {pc['pair']} isn't in {x['id']}")
+    else:
+        if 'bpm' in pc:
+            t = x.get('tempo')
+            if x['pace'] != 'timed' or not t or t['target'] != pc['bpm'] or t['start'] != round(0.65 * pc['bpm']): errors.append(f"{l['id']}: {x['id']} needs tempo {round(0.65 * pc['bpm'])}->{pc['bpm']} (the lesson's tempo ladder)")
+        elif 'tempo' in x: errors.append(f"{l['id']}: {x['id']} has a tempo ladder but the lesson has no bpm")
+        if not 0.5 <= pc['ratio'] <= 1: errors.append(f"{l['id']}: ratio {pc['ratio']}")
 
 # games: lesson refs, keys, numbers
 NUMS = {'1', '2m', '3m', '4', '5', '6m', 'major', 'minor'}
