@@ -60,6 +60,7 @@ The catalog is read-only. Everything the app learns about the player lives in In
 
 The Arcade adds `games.json` to the catalog and seven game tables (`game_run`, `game_best`, `xp_ledger`, `streak`, `service_day`, `badge`, `daily_challenge`). They're defined in `07-games.md` §7.
 **Built in G1:** `games.json` (all 12 games, levels for the six G1 tap games; `build_catalog.py` checks lesson refs, keys, numbers and zones), `game_run` (auto id), `game_best` (PK `key` = `game|level|mode`, `ghost` = `[[second, score], …]`), `xp_ledger` (auto id), `service_day`. The streak is computed from `practice_day` (game rounds and "Played a service" add the day), so there's no `streak` row yet; `badge` and `daily_challenge` arrive with G3.
+**G2:** `practice_day` rows carry `active_s` (practice seconds that day, from the activity clock); a day counts with ≥ 300 s, a `service_day`, or (rows from before G2, without `active_s`) any practice. Freezes are recomputed from these rows (`web/src/streak.ts`), still no `streak` row. `game_run.mode` / `game_best` keys use `tap|play`. Games added: Octave Jump, Box Runner, In the Pocket (levels in `games.json`).
 
 **Catalog updates:** on startup, if `meta.schema_version` or the catalog checksum changed, add `lesson_progress` rows for new lessons and recompute `locked/available` from prereqs. Never delete history: rows for IDs that disappear are kept and hidden. Backup/restore exports and imports all tables as one JSON file.
 
