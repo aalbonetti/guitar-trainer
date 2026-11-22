@@ -6,7 +6,7 @@ export interface LessonProgress {
   lesson_id: string; state: State; first_pass_day?: string; passed_day?: string;
   review_index: number; next_review_day?: string; mastered: boolean; updated_at: number;
 }
-export interface AttemptResult { met: boolean; atTarget: boolean; score: number; mode: 'auto' | 'self'; metrics?: Record<string, unknown> }
+export interface AttemptResult { met: boolean; atTarget: boolean; score: number; mode: 'auto' | 'assisted' | 'self'; metrics?: Record<string, unknown> }
 export type Event = 'none' | 'first_pass' | 'passed' | 'review_passed' | 'review_failed' | 'mastered';
 
 export function dayOf(d = new Date()): string { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }

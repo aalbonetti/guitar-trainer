@@ -12,6 +12,11 @@ Push the string sideways to raise its pitch. A bend is only good if it lands **e
 
 {{tool:tuner}}
 
+### The graded bends
+{{exercise:EX_bends_G}}
+
+The app asks for each bend in turn. Pick the starting note, bend up to the target and **hold it there** for half a second. It listens for the pitch rising from the starting note, so fretting the target directly doesn't count.
+
 ### Vibrato
 A gentle, regular wobble on a held note: bend slightly above pitch and back, about 5–6 times a second, driven by the wrist. Add it to the last note of every phrase.
 

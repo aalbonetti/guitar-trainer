@@ -266,3 +266,16 @@ details.card.later summary::-webkit-details-marker { display:none; }
 details.card.later summary::after { content:'›'; margin-left:auto; color:var(--muted); transition:transform .15s; }
 details.card.later[open] summary::after { transform:rotate(90deg); }
 details.card.later ul.list li > span { font-weight:400; }
+/* pitch attempts (M7) */
+.notechips { list-style:none; margin:8px 0; padding:0; display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+.notechips li { min-width:44px; padding:4px 8px; border-radius:10px; background:var(--card); border:1px solid var(--line); text-align:center; font-variant-numeric:tabular-nums; }
+.notechips li b { display:block; font-size:15px; } .notechips li small { display:block; font-size:11px; color:var(--bad); }
+.notechips li.ok { border-color:#2d6b4f; background:#1c2d25; } .notechips li.ok b { color:var(--ok); }
+.notechips li.miss { border-color:#6b2d2d; background:#2d1c1c; } .notechips li.miss b { color:var(--bad); }
+.notechips li.cur { outline:2px solid var(--accent); }
+.pitchrun .nowline { display:flex; justify-content:space-around; gap:12px; flex-wrap:wrap; font-size:15px; }
+.pitchrun .nowline b { display:block; font-size:30px; font-variant-numeric:tabular-nums; } .pitchrun .nowline small { display:block; color:var(--muted); font-size:12px; }
+.pitchrun .nowline .hear.ok { color:var(--ok); }
+.holdbar { height:12px; background:var(--line); border-radius:6px; overflow:hidden; margin:8px auto; max-width:360px; } .holdbar i { display:block; height:100%; background:var(--ok); transition:width .06s; }
+.heldlist li { padding:6px 2px; }
+.assist { margin-top:8px; }
