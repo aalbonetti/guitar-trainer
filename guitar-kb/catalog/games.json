@@ -572,38 +572,261 @@
  {
   "id": "G_octave_jump",
   "name": "Octave Jump",
-  "blurb": "Play the octave of a note on string 6 or 5, against the clock.",
+  "blurb": "A note on string 6 or 5: play its octave, 2 strings over and 2 frets up, against the clock.",
   "unlock_lesson": "EL.04",
   "review_for": [],
   "modes": [
-   "play"
+   "play",
+   "tap"
   ],
   "milestone": "G2",
-  "levels": []
+  "levels": [
+   {
+    "id": "oj1",
+    "name": "String 6, frets 0\u20137, fret shown",
+    "params": {
+     "zone": {
+      "strings": [
+       6
+      ],
+      "frets": [
+       0,
+       7
+      ]
+     },
+     "show_fret": true
+    },
+    "target_score": 4200,
+    "round_s": 60
+   },
+   {
+    "id": "oj2",
+    "name": "Strings 6 & 5, frets 0\u20137, fret shown",
+    "params": {
+     "zone": {
+      "strings": [
+       6,
+       5
+      ],
+      "frets": [
+       0,
+       7
+      ]
+     },
+     "show_fret": true
+    },
+    "target_score": 3600,
+    "round_s": 60
+   },
+   {
+    "id": "oj3",
+    "name": "Strings 6 & 5, frets 0\u201312, note name only",
+    "params": {
+     "zone": {
+      "strings": [
+       6,
+       5
+      ],
+      "frets": [
+       0,
+       12
+      ]
+     },
+     "show_fret": false
+    },
+    "target_score": 2700,
+    "round_s": 60,
+    "unlock_lesson": "F.07"
+   }
+  ]
  },
  {
   "id": "G_box_runner",
   "name": "Box Runner",
-  "blurb": "Run the pentatonic box in time with the click.",
+  "blurb": "The pentatonic box is shown: play the path in time with the click.",
   "unlock_lesson": "EL.01",
   "review_for": [],
   "modes": [
    "play"
   ],
   "milestone": "G2",
-  "levels": []
+  "levels": [
+   {
+    "id": "br1",
+    "name": "Major box in G, up & down, quarter notes, 70 BPM",
+    "params": {
+     "scale": "major_pentatonic",
+     "positions": [
+      2
+     ],
+     "keys": [
+      "G"
+     ],
+     "path": "updown",
+     "bpm": 70,
+     "sub": 1,
+     "passes": 2
+    },
+    "target_score": 14000
+   },
+   {
+    "id": "br2",
+    "name": "Major box in G, up & down, eighths, 80 BPM",
+    "params": {
+     "scale": "major_pentatonic",
+     "positions": [
+      2
+     ],
+     "keys": [
+      "G"
+     ],
+     "path": "updown",
+     "bpm": 80,
+     "sub": 2,
+     "passes": 4
+    },
+    "target_score": 15500
+   },
+   {
+    "id": "br3",
+    "name": "Major box in threes, eighths, 70 BPM (G A C D)",
+    "params": {
+     "scale": "major_pentatonic",
+     "positions": [
+      2
+     ],
+     "keys": [
+      "G",
+      "A",
+      "C",
+      "D"
+     ],
+     "path": "threes",
+     "bpm": 70,
+     "sub": 2,
+     "passes": 2
+    },
+    "target_score": 22000
+   },
+   {
+    "id": "br4",
+    "name": "Minor box 1, up & down, eighths, 80 BPM (A E G)",
+    "params": {
+     "scale": "minor_pentatonic",
+     "positions": [
+      1
+     ],
+     "keys": [
+      "A",
+      "E",
+      "G"
+     ],
+     "path": "updown",
+     "bpm": 80,
+     "sub": 2,
+     "passes": 4
+    },
+    "target_score": 15500,
+    "unlock_lesson": "EL.02"
+   },
+   {
+    "id": "br5",
+    "name": "Minor boxes 2 and 5 in A, eighths, 80 BPM",
+    "params": {
+     "scale": "minor_pentatonic",
+     "positions": [
+      2,
+      5
+     ],
+     "keys": [
+      "A"
+     ],
+     "path": "updown",
+     "bpm": 80,
+     "sub": 2,
+     "passes": 4
+    },
+    "target_score": 15500,
+    "unlock_lesson": "EL.02"
+   }
+  ]
  },
  {
   "id": "G_in_the_pocket",
   "name": "In the Pocket",
-  "blurb": "Strum to the click, then keep time when the click drops out.",
+  "blurb": "Strum to the click; the meter shows ahead or behind. Gap Click: keep time when the click drops out.",
   "unlock_lesson": "A.05",
   "review_for": [],
   "modes": [
    "play"
   ],
   "milestone": "G2",
-  "levels": []
+  "levels": [
+   {
+    "id": "pk1",
+    "name": "Quarter-note downs, 70 BPM",
+    "params": {
+     "pattern": "S1_quarters",
+     "bpm": 70,
+     "bars": 16,
+     "window_ms": 60
+    },
+    "target_score": 19000,
+    "unlock_lesson": "F.06"
+   },
+   {
+    "id": "pk2",
+    "name": "Straight eighths, 80 BPM",
+    "params": {
+     "pattern": "S2_eighths",
+     "bpm": 80,
+     "bars": 16,
+     "window_ms": 60
+    },
+    "target_score": 21000
+   },
+   {
+    "id": "pk3",
+    "name": "Gap Click: eighths, 80 BPM, gaps of 1, 2, 4 bars",
+    "params": {
+     "pattern": "S2_eighths",
+     "bpm": 80,
+     "gap_bars": [
+      1,
+      2,
+      4
+     ],
+     "click_bars": 2,
+     "window_ms": 60,
+     "bars": 15
+    },
+    "target_score": 19500
+   },
+   {
+    "id": "pk4",
+    "name": "Worship pattern, 90 BPM",
+    "params": {
+     "pattern": "S3_worship",
+     "bpm": 90,
+     "bars": 16,
+     "window_ms": 60
+    },
+    "target_score": 15500,
+    "unlock_lesson": "A.06"
+   },
+   {
+    "id": "pk5",
+    "name": "Sixteenth groove, 90 BPM",
+    "params": {
+     "pattern": "S8_sixteenths",
+     "bpm": 90,
+     "bars": 12,
+     "window_ms": 45
+    },
+    "target_score": 16500,
+    "unlock_lesson": "ER.10"
+   }
+  ]
  },
  {
   "id": "G_change_sprint",
