@@ -3,7 +3,7 @@ import * as db from './db';
 import { Store, persisted } from './store';
 import { addXp } from './xp';
 import { XP, xpForScore, stars as starsFor } from './games/core';
-import { progress, recordAttempt, markPracticed, addServiceDay } from './progressStore';
+import { progress, recordAttempt, addServiceDay } from './progressStore';
 import { isReviewDue, dayOf } from './progress';
 import { session, touch } from './practice';
 import type { Catalog, Game, GameLevel } from './catalog';
@@ -29,9 +29,11 @@ export function unlocked(_cat: Catalog, g: Game, l?: GameLevel): boolean {
 export type Mode = 'tap' | 'play';
 /** Each game remembers the mode you last used (07-games.md §1). Default: tap where the game has it. */
 export const modePref = persisted<Record<string, Mode>>('gt_game_mode', {});
+/** The mode the game lists first is its default (games.json): tap for the G1 games, play for the play-first
+ *  games (Octave Jump; Box Runner and In the Pocket are play only). */
 export function modeFor(g: Game): Mode {
   const m = modePref.get()[g.id];
-  return m && g.modes.includes(m) ? m : g.modes.includes('tap') ? 'tap' : 'play';
+  return m && g.modes.includes(m) ? m : (g.modes[0] as Mode) || 'tap';
 }
 export function setModeFor(g: Game, m: Mode) { if (g.modes.includes(m)) modePref.set({ ...modePref.get(), [g.id]: m }); }
 /** Lesson that teaches this game's skill (shown as a tip, not a lock). */
@@ -64,7 +66,7 @@ export async function finishRun(cat: Catalog, g: Game, l: GameLevel, r: RunResul
   const gained = xpForScore(r.score) + (pb && prev ? XP.pb : 0);
   await addXp('game', g.id, xpForScore(r.score));
   if (pb && prev) await addXp('pb', key, XP.pb);
-  await markPracticed(); touch();
+  touch();
   return { stars, accuracy, xp: gained, pb, prevBest: prev?.best_score || 0, reviewed };
 }
 
