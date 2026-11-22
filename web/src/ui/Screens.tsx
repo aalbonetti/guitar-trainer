@@ -52,8 +52,8 @@ export function Today({ cat }: { cat: Catalog }) {
             </div>
           </section>
           {(() => { const pool = songPool({ cat, setlist: sl }); const id = songOfWeek(pool.ids, new Date()); const o = id ? cat.outlineById[id] : null;
-            return o ? <section class="card"><h2>Song of the week</h2><p><a class="big-link" href={`#/song/${o.id}`}>{o.title}</a> <small class="muted">{o.artist}</small></p>
-              <p class="muted small">Picked at random from {pool.fromList ? 'your church’s song list' : 'the song library'}. A new one every Monday at 12:01 am.</p></section> : null; })()}
+            return o ? <a class="card tap-card" href={`#/song/${o.id}`} aria-label={`Song of the week: ${o.title}`}><h2>Song of the week <span class="chev" aria-hidden="true">›</span></h2><p><span class="big-link">{o.title}</span> <small class="muted">{o.artist}</small></p>
+              <p class="muted small">Picked at random from {pool.fromList ? 'your church’s song list' : 'the song library'}. A new one every Monday at 12:01 am.</p></a> : null; })()}
         </div>
       </div>
     </div>
