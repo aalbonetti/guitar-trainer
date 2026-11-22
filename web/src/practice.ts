@@ -3,79 +3,90 @@
 import type { Catalog, Lesson } from './catalog';
 import { isReviewDue, type LessonProgress, type State } from './progress';
 import type { SetList } from './setlist';
-import { recentSongs } from './setlist';
+import { thisWeekSongs } from './setlist';
 import { Store, persisted } from './store';
 import * as db from './db';
 
-export type Routine = 15 | 30 | 'free';
+export type Routine = 10 | 20 | 'free';
+/** Older saved choices (15/30) map onto the current routines. */
+export const normRoutine = (r: unknown): Routine => (r === 'free' ? 'free' : typeof r === 'number' && r > 15 ? 20 : 10);
 export type ItemKind = 'warmup' | 'review' | 'lesson' | 'song' | 'ear';
 export interface Item { kind: ItemKind; lessonId?: string; songId?: string; title: string; why: string; minutes: number | null }
 export interface QueueInput {
   cat: Pick<Catalog, 'lessons' | 'tracks' | 'outlines'>; lp: Record<string, LessonProgress>; states: Record<string, State>;
-  day: string; visibleTrack: (id: string) => boolean; setlist: SetList | null; songLast: Record<string, string>;
+  day: string; today?: Date; visibleTrack: (id: string) => boolean; setlist: SetList | null; songLast?: Record<string, string>;
 }
 
 const WARMUP = 'F.05', EAR = ['T.06', 'T.05'];
 
-/** Today's queue: warm-up → up to 3 due reviews → current lesson per track → 1 song (→ ear quiz in 30 min). */
+// Minutes per part. Lessons get whatever is left of the routine's total.
+const PLAN = {
+  10: { total: 10, warmup: 2, review: 2, maxReviews: 1, song: 3, ear: 0, maxLessons: 1 },
+  20: { total: 20, warmup: 3, review: 2, maxReviews: 2, song: 5, ear: 2, maxLessons: 2 },
+  free: { total: 0, warmup: 0, review: 0, maxReviews: 3, song: 0, ear: 0, maxLessons: 99 },
+} as const;
+
+/** Today's queue, in a fixed order: warm-up → due reviews → current lesson(s) → this week's song (→ ear quiz in 20 min). */
 export function buildQueue(q: QueueInput, routine: Routine): Item[] {
   const { cat, lp, states, day } = q;
+  const P = PLAN[routine], timed = routine !== 'free';
   const L = (id: string) => cat.lessons.find(l => l.id === id);
-  const mins = (m15: number, m30: number) => (routine === 'free' ? null : routine === 15 ? m15 : m30);
   const items: Item[] = [];
   const used = new Set<string>();
   const visible = cat.lessons.filter(l => q.visibleTrack(l.track));
 
   // warm-up: the spider exercise, once it's unlocked
-  const w = L(WARMUP);
-  if (w && states[WARMUP] !== 'locked') { items.push({ kind: 'warmup', lessonId: WARMUP, title: 'Warm-up: spider', why: 'Loosen up the fingers with the click', minutes: mins(3, 5) }); used.add(WARMUP); }
+  if (L(WARMUP) && states[WARMUP] !== 'locked') { items.push({ kind: 'warmup', lessonId: WARMUP, title: 'Warm-up: spider', why: 'Loosen up the fingers with the click', minutes: timed ? P.warmup : null }); used.add(WARMUP); }
 
   // reviews due (oldest due first)
-  const maxReviews = routine === 15 ? 2 : 3;
   const due = visible.filter(l => isReviewDue(lp[l.id], day) && !used.has(l.id))
-    .sort((a, b) => (lp[a.id].next_review_day! < lp[b.id].next_review_day! ? -1 : 1)).slice(0, maxReviews);
-  for (const l of due) { items.push({ kind: 'review', lessonId: l.id, title: `Review: ${l.title}`, why: 'Quick check so it sticks', minutes: mins(2, 2) }); used.add(l.id); }
+    .sort((a, b) => (lp[a.id].next_review_day! < lp[b.id].next_review_day! ? -1 : 1)).slice(0, P.maxReviews);
+  for (const l of due) { items.push({ kind: 'review', lessonId: l.id, title: `Review: ${l.title}`, why: 'Quick check so it sticks', minutes: timed ? P.review : null }); used.add(l.id); }
 
-  // current lessons: passed-once first (finish what you started), then the next available, by track order
-  const maxLessons = routine === 15 ? 1 : routine === 30 ? 2 : 99;
+  // current lessons: passed-once first (finish what you started), then in progress, then the next one, by track order
   const tracks = [...cat.tracks].sort((a, b) => a.order - b.order).filter(t => q.visibleTrack(t.id));
+  const rank = (l: Lesson) => (lp[l.id]?.first_pass_day ? 0 : states[l.id] === 'in_progress' ? 1 : 2);
   const pick = (t: string): Lesson | undefined => {
-    const inTrack = visible.filter(l => l.track === t && !used.has(l.id));
-    return inTrack.find(l => states[l.id] === 'in_progress' && lp[l.id]?.first_pass_day) || inTrack.find(l => states[l.id] === 'in_progress') || inTrack.find(l => states[l.id] === 'available');
+    const inTrack = visible.filter(l => l.track === t && !used.has(l.id) && states[l.id] !== 'locked' && states[l.id] !== 'passed');
+    return inTrack.sort((a, b) => rank(a) - rank(b))[0];
   };
-  const cands = tracks.map(t => pick(t.id)).filter((l): l is Lesson => !!l)
-    .sort((a, b) => rank(a) - rank(b));
-  function rank(l: Lesson) { return lp[l.id]?.first_pass_day ? 0 : states[l.id] === 'in_progress' ? 1 : 2; }
-  const lessonMins = routine === 30 ? [8, 7] : [5];
-  cands.slice(0, maxLessons).forEach((l, i) => {
-    items.push({ kind: 'lesson', lessonId: l.id, title: l.title, why: lp[l.id]?.first_pass_day ? 'Passed once: pass it again today to finish it' : states[l.id] === 'in_progress' ? 'Keep going' : 'Next up', minutes: routine === 'free' ? null : lessonMins[i] ?? 5 });
-    used.add(l.id);
-  });
+  const cands = tracks.map(t => pick(t.id)).filter((l): l is Lesson => !!l).sort((a, b) => rank(a) - rank(b)).slice(0, P.maxLessons);
+  for (const l of cands) used.add(l.id);
 
-  // one song: this month's set first, least recently practiced; else a song that uses a current lesson
+  // this week's song
   const song = pickSong(q, [...used]);
-  if (song) items.push({ kind: 'song', songId: song.id, title: song.title, why: song.why, minutes: mins(7, 8) });
+  // ear quiz (20 min) when unlocked
+  const ear = P.ear ? EAR.map(L).find(l => l && states[l.id] !== 'locked' && q.visibleTrack(l.track) && !used.has(l.id)) : undefined;
 
-  // 30 min: ear quiz
-  if (routine === 30) {
-    const ear = EAR.map(L).find(l => l && states[l.id] !== 'locked' && q.visibleTrack(l.track) && !used.has(l.id));
-    if (ear) items.push({ kind: 'ear', lessonId: ear.id, title: `Ear training: ${ear.title}`, why: 'Two minutes of listening', minutes: 2 });
-  }
+  const fixed = items.reduce((a, i) => a + (i.minutes || 0), 0) + (song ? P.song : 0) + (ear ? P.ear : 0);
+  const left = Math.max(cands.length * 3, P.total - fixed);
+  cands.forEach((l, i) => {
+    const m = timed ? Math.floor(left / cands.length) + (i < left % cands.length ? 1 : 0) : null;
+    items.push({ kind: 'lesson', lessonId: l.id, title: l.title, why: lp[l.id]?.first_pass_day ? 'Passed once: pass it again today to finish it' : states[l.id] === 'in_progress' ? 'Keep going' : 'Next up', minutes: m });
+  });
+  if (song) items.push({ kind: 'song', songId: song.id, title: song.title, why: song.why, minutes: timed ? P.song : null });
+  if (ear) items.push({ kind: 'ear', lessonId: ear.id, title: `Ear training: ${ear.title}`, why: 'Two minutes of listening', minutes: P.ear });
   return items;
 }
 
+/** Small deterministic hash, so "random" picks stay put for the whole day. */
+export function dayHash(str: string): number { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
 function pickSong(q: QueueInput, lessonIds: string[]): { id: string; title: string; why: string } | null {
-  const byId = (id: string) => q.cat.outlines.find(o => o.id === id);
-  const older = (a: string, b: string) => (q.songLast[a] || '') < (q.songLast[b] || '') ? -1 : (q.songLast[a] || '') > (q.songLast[b] || '') ? 1 : 0;
+  const has = (id: string | null): id is string => !!id && q.cat.outlines.some(o => o.id === id);
+  const title = (id: string) => q.cat.outlines.find(o => o.id === id)!.title;
+  const choose = (ids: string[]) => ids[dayHash(q.day + '|' + ids.join(',')) % ids.length];
   if (q.setlist) {
-    const month = recentSongs(q.setlist, 4).filter(s => s.outlineId && byId(s.outlineId)).map(s => s.outlineId!);
-    if (month.length) { const id = [...month].sort(older)[0]; return { id, title: byId(id)!.title, why: 'On this month’s set list' }; }
+    const week = [...new Set(thisWeekSongs(q.setlist, q.today).map(s => s.outlineId).filter(has))];
+    if (week.length) { const id = choose(week); return { id, title: title(id), why: 'On this week’s set list' }; }
+    const all = [...new Set(q.setlist.songs.map(s => s.outlineId).filter(has))];
+    if (all.length) { const id = choose(all); return { id, title: title(id), why: 'From your church’s song list' }; }
   }
   const linked = q.cat.outlines.filter(o => o.practice_for.some(id => lessonIds.includes(id))).map(o => o.id);
   const pool = linked.length ? linked : q.cat.outlines.filter(o => o.practice_for.length).map(o => o.id);
   if (!pool.length) return null;
-  const id = [...pool].sort(older)[0];
-  return { id, title: byId(id)!.title, why: linked.length ? 'Uses what you’re working on' : 'Song practice' };
+  const id = choose(pool);
+  return { id, title: title(id), why: linked.length ? 'Uses what you’re working on' : 'Song practice' };
 }
 
 export const totalMinutes = (items: Item[]) => items.reduce((s, i) => s + (i.minutes || 0), 0);
