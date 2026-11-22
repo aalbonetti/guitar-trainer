@@ -317,3 +317,19 @@ details.card.later ul.list li > span { font-weight:400; }
 .pocketmeter .needle { position:absolute; top:4px; bottom:4px; width:6px; margin-left:-3px; border-radius:3px; transition:left .08s; }
 .pocketmeter .needle.ok { background:var(--ok); } .pocketmeter .needle.off { background:var(--bad); }
 .pocketmeter small { position:absolute; bottom:2px; font-size:10px; color:var(--muted); } .pocketmeter .l { left:6px; } .pocketmeter .r { right:6px; }
+/* ---- M8 chord graders ---- */
+.chordrun .keyline { font-size:17px; text-align:center; } .chordrun .keyline b { color:var(--accent); }
+.chordrun .nowline { display:flex; justify-content:space-around; gap:12px; flex-wrap:wrap; font-size:15px; }
+.chordrun .nowline b { display:block; font-size:30px; } .chordrun .nowline .hear.ok { color:var(--ok); } .chordrun .nowline .hear.bad { color:var(--bad); font-size:22px; }
+.chordrun .pairname { text-align:center; font-size:22px; margin:4px 0; }
+.chordrun .bigcount { text-align:center; font-size:22px; }
+.changecount { text-align:center; margin:4px 0; } .changecount b { display:block; font-size:54px; line-height:1.1; font-variant-numeric:tabular-nums; color:var(--ok); } .changecount span { color:var(--muted); font-size:13px; }
+.strumdots { display:inline-flex; gap:5px; vertical-align:middle; } .strumdots i { width:12px; height:12px; border-radius:50%; border:2px solid var(--line); } .strumdots i.on { background:var(--accent); border-color:var(--accent); }
+.chordchips li.mixed { border-color:#7a6431; background:#2d2818; } .chordchips li.mixed b { color:var(--accent); }
+.chordchips li small { color:var(--muted); }
+.chordline .capo { background:transparent; border-style:dashed; color:var(--accent); font-size:14px; }
+table.confusion { width:100%; border-collapse:collapse; margin:8px 0; font-size:14px; }
+table.confusion th, table.confusion td { text-align:left; padding:4px 6px; border-bottom:1px solid var(--line); } table.confusion th { color:var(--muted); font-weight:500; font-size:12px; }
+table.confusion td:nth-child(2) { color:var(--ok); font-variant-numeric:tabular-nums; }
+details.shapes { margin:6px 0; } details.shapes summary { cursor:pointer; color:var(--accent); }
+.changelist li { line-height:1.5; } .changelist b { font-size:18px; }

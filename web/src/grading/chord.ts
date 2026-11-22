@@ -113,6 +113,8 @@ export interface StrumOpts { winStart?: number; winEnd?: number; fftN?: number; 
 export class StrumAnalyzer {
   readonly sr: number; readonly det: InstanceType<typeof OnsetDetector>;
   private o: Required<StrumOpts>; private ring: Float32Array; private end = 0; private pending: number[] = [];
+  /** Called as soon as a strum's onset is detected (seconds), before its chroma is ready. */
+  onOnset: ((t: number) => void) | null = null;
   constructor(sr: number, o: StrumOpts = {}, det?: InstanceType<typeof OnsetDetector>) {
     this.sr = sr; this.det = det ?? new OnsetDetector(sr);
     this.o = { winStart: 0.06, winEnd: 0.45, fftN: 8192, stepS: 0.02, ringS: 3, latencyS: 0.03, ...o };
@@ -122,7 +124,7 @@ export class StrumAnalyzer {
     const R = this.ring.length;
     for (let i = 0; i < d.length; i++) this.ring[(startFrame + i) % R] = d[i];
     this.end = startFrame + d.length;
-    for (const f of this.det.push(d, startFrame)) this.pending.push(f);
+    for (const f of this.det.push(d, startFrame)) { this.pending.push(f); this.onOnset?.(f / this.sr); }
     return this.drain(false);
   }
   /** Finish every pending strum with the audio there is (end of an attempt). */
