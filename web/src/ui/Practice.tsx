@@ -5,16 +5,16 @@ import { useStore } from '../store';
 import { progress, markPracticed } from '../progressStore';
 import { computeStates, dayOf, isReviewDue } from '../progress';
 import { getSetList } from '../setlist';
-import { buildQueue, totalMinutes, itemHref, session, startSession, endSession, goTo, songLastPref, type Routine, type Item } from '../practice';
+import { buildQueue, totalMinutes, itemHref, session, startSession, endSession, goTo, songLastPref, normRoutine, type Routine, type Item } from '../practice';
 import { persisted } from '../store';
 
-const routinePref = persisted<Routine>('gt_routine', 15);
+const routinePref = persisted<Routine>('gt_routine', 10);
 const KIND_ICON: Record<Item['kind'], string> = { warmup: '🔥', review: '↻', lesson: '◐', song: '♪', ear: '👂' };
 
 export function useQueue(cat: Catalog, routine: Routine, visibleTrack: (id: string) => boolean) {
   const pr = useStore(progress);
   const states = computeStates(cat.lessons, cat.tracks, pr.lp);
-  return buildQueue({ cat, lp: pr.lp, states, day: dayOf(), visibleTrack, setlist: getSetList(), songLast: songLastPref.get() }, routine);
+  return buildQueue({ cat, lp: pr.lp, states, day: dayOf(), today: new Date(), visibleTrack, setlist: getSetList(), songLast: songLastPref.get() }, routine);
 }
 
 /** Number of reviews due today (for the nav badge). */
@@ -44,7 +44,7 @@ function QueueList({ items, done, idx }: { items: Item[]; done?: boolean[]; idx?
 
 export function PracticeCard({ cat, visibleTrack }: { cat: Catalog; visibleTrack: (id: string) => boolean }) {
   const ss = useStore(session);
-  const [routine, setRoutineState] = useState<Routine>(routinePref.get());
+  const [routine, setRoutineState] = useState<Routine>(normRoutine(routinePref.get()));
   const setRoutine = (r: Routine) => { setRoutineState(r); routinePref.set(r); };
   const queue = useQueue(cat, routine, visibleTrack);
   const s = ss.s;
@@ -65,14 +65,15 @@ export function PracticeCard({ cat, visibleTrack }: { cat: Catalog; visibleTrack
     <section class="card practice">
       {ss.summary ? <Summary /> : null}
       <h2>Today's practice</h2>
+      <p class="muted small">Your guided plan for today. Pick how long you have; the app sets the order and the tempo.</p>
       <div class="tabs">
-        {([15, 30, 'free'] as Routine[]).map(r => <button class={routine === r ? 'sel' : ''} onClick={() => setRoutine(r)}>{r === 'free' ? 'Free' : `${r} min`}</button>)}
+        {([10, 20, 'free'] as Routine[]).map(r => <button class={routine === r ? 'sel' : ''} onClick={() => setRoutine(r)}>{r === 'free' ? 'Free' : `${r} min`}</button>)}
       </div>
       <QueueList items={queue}  />
       {queue.length ? (
         <div class="row between">
           <button class="primary big" onClick={() => { const st = startSession(queue, routine); location.hash = itemHref(st.items[0]); }}>▶ Start practice</button>
-          {routine !== 'free' ? <span class="muted">about {totalMinutes(queue)} min</span> : null}
+          {routine !== 'free' ? <span class="muted">about {totalMinutes(queue)} min</span> : <span class="muted">no timer</span>}
         </div>
       ) : <p class="muted">Nothing queued. Everything visible is passed and no reviews are due: pick anything from the Path.</p>}
     </section>

@@ -54,6 +54,33 @@ export function importSetList(text: string, outlines: Outline[]): SetList {
   return list;
 }
 
+// ---------- "this week" ----------
+const MON: Record<string, number> = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+/** Week label ("Aug 23", "Sept 6", "11/15", "2026-11-15") → date, choosing the year closest to `today`. */
+export function weekDate(label: string, today: Date): Date | null {
+  let m: number, d: number, y: number | null = null;
+  const iso = label.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/), num = label.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/), txt = label.match(/^([A-Za-z]{3})[A-Za-z]*\.?\s+(\d{1,2})/);
+  if (iso) { y = +iso[1]; m = +iso[2] - 1; d = +iso[3]; }
+  else if (num) { m = +num[1] - 1; d = +num[2]; if (num[3]) y = +num[3] < 100 ? 2000 + +num[3] : +num[3]; }
+  else if (txt && MON[txt[1].toLowerCase()] !== undefined) { m = MON[txt[1].toLowerCase()]; d = +txt[2]; }
+  else return null;
+  if (y !== null) return new Date(y, m, d);
+  const Y = today.getFullYear();
+  return [Y - 1, Y, Y + 1].map(yy => new Date(yy, m, d)).sort((a, b) => Math.abs(a.getTime() - today.getTime()) - Math.abs(b.getTime() - today.getTime()))[0];
+}
+/** Index of this week's column: the newest week on or before the coming Sunday (or the last column if labels can't be read). */
+export function thisWeekIndex(list: SetList, today = new Date()): number {
+  const limit = new Date(today.getFullYear(), today.getMonth(), today.getDate() + ((7 - today.getDay()) % 7), 23, 59);
+  let best = -1, bestT = -Infinity;
+  list.weeks.forEach((w, i) => { const t = weekDate(w, today)?.getTime(); if (t !== undefined && t <= limit.getTime() && t > bestT) { best = i; bestT = t; } });
+  return best >= 0 ? best : list.weeks.length - 1;
+}
+/** Songs on this week's set. */
+export function thisWeekSongs(list: SetList, today = new Date()): SetSong[] {
+  const i = thisWeekIndex(list, today), w = list.weeks[i];
+  return list.songs.filter(s => s.weeks.includes(w));
+}
+
 /** Songs played in the most recent `n` weeks of the imported list, newest first. */
 export function recentSongs(list: SetList, n = 4): SetSong[] {
   const from = list.weeks.length - n;
