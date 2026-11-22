@@ -55,7 +55,7 @@ The catalog is read-only. Everything the app learns about the player lives in In
 | `calibration` | `key PK (input_route\|posture), input_route, posture (folded\|unfolded), offset_ms, spread_ms, method (strum), measured_at` | Subtracted from timing grades. Click-bleed arrival is re-measured from each attempt's count-in, so no separate loopback row |
 | `quiz_item_stats` | `quiz_id, item_key, seen, correct, last_seen_at` · PK `(quiz_id, item_key)` | e.g. `item_key = "s5f7"`. Weights generated questions toward misses |
 | `imported_chart` | `id PK, title, artist?, ccli?, key, tempo?, time?, capo?, source_filename, raw_text, matched_outline_id?, imported_at` | Raw ChordPro kept locally only |
-| `chart_section` | `chart_id FK, ord, name, chords_json, numbers_json` · PK `(chart_id, ord)` | Parsed sections; numbers computed from `key` |
+| ~~`chart_section`~~ | not stored | Sections, chords and numbers are re-parsed from `raw_text` when a chart is shown (`web/src/chordpro.ts`), so there's nothing to keep in sync. Minor-key charts are numbered from the relative major (Em = 6m) |
 | `song_practice` | `song_ref PK (outline id or "chart:<id>"), preferred_key?, preferred_capo?, last_practiced_at?, times_practiced` | Per-song personal settings |
 
 The Arcade adds `games.json` to the catalog and seven game tables (`game_run`, `game_best`, `xp_ledger`, `streak`, `service_day`, `badge`, `daily_challenge`). They're defined in `07-games.md` §7.

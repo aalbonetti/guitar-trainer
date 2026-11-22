@@ -3,6 +3,8 @@ import { loadCatalog, type Catalog } from './catalog';
 import { Today, Path, LessonView, Songs, Tools, Settings, trackVisibleFor } from './ui/Screens';
 import { SessionBar, useDueCount } from './ui/Practice';
 import { Progress } from './ui/Progress';
+import { ImportView, ChartView } from './ui/Charts';
+import { loadCharts } from './charts';
 import { expireIdle, touch, noteTuned } from './practice';
 import { onFirstTune } from './audio/engine';
 import { MetroStrip } from './ui/Tools';
@@ -29,7 +31,7 @@ export function App() {
   const [, bump] = useState(0);
   const hash = useHash();
   useEffect(() => {
-    void expireIdle(); void loadProgress(); loadCatalog().then(setCat).catch(e => setErr(String(e)));
+    void expireIdle(); void loadProgress(); void loadCharts(); loadCatalog().then(setCat).catch(e => setErr(String(e)));
     onFirstTune(() => noteTuned());
     const vis = () => { if (document.visibilityState === 'visible') void expireIdle(); };
     document.addEventListener('visibilitychange', vis);
@@ -38,13 +40,15 @@ export function App() {
   useEffect(() => { touch(); }, [hash]);
   const due = useDueCount(cat, cat ? trackVisibleFor(cat) : () => true);
   const [, route, arg] = hash.split('/');
-  const active = NAV.find(n => n.h.split('/')[1] === route || (route === 'lesson' && n.label === 'Path') || (route === 'song' && n.label === 'Songs'));
+  const active = NAV.find(n => n.h.split('/')[1] === route || (route === 'lesson' && n.label === 'Path') || ((route === 'song' || route === 'import' || route === 'chart') && n.label === 'Songs'));
   let body;
   if (err) body = <div class="page"><p class="error">Couldn't load the catalog: {err}</p></div>;
   else if (!cat) body = <div class="page"><p class="muted">Loading…</p></div>;
   else if (route === 'path') body = <Path cat={cat} />;
   else if (route === 'lesson') body = <LessonView cat={cat} id={decodeURIComponent(arg || '')} />;
-  else if (route === 'songs') body = <Songs cat={cat} />;
+  else if (route === 'songs') body = <Songs cat={cat} initialTab={arg} />;
+  else if (route === 'import') body = <ImportView cat={cat} />;
+  else if (route === 'chart') body = <ChartView cat={cat} id={decodeURIComponent(arg || '')} />;
   else if (route === 'song') body = <Songs cat={cat} selected={decodeURIComponent(arg || '')} />;
   else if (route === 'tools') body = <Tools which={arg} />;
   else if (route === 'progress') body = <Progress cat={cat} />;
