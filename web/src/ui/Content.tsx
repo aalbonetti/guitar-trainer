@@ -7,6 +7,7 @@ import type { Catalog, Exercise } from '../catalog';
 import { shapeFor, type Shape } from '../music';
 import { ChordDiagram, ScaleDiagram, StrumGrid } from './Diagrams';
 import { startMetronome, setMetro } from '../audio/engine';
+import { isMeter, meterFrom } from '../audio/meter';
 import { QuizCard } from './Quiz';
 import { TOKEN_RE } from '../tokens';
 import { usePracticeTempo } from './Timing';
@@ -83,11 +84,13 @@ function curated(cat: Catalog, id: string): { name: string; shape: Shape } | nul
 }
 
 const SUBS = ['', '', 'eighths', 'triplets', 'sixteenths'];
-function ClickButton({ preset, note }: { preset: { bpm: number; beats: number; sub: number }; note?: string }) {
-  return <p><button class="chip" onClick={() => { setMetro(preset); startMetronome(preset); }}>▶ Click at {preset.bpm} BPM{preset.sub > 1 ? ` (${SUBS[preset.sub]})` : ''}{note ? ` · ${note}` : ''}</button></p>;
+type Preset = { bpm: number; beats: number; sub: number; meter: string };
+function ClickButton({ preset, note }: { preset: Preset; note?: string }) {
+  const compound = preset.meter === '6/8';
+  return <p><button class="chip" onClick={() => { setMetro(preset); startMetronome(preset); }}>▶ Click at {preset.bpm} BPM{preset.meter !== '4/4' ? ` · ${preset.meter}` : ''}{compound ? (preset.sub === 3 ? ' (eighths)' : '') : preset.sub > 1 ? ` (${SUBS[preset.sub]})` : ''}{note ? ` · ${note}` : ''}</button></p>;
 }
 /** {{tool:metronome:bpm=ladder}}: clicks at the lesson's current practice tempo. */
-function LadderClick({ l, base }: { l: import('../catalog').Lesson; base: { bpm: number; beats: number; sub: number } }) {
+function LadderClick({ l, base }: { l: import('../catalog').Lesson; base: Preset }) {
   const t = usePracticeTempo(l);
   return <ClickButton preset={{ ...base, bpm: t ? t.bpm : base.bpm }} note={t ? (t.atGoal ? 'goal tempo' : 'your practice tempo') : undefined} />;
 }
@@ -130,7 +133,9 @@ function Embed({ kind, arg, cat, lessonId }: { kind: string; arg: string; cat: C
       if (name === 'metronome') {
         const raw: Record<string, string> = Object.fromEntries((params || '').split(',').filter(Boolean).map(kv => kv.split('=').map(x => x.trim())));
         const p = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, +v]));
-        const base = { bpm: p.bpm || 80, beats: p.beats || 4, sub: p.sub || 1 };
+        const beats = p.beats || 4, sub = p.sub || 1;
+        // meter=6/8 may be given; otherwise it follows beats + sub (2 beats split in 3 = 6/8)
+        const base = { bpm: p.bpm || 80, beats, sub, meter: isMeter(raw.meter) ? raw.meter : meterFrom(beats, sub) };
         return raw.bpm === 'ladder' && cat.lessonById[lessonId] ? <LadderClick l={cat.lessonById[lessonId]} base={base} /> : <ClickButton preset={base} />;
       }
       if (name === 'tuner') return <p><a class="btn" href="#/tools/tuner">🎚 Open the tuner</a> <small class="muted">or use the Tuner button at the top of this lesson</small></p>;
