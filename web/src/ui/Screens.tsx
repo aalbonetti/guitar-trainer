@@ -10,10 +10,13 @@ import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
 import { progress, recordAttempt } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
-import { exportAll, importAll } from '../db';
+import { exportAll, importAll, downloadBackup } from '../db';
 import { TimingPanel, CalibrationCard } from './Timing';
+import { PracticeCard } from './Practice';
+import { noteSongOpened } from '../practice';
 import { attempt } from '../grading/runner';
 
+export const trackVisibleFor = (cat: Catalog) => (id: string) => trackVisible(cat, id);
 export const instrumentPref = persisted<'acoustic' | 'electric' | 'both'>('gt_instruments', 'both');
 const go = (h: string) => { location.hash = h; };
 const trackVisible = (cat: Catalog, trackId: string) => {
@@ -27,38 +30,32 @@ export function Today({ cat }: { cat: Catalog }) {
   const day = dayOf();
   const sl = getSetList();
   const recent = sl ? recentSongs(sl, 4) : [];
-  const visible = cat.lessons.filter(l => trackVisible(cat, l.track));
-  const reviews = visible.filter(l => isReviewDue(pr.lp[l.id], day)).slice(0, 3);
-  const next: Lesson[] = [];
-  for (const t of cat.tracks.filter(t => trackVisible(cat, t.id))) {
-    const l = cat.lessons.find(x => x.track === t.id && (states[x.id] === 'in_progress' || states[x.id] === 'available'));
-    if (l) next.push(l);
-  }
   const streak = (() => { let n = 0, d = day; const set = new Set(pr.days); if (!set.has(d)) d = addDaysLocal(d, -1); while (set.has(d)) { n++; d = addDaysLocal(d, -1); } return n; })();
   const passed = Object.values(states).filter(s => s === 'passed').length;
+  const vis = (id: string) => trackVisible(cat, id);
   return (
     <div class="page">
       <h1>Today</h1>
-      <p class="muted">{passed} of {cat.lessons.length} lessons passed{streak ? ` · ${streak}-day streak` : ''}</p>
-      <section class="card">
-        <h2>Quick tools</h2>
-        <div class="row">
-          <button class="primary" onClick={() => go('#/tools/tuner')}>🎚 Tuner</button>
-          <button class="primary" onClick={() => go('#/tools/metronome')}>⏱ Metronome</button>
+      <p class="muted">{passed} of {cat.lessons.length} lessons passed{streak ? ` · ${streak}-day streak` : ''} · <a href="#/progress">progress</a></p>
+      <div class="two">
+        <div><PracticeCard cat={cat} visibleTrack={vis} /></div>
+        <div>
+          <section class="card">
+            <h2>Quick tools</h2>
+            <div class="row">
+              <button class="primary" onClick={() => go('#/tools/tuner')}>🎚 Tuner</button>
+              <button class="primary" onClick={() => go('#/tools/metronome')}>⏱ Metronome</button>
+            </div>
+          </section>
+          <section class="card">
+            <h2>This month's songs</h2>
+            {sl ? (recent.length ? (
+              <ul class="list">{recent.map(s => <li>{s.outlineId ? <a href={`#/song/${s.outlineId}`}>{s.name}</a> : <span class="muted">{s.name} (no outline)</span>} <small class="muted">{s.last}</small></li>)}</ul>
+            ) : <p class="muted">No songs in the last 4 weeks of your imported list.</p>)
+              : <p class="muted">Import your set-list CSV in <a href="#/settings">Settings</a> to see what you're playing this month. It stays on this phone.</p>}
+          </section>
         </div>
-      </section>
-      {reviews.length ? <section class="card"><h2>Reviews due</h2><ul class="list">{reviews.map(l => <li><a href={`#/lesson/${l.id}`}><b>{l.id}</b> {l.title}<small>quick check so it sticks</small></a></li>)}</ul></section> : null}
-      <section class="card">
-        <h2>Up next</h2>
-        <ul class="list">{next.map(l => <li><a href={`#/lesson/${l.id}`}><b>{l.id}</b> {l.title}<small>{cat.tracks.find(t => t.id === l.track)?.name} · {pr.lp[l.id]?.first_pass_day ? 'passed once, pass again on another day' : describePass(l.pass_criteria)}</small></a></li>)}</ul>
-      </section>
-      <section class="card">
-        <h2>This month's songs</h2>
-        {sl ? (recent.length ? (
-          <ul class="list">{recent.map(s => <li>{s.outlineId ? <a href={`#/song/${s.outlineId}`}>{s.name}</a> : <span class="muted">{s.name} (no outline)</span>} <small class="muted">{s.last}</small></li>)}</ul>
-        ) : <p class="muted">No songs in the last 4 weeks of your imported list.</p>)
-          : <p class="muted">Import your set-list CSV in <a href="#/settings">Settings</a> to see what you're playing this month. It stays on this phone.</p>}
-      </section>
+      </div>
     </div>
   );
 }
@@ -114,7 +111,11 @@ export function LessonView({ cat, id }: { cat: Catalog; id: string }) {
   const exercises = (a.exercises || []).map(eid => cat.exercises.find(e => e.id === eid)).filter(Boolean);
   const tempo = lessonTempo(l, cat);
   const [md, setMd] = useState<string | null>(null);
-  useEffect(() => { setMd(null); fetch(`./content/${l.id}.md`).then(r => (r.ok ? r.text() : '')).then(t => setMd(t.startsWith('<') ? '' : t)).catch(() => setMd('')); }, [l.id]);
+  useEffect(() => {
+    let live = true; setMd(null); // ignore a slower response for a lesson we've already left
+    fetch(`./content/${l.id}.md`).then(r => (r.ok ? r.text() : '')).then(t => { if (live) setMd(t.startsWith('<') ? '' : t); }).catch(() => { if (live) setMd(''); });
+    return () => { live = false; };
+  }, [l.id]);
   return (
     <div class="page lesson">
       <div class="crumbs"><a href="#/path">Path</a> › {cat.tracks.find(t => t.id === l.track)?.name}</div>
@@ -220,6 +221,7 @@ export function Songs({ cat, selected }: { cat: Catalog; selected?: string }) {
 const songKeyPref = persisted<Record<string, string>>('gt_song_keys', {});
 export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
   const [key, setKeyState] = useState(songKeyPref.get()[o.id] || o.chart_key);
+  useEffect(() => { noteSongOpened(o.id); }, [o.id]);
   const [nash, setNash] = useState(false);
   const [capo, setCapo] = useState(0);
   const setKey = (k: string) => { setKeyState(k); setCapo(0); const all = songKeyPref.get(); all[o.id] = k; songKeyPref.set(all); };
@@ -288,6 +290,8 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
   const [msg, setMsg] = useState('');
   const [inst, setInst] = useState(instrumentPref.get());
   const [backup, setBackup] = useState<string | null>(null);
+  const [bmsg, setBMsg] = useState('');
+  const lastBackup = persisted<number | null>('gt_last_backup', null).get();
   const sl = getSetList();
   const onFile = async (e: Event) => {
     const f = (e.target as HTMLInputElement).files?.[0];
@@ -314,13 +318,20 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
       </section>
       <section class="card">
         <h2>Backup</h2>
-        <p class="muted">Your progress lives in Chrome on this phone. Copy a backup now and then (paste it into a note or email to yourself).</p>
+        <p class="muted">Your progress lives in Chrome on this phone. Save a backup file now and then (it lands in Downloads; drop it in Google Drive or email it to yourself). It includes progress, calibration, tempo ladders, settings and your imported set list.</p>
+        <p class="muted small">{lastBackup ? `Last backup: ${new Date(lastBackup).toLocaleDateString()}` : 'No backup saved yet.'}</p>
         <div class="row">
-          <button onClick={async () => { const j = JSON.stringify(await exportAll()); try { await navigator.clipboard.writeText(j); setMsg('Backup copied to the clipboard.'); } catch { setBackup(j); } }}>Copy backup</button>
-          <button onClick={() => setBackup(backup === null ? '' : null)}>Restore…</button>
+          <button class="primary" onClick={async () => { const n = await downloadBackup(); setBMsg(`Saved ${n}.`); }}>Save backup file</button>
+          <label class="btn">Restore from file<input type="file" accept=".json,application/json" hidden onChange={async e => {
+            const f = (e.target as HTMLInputElement).files?.[0]; if (!f) return;
+            try { const data = JSON.parse(await f.text()); if (!confirm('Replace everything on this phone with this backup?')) return; await importAll(data); location.reload(); }
+            catch (err) { setBMsg('That backup could not be read: ' + (err as Error).message); } }} /></label>
+          <button class="small" onClick={async () => { const j = JSON.stringify(await exportAll()); try { await navigator.clipboard.writeText(j); setBMsg('Backup copied to the clipboard.'); } catch { setBackup(j); } }}>Copy as text</button>
+          <button class="small" onClick={() => setBackup(backup === null ? '' : null)}>Paste…</button>
         </div>
         {backup !== null ? <div><textarea class="backup" value={backup} onInput={e => setBackup((e.target as HTMLTextAreaElement).value)} placeholder="Paste a backup here" />
-          <button onClick={async () => { try { await importAll(JSON.parse(backup)); location.reload(); } catch (e) { setMsg('That backup could not be read: ' + (e as Error).message); } }}>Restore from pasted backup</button></div> : null}
+          <button onClick={async () => { try { await importAll(JSON.parse(backup)); location.reload(); } catch (e) { setBMsg('That backup could not be read: ' + (e as Error).message); } }}>Restore from pasted backup</button></div> : null}
+        {bmsg ? <p class="note">{bmsg}</p> : null}
       </section>
       <section class="card">
         <h2>About</h2>
