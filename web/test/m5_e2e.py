@@ -58,7 +58,11 @@ async def main():
         await pg.goto(f'http://127.0.0.1:{PORT}/#/lesson/A.09'); await pg.wait_for_selector('text=Not unlocked yet')
         check(await pg.locator('text=Start at').count()==0, 'locked lesson A.09 has no attempt button')
         await pg.goto(f'http://127.0.0.1:{PORT}/#/progress'); await pg.wait_for_selector('text=Minutes per week'); await pg.wait_for_timeout(300)
-        pt=await pg.inner_text('.page'); check('3-day streak' in pt, 'finishing items counts today: 3-day streak'); await pg.screenshot(path='/tmp/m5_progress.png', full_page=True)
+        # 07-games §4: a day counts with 5 minutes of practice. A short session today keeps the streak (2 days) without counting yet.
+        pt=await pg.inner_text('.page'); check('2-day streak' in pt and 'Today:' in pt and 'min ✓' not in pt, 'short session: streak kept at 2 days, today not counted yet')
+        await pg.evaluate(f"(async()=>{{const r=indexedDB.open('guitar-trainer');await new Promise(x=>r.onsuccess=x);await new Promise(x=>{{const q=r.result.transaction('practice_day','readwrite').objectStore('practice_day').put({{day:'{D(0)}',active_s:300}});q.onsuccess=x}})}})()")
+        await pg.reload(); await pg.wait_for_selector('text=Minutes per week'); await pg.wait_for_timeout(300)
+        pt=await pg.inner_text('.page'); check('3-day streak' in pt, '5 minutes today: 3-day streak'); await pg.screenshot(path='/tmp/m5_progress.png', full_page=True)
         await pg.goto(f'http://127.0.0.1:{PORT}/#/settings'); await pg.wait_for_selector('text=Save backup file')
         async with pg.expect_download() as dl: await pg.click('text=Save backup file')
         d=await dl.value; path=await d.path(); data=json.load(open(path))

@@ -8,7 +8,7 @@ import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
 import { getSetList, importSetList, clearSetList, thisWeekSongs, thisWeekIndex } from '../setlist';
 import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
-import { progress, recordAttempt, saveStatus } from '../progressStore';
+import { progress, recordAttempt, saveStatus, streakInfo } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
 import { exportAll, importAll, downloadBackup, shareBackup, canShareBackup } from '../db';
 import { TimingPanel, CalibrationCard, usePracticeTempo } from './Timing';
@@ -38,7 +38,7 @@ export function Today({ cat }: { cat: Catalog }) {
   const { pr, states } = useStates(cat);
   const day = dayOf();
   const sl = getSetList();
-  const streak = (() => { let n = 0, d = day; const set = new Set(pr.days); if (!set.has(d)) d = addDaysLocal(d, -1); while (set.has(d)) { n++; d = addDaysLocal(d, -1); } return n; })();
+  const streak = streakInfo(day).current;
   const passed = Object.values(states).filter(s => s === 'passed').length;
   const vis = (id: string) => trackVisible(cat, id);
   const x = useStore(xp);
@@ -89,7 +89,6 @@ function BackupNudge() {
     </section>
   );
 }
-function addDaysLocal(day: string, n: number) { const [y, m, d] = day.split('-').map(Number); return dayOf(new Date(y, m - 1, d + n)); }
 
 // ---------- Path ----------
 const ICON: Record<State, string> = { locked: '🔒', available: '○', in_progress: '◐', passed: '●' };
