@@ -52,3 +52,16 @@ export const TICK_S = 10, IDLE_MS = 60_000;
 export function counts(o: { visible: boolean; sinceInputMs: number; audio: boolean }): boolean {
   return o.visible && (o.sinceInputMs < IDLE_MS || o.audio);
 }
+
+/** Screen off with the click or mic running: timers don't tick while the page is hidden, so the activity clock
+ *  compares how far the click was actually scheduled and how much input the mic actually processed between
+ *  hiding and showing again. Only that audio time counts (never more than the wall time, at most 2 hours). If
+ *  Chrome suspended the page, nothing advanced and nothing is counted. */
+export interface AudioMark { wallMs: number; clickT: number | null; micS: number; micOn: boolean }
+export const HIDDEN_MAX_S = 2 * 3600;
+export function hiddenCredit(hide: AudioMark, show: AudioMark): number {
+  const wall = Math.max(0, (show.wallMs - hide.wallMs) / 1000);
+  const click = hide.clickT !== null && show.clickT !== null ? Math.max(0, show.clickT - hide.clickT) : 0;
+  const mic = hide.micOn && show.micOn ? Math.max(0, show.micS - hide.micS) : 0;
+  return Math.floor(Math.min(wall, Math.max(click, mic), HIDDEN_MAX_S));
+}

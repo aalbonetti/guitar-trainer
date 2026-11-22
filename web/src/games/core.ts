@@ -19,7 +19,10 @@ export function stars(finished: boolean, accuracy: number, score: number, target
 
 // ---------- XP + player level ----------
 export const XP = { lessonPass: 50, review: 20, daily: 30, pb: 10 } as const;
-export const xpForScore = (score: number) => Math.floor(score / 100);
+/** XP for a round: score ÷ 500, at most 30 (07-games §4, rebalanced in G2 so one round can't outweigh a lesson
+ *  pass (+50); a long click-timed round scores 20–45k). */
+export const XP_PER_ROUND_MAX = 30;
+export const xpForScore = (score: number) => Math.min(XP_PER_ROUND_MAX, Math.floor(score / 500));
 /** Level n needs 100 + 25·(n−1) XP to reach level n+1. */
 export function levelFor(totalXp: number): { level: number; into: number; need: number } {
   let level = 1, left = totalXp;

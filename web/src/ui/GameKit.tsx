@@ -6,6 +6,7 @@ import { comboMult, points, pointsWith, type Pos, type Zone } from '../games/cor
 import { openEars, closeEars, ears, heardSince, now as ctxNowS, publishExpect } from '../games/listen';
 import { judgeAnswer, type AnswerCheck, type Heard } from '../games/judge';
 import { useStore } from '../store';
+import { isSim } from '../audio/engine';
 import type { Mode } from '../arcade';
 
 export const Stars = ({ n }: { n: number }) => <span class="stars">{[1, 2, 3].map(i => <i class={i <= n ? 'on' : ''}>★</i>)}</span>;
@@ -26,7 +27,7 @@ export interface Round {
   finish: (finished: boolean) => void;
 }
 /** Test-only: shorter rounds for headless tests (`__gtGameShortS`). */
-export const shortRound = (s?: number) => { const x = (globalThis as any).__gtGameShortS as number | undefined; return s && x ? Math.min(s, x) : s; };
+export const shortRound = (s?: number) => { const x = isSim() ? (globalThis as any).__gtGameShortS as number | undefined : undefined; return s && x ? Math.min(s, x) : s; };
 
 export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean, onEnd: (finished: boolean) => void, finishedRule: (correct: number, timeUp: boolean) => boolean) {
   const [st, setSt] = useState({ score: 0, streak: 0, maxCombo: 1, correct: 0, total: 0, lives: l.lives || 0, misses: [] as string[] });
@@ -122,8 +123,8 @@ export function useHeard(active: boolean, openedAt: { current: number }, check: 
       const since = Math.max(c.since, openedAt.current);
       const h = judgeAnswer(heardSince(since), { ...c, since }, ctxNowS(), seen.current);
       if (h) {
-        const log = ((globalThis as any).__gtHeardLog ||= []) as unknown[]; // diagnostics: what was decided against what
-        log.push({ at: +ctxNowS().toFixed(3), since: +since.toFixed(3), right: c.right, kind: h.kind, heard: h.heard, t0: +h.t0.toFixed(3) }); if (log.length > 50) log.shift();
+        if (isSim()) { const log = ((globalThis as any).__gtHeardLog ||= []) as unknown[]; // test diagnostics: what was decided against what
+        log.push({ at: +ctxNowS().toFixed(3), since: +since.toFixed(3), right: c.right, kind: h.kind, heard: h.heard, t0: +h.t0.toFixed(3) }); if (log.length > 50) log.shift(); }
         cb.current(h);
       }
     }, 60);

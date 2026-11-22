@@ -7,7 +7,7 @@ import type { Catalog, GameLevel } from '../catalog';
 import { boxWindowS, midiAt, timingBonus, pocketVerdicts, type Rng } from '../games/core';
 import { boxSetup, pocketSetup, type PocketSetup } from '../games/rounds';
 import { gradeTimedNote, type NoteVerdict } from '../games/judge';
-import { openEars, closeEars, startTimed, heardSince, onsetsSince, now, ears, simAuto } from '../games/listen';
+import { openEars, closeEars, startTimed, heardSince, onsetsSince, now, ears, simAuto, publishPlan } from '../games/listen';
 import { buildNotePlan, midiName, type NotePlan } from '../grading/pitch';
 import { audioContext } from '../audio/engine';
 import { useStore } from '../store';
@@ -35,8 +35,8 @@ export function BoxRunner({ cat, l, round, r }: { cat: Catalog; l: GameLevel; ro
       if (!(await openEars(S.path.map(midiAt)))) { if (!g.cancelled) setPhase('error'); return; }
       const exp = S.path.map((q, i) => ({ t: i / p.sub, dur: 1 / p.sub, midis: [midiAt(q)], label: midiName(midiAt(q)), where: posText(q) }));
       const plan: NotePlan = buildNotePlan(exp, p.bpm, 4, now() + 0.6);
-      (globalThis as any).__gtGamePlan = { kind: 'box', expected: plan.expected.map(e => ({ t: e.t, midi: e.midis[0] })) };
-      simAuto('game-box', (globalThis as any).__gtGamePlan);
+      const pub = { kind: 'box', expected: plan.expected.map(e => ({ t: e.t, midi: e.midis[0] })) };
+      publishPlan(pub); simAuto('game-box', pub);
       setPhase('countin');
       const ticker = window.setInterval(() => { const t = now() - lagS(); let b = -1; plan.clicks.forEach((c, i) => { if (c.t <= t) b = i; }); setBeat(b); }, 40);
       try {
@@ -106,7 +106,7 @@ export function InThePocket({ cat, l, round }: { cat: Catalog; l: GameLevel; rou
       if (!(await openEars([40, 64]))) { if (!g.cancelled) setPhase('error'); return; }
       const S = pocketSetup(cat, p, now() + 0.6); setupRef.current = S;
       const { plan, slots } = S, slotDur = plan.slotDur;
-      (globalThis as any).__gtGamePlan = { kind: 'pocket', slots: slots.map(s => ({ t: s.t, expected: s.expected })), clicks: plan.clicks.map(c => c.t) };
+      publishPlan({ kind: 'pocket', slots: slots.map(s => ({ t: s.t, expected: s.expected })), clicks: plan.clicks.map(c => c.t) });
       simAuto('game-pocket', slots.filter(s => s.expected).map(s => s.t));
       setPhase('countin');
       let offMs = 0, settled = 0; const recent: number[] = [];

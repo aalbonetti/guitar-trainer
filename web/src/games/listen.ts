@@ -9,7 +9,7 @@
 // offset comes from strum calibration (else the count-in's measured click round trip).
 import { Store, persisted } from '../store';
 import { OnsetDetector, BandOnsetDetector } from '../dsp/dsp.js';
-import { acquireCapture, releaseCapture, onBlock, playClickPlan, cancelClickPlan, ctxNow, waitUntil, sampleRate, routeLabel, metro, stopMetronome, type PlannedClick } from '../audio/engine';
+import { acquireCapture, releaseCapture, onBlock, playClickPlan, cancelClickPlan, ctxNow, waitUntil, sampleRate, routeLabel, metro, stopMetronome, isSim, type PlannedClick } from '../audio/engine';
 import { PitchTracker, segmentNotes, trackerRange, midiName, type PitchFrame, type Segment } from '../grading/pitch';
 import { bleedDelay } from '../grading/timing';
 import { getCalibration, routeName } from '../grading/runner';
@@ -19,16 +19,22 @@ const inputPref = persisted<string>('gt_input', ''); // same setting as Settings
 export const ears = new Store<{ on: boolean; opening: boolean; hearing: string | null; cents: number | null; error: string | null; route: string }>({ on: false, opening: false, hearing: null, cents: null, error: null, route: '' });
 
 interface Session { tracker: PitchTracker; det: InstanceType<typeof OnsetDetector>; frames: PitchFrame[]; onsets: number[]; unsub: () => void; liveAt: number; gen: number }
-let S: Session | null = null, gen = 0, clicking = false;
+let S: Session | null = null, gen = 0, clicking = false, opening = 0;
 
 /** Open the mic for a game. `midis`: every note the round can ask for (sizes the tracker, with an octave of slack). */
 export async function openEars(midis: number[]): Promise<boolean> {
   closeEars();
   const my = ++gen;
   ears.set({ opening: true, error: null });
+  opening++;
   try {
     await acquireCapture(WHO, inputPref.get() || undefined);
-    if (my !== gen) { return false; } // closed while opening
+    opening--;
+    if (my !== gen) {
+      // closed (paused, quit) while the mic was opening: let go of it unless a newer round is opening or holds it
+      if (!S && !opening) releaseCapture(WHO);
+      return false;
+    }
     const sr = sampleRate();
     const s: Session = { tracker: new PitchTracker(sr, trackerRange(midis)), det: new OnsetDetector(sr), frames: [], onsets: [], unsub: () => undefined, liveAt: 0, gen: my };
     s.unsub = onBlock((d, f) => {
@@ -44,10 +50,11 @@ export async function openEars(midis: number[]): Promise<boolean> {
     });
     S = s;
     ears.set({ on: true, opening: false, route: routeLabel() });
-    (globalThis as any).__gtGameEars = s; // test-only diagnostics
+    if (isSim()) (globalThis as any).__gtGameEars = s; // test-only diagnostics (?sim)
     return true;
   } catch (e) {
-    releaseCapture(WHO);
+    opening = Math.max(0, opening - 1);
+    if (!S && !opening) releaseCapture(WHO);
     if (my === gen) ears.set({ on: false, opening: false, error: (e as Error).message || 'Microphone not available' });
     return false;
   }
@@ -98,12 +105,14 @@ export async function startTimed(plan: TimedPlan, sig: { cancelled: boolean }): 
 
 // ---------- test-only (?sim): play right and wrong answers into the simulated input ----------
 /** The answer the game on screen expects, for headless tests. */
-export function publishExpect(x: { right: number[]; neutral?: number[] } | null) { (globalThis as any).__gtGameExpect = x; }
+export function publishExpect(x: { right: number[]; neutral?: number[] } | null) { if (isSim()) (globalThis as any).__gtGameExpect = x; }
+/** Test-only: publish a click-timed round's plan (?sim only). */
+export function publishPlan(p: unknown) { if (isSim()) (globalThis as any).__gtGamePlan = p; }
 /** `__gtSimAnswer('right' | 'wrong' | 'octave' | 'neutral')` plays a note for the question on screen. A wrong
  *  note is a fourth or fifth off the answer and never the note just played (re-picking the last note while it
  *  rings is deliberately not counted as wrong). */
 let lastSim = -1;
-(globalThis as any).__gtSimAnswer = (kind = 'right', o: { dur?: number; gain?: number; delay?: number } = {}) => {
+if (isSim()) (globalThis as any).__gtSimAnswer = (kind = 'right', o: { dur?: number; gain?: number; delay?: number } = {}) => {
   const x = (globalThis as any).__gtGameExpect as { right: number[]; neutral?: number[] } | null;
   if (!x) return false;
   const r = x.right[0], taken = new Set([...x.right, ...(x.neutral || []), lastSim]);
@@ -113,4 +122,4 @@ let lastSim = -1;
   lastSim = m;
   return (globalThis as any).__gtSimNotes?.([{ midi: m, t: ctxNow() + (o.delay ?? 0.05), dur: o.dur ?? 0.7, gain: o.gain ?? 0.5 }]);
 };
-export const simAuto = (kind: string, arg: unknown) => (globalThis as any).__gtSimAuto?.(kind, arg);
+export const simAuto = (kind: string, arg: unknown) => { if (isSim()) (globalThis as any).__gtSimAuto?.(kind, arg); };

@@ -111,7 +111,7 @@ export function GameScreen({ cat, gameId, levelId }: { cat: Catalog; gameId: str
     if (mode === 'play' && g.id === 'G_in_the_pocket') {
       // strums are graded against the click, so this input + posture needs a strum calibration first
       setChecking(true);
-      try { await acquireCapture('game-check', dev()); const c = await getCalibration(routeName()); releaseCapture('game-check'); setChecking(false); if (!c) { setNeedCal(true); return; } }
+      try { await acquireCapture('game-check', dev()); const c = await getCalibration(routeName()); releaseCapture('game-check'); setChecking(false); if (!c) { setCalMsg(''); setNeedCal(true); return; } }
       catch { releaseCapture('game-check'); setChecking(false); }
     }
     setNeedCal(false); setRunId(x => x + 1); setPhase('play');
