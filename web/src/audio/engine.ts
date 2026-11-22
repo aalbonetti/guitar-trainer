@@ -170,6 +170,10 @@ const RING = 48000 * 4; const ring = new Float32Array(RING); let wAbs = 0;
 // decoy tone on the others, to check that only the chosen channel reaches the analyzers.
 const SIM = typeof location !== 'undefined' && /[?&]sim\b/.test(location.search);
 const simQ = (k: string, d: number) => { const m = typeof location !== 'undefined' ? new RegExp(`[?&]${k}=(\\d+)`).exec(location.search) : null; return m ? +m[1] : d; };
+/** Test mode (?sim): simulated input, and the test-only globals games publish. */
+export const isSim = () => SIM;
+// ?sim&simdelay=800 delays opening the simulated input, like a slow getUserMedia (permission prompt).
+const SIM_DELAY = SIM ? simQ('simdelay', 0) : 0;
 const SIM_CHS = SIM ? Math.max(1, Math.min(8, simQ('simchs', 1))) : 1, SIM_CH = Math.min(SIM_CHS, Math.max(1, simQ('simch', 1))) - 1;
 let simBus: GainNode | null = null, simMerge: ChannelMergerNode | null = null;
 function simSource(c: AudioContext): AudioNode {
@@ -194,7 +198,7 @@ export async function acquireCapture(who: string, deviceId?: string): Promise<vo
   try {
     if (!workletReady) workletReady = c.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' })));
     let label = 'simulated input';
-    if (SIM) srcNode = simSource(c);
+    if (SIM) { if (SIM_DELAY) await new Promise(r => setTimeout(r, SIM_DELAY)); srcNode = simSource(c); }
     else {
       // up to 8 channels, as in the M0 page (a USB interface may offer several; a phone mic gives 1 or 2)
       const audio: MediaTrackConstraints = { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 8 } };
@@ -204,6 +208,9 @@ export async function acquireCapture(who: string, deviceId?: string): Promise<vo
       label = stream.getAudioTracks()[0]?.label || 'microphone';
     }
     await workletReady;
+    // Everyone who asked let go while the mic was opening (e.g. a game paused during the permission prompt):
+    // don't leave it open with nobody listening.
+    if (!users.size) { closeStream(); return; }
     node = new AudioWorkletNode(c, 'cap', { numberOfInputs: 1, numberOfOutputs: 1, channelCountMode: 'max' }); wAbs = 0;
     const want = channelFor(label, deviceId);
     node.port.postMessage({ ch: want });
@@ -321,6 +328,12 @@ export function waitUntil(t: number, signal?: { cancelled: boolean }): Promise<v
   return new Promise(res => { const f = () => { if (signal?.cancelled || audioContext().currentTime >= t) res(); else setTimeout(f, 20); }; f(); });
 }
 export function sampleRate(): number { return audioContext().sampleRate; }
+/** How far the click and the mic have actually run: the metronome's scheduled-through time (context seconds,
+ *  null when it's stopped) and input samples processed. The activity clock compares these across a screen-off
+ *  stretch, so it only counts time the click really played or the mic really listened. */
+export function audioProgress(): { clickT: number | null; micS: number } {
+  return { clickT: metro.get().running ? nextT : null, micS: ctx ? wAbs / ctx.sampleRate : 0 };
+}
 /** Bluetooth output adds 150–300 ms; timing grades are blocked while it's active. Best guess from labels + latency. */
 export async function bluetoothOutputLikely(): Promise<boolean> {
   try {

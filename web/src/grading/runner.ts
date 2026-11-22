@@ -33,6 +33,8 @@ export interface AttemptState {
   pitch?: PitchLive | null; pitchResult?: PitchOutcome | null;
   /** assisted mode: the result is shown but not saved until you confirm or override it */
   pending?: boolean;
+  /** when the current/last calibration run started (tells a fresh result from an old one left in the store) */
+  calAt?: number;
 }
 export const attempt = new Store<AttemptState>({ phase: 'idle', kind: null, lessonId: null, heard: 0, expected: 0, beat: -1, step: -1, bpm: 0, result: null, event: null, ladder: null, message: '', cal: null, pitch: null, pitchResult: null, pending: false });
 
@@ -102,7 +104,7 @@ const simAuto = (kind: string, times: number[]) => (globalThis as any).__gtSimAu
 // ---------- strum calibration ----------
 export async function runCalibration(deviceId?: string) {
   cancelled = { cancelled: false }; const sig = cancelled;
-  attempt.set({ phase: 'starting', kind: 'calibration', lessonId: null, heard: 0, expected: 16, beat: -1, bpm: 80, result: null, event: null, cal: null, message: '' });
+  attempt.set({ phase: 'starting', kind: 'calibration', lessonId: null, heard: 0, expected: 16, beat: -1, bpm: 80, result: null, event: null, cal: null, message: '', calAt: Date.now() });
   try {
     await acquireCapture(WHO, deviceId);
     const beat = 0.75, t0 = ctxNow() + 0.5;

@@ -6,11 +6,11 @@ import { OnsetDetector } from '../src/dsp/dsp.js';
 import { PitchTracker, segmentNotes, trackerRange, type PitchFrame } from '../src/grading/pitch';
 import {
   pointsWith, points, timingBonus, scoreRun, comboMult, octaveQ, octaveShape, midiAt, zoneMidis, rng, boxFrets, boxNotes, boxPath, boxWindowS,
-  pocketLayout, pocketVerdicts, stars, type Pos, type Verdict,
+  pocketLayout, pocketVerdicts, stars, xpForScore, XP, type Pos, type Verdict,
 } from '../src/games/core';
 import { judgeAnswer, gradeTimedNote } from '../src/games/judge';
 import { boxSetup, pocketSetup } from '../src/games/rounds';
-import { computeStreak, qualifies, counts, STREAK_MIN_S } from '../src/streak';
+import { computeStreak, qualifies, counts, hiddenCredit, STREAK_MIN_S, HIDDEN_MAX_S } from '../src/streak';
 import { addDays } from '../src/progress';
 import { bests, bestKey, unlocked, bestStars, modeFor, setModeFor } from '../src/arcade';
 
@@ -304,11 +304,28 @@ describe('streak (07 §4): 5 minutes, service days, freezes', () => {
     // three misses with 2 freezes: broken
     expect(computeStreak([...run(1, T), ...run(14, addDays(T, -4))], [], T)).toMatchObject({ current: 1, longest: 14 });
   });
+  it('screen off: only time the click really played or the mic really listened counts', () => {
+    const at = (wallS: number, clickT: number | null, micS: number, micOn = false) => ({ wallMs: wallS * 1000, clickT, micS, micOn });
+    expect(hiddenCredit(at(0, 100, 0), at(600, 700, 0))).toBe(600);            // click ran the whole 10 minutes
+    expect(hiddenCredit(at(0, 100, 0), at(600, 100.2, 0))).toBe(0);            // page suspended: the click didn't advance
+    expect(hiddenCredit(at(0, 100, 0), at(600, null, 0))).toBe(0);             // click stopped
+    expect(hiddenCredit(at(0, null, 50, true), at(300, null, 230, true))).toBe(180); // mic listened 3 of 5 minutes
+    expect(hiddenCredit(at(0, null, 50, true), at(300, null, 10, true))).toBe(0);    // mic reopened (counter reset)
+    expect(hiddenCredit(at(0, 0, 0), at(5 * 3600, 5 * 3600, 0))).toBe(HIDDEN_MAX_S);
+    expect(hiddenCredit(at(0, 0, 0), at(60, 90, 0))).toBe(60);                  // never more than the wall time
+  });
   it('the activity clock counts visible time you\'re using, or with audio running', () => {
     expect(counts({ visible: true, sinceInputMs: 5000, audio: false })).toBe(true);
     expect(counts({ visible: true, sinceInputMs: 120000, audio: false })).toBe(false);
     expect(counts({ visible: true, sinceInputMs: 120000, audio: true })).toBe(true);
     expect(counts({ visible: false, sinceInputMs: 0, audio: true })).toBe(false);
+  });
+});
+
+describe('XP (07 §4, G2 rebalance)', () => {
+  it('score ÷ 500, at most 30 a round: a round never outweighs a lesson pass', () => {
+    expect(xpForScore(2499)).toBe(4); expect(xpForScore(15000)).toBe(30); expect(xpForScore(46000)).toBe(30); expect(xpForScore(0)).toBe(0);
+    expect(xpForScore(1e9) + XP.pb).toBeLessThan(XP.lessonPass);
   });
 });
 
@@ -325,6 +342,7 @@ describe('level unlocks and modes', () => {
   it('tap and play bests are separate keys; each game remembers its mode', () => {
     expect(bestKey('G_x', 'a', 'tap')).not.toBe(bestKey('G_x', 'a', 'play'));
     expect(modeFor(g)).toBe('tap'); expect(modeFor(G('G_box_runner'))).toBe('play');
+    expect(modeFor(G('G_octave_jump'))).toBe('play');                                    // play-first; tap is the fallback
     setModeFor(g, 'play'); expect(['tap', 'play']).toContain(modeFor(g));
     setModeFor(G('G_box_runner'), 'tap'); expect(modeFor(G('G_box_runner'))).toBe('play');  // no tap mode there
   });

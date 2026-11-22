@@ -1,5 +1,5 @@
 // Timing attempt runner (count-in → play → result card) and strum calibration UI.
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Catalog, Lesson } from '../catalog';
 import { useStore } from '../store';
 import { attempt, runCalibration, runTimingAttempt, cancelAttempt, getCalibration, getLadder, allCalibrations, posture, routeName, type Calibration } from '../grading/runner';
@@ -40,7 +40,10 @@ export function CalibrationCard({ compact = false, onDone }: { compact?: boolean
   const [list, setList] = useState<Calibration[]>([]);
   const refresh = () => void allCalibrations().then(setList);
   useEffect(refresh, [a.phase]);
-  useEffect(() => { if (a.kind === 'calibration' && a.phase === 'result') onDone?.(); }, [a.phase]);
+  // Only a calibration that finished after this card appeared counts: an old result left in the shared attempt
+  // store (another input, the other fold posture) must not look like "calibrated" here.
+  const stale = useRef(a.kind === 'calibration' && a.phase === 'result' ? a.calAt : undefined);
+  useEffect(() => { if (a.kind === 'calibration' && a.phase === 'result' && a.calAt !== stale.current) onDone?.(); }, [a.phase, a.calAt]);
   const mine = a.kind === 'calibration';
   const busy = mine && (a.phase === 'starting' || a.phase === 'countin' || a.phase === 'playing');
   return (
@@ -57,7 +60,7 @@ export function CalibrationCard({ compact = false, onDone }: { compact?: boolean
           <button onClick={cancelAttempt}>Cancel</button>
         </div>
       ) : <button class="primary" onClick={() => runCalibration(dev())}>{list.length ? 'Calibrate this input' : 'Calibrate (30 seconds)'}</button>}
-      {mine && a.phase === 'result' && a.cal ? <p class="okText">Offset {a.cal.offsetMs.toFixed(0)} ms · spread {a.cal.spreadMs.toFixed(0)} ms · {a.cal.matched}/16 strums. {a.message}</p> : null}
+      {mine && a.phase === 'result' && a.cal && a.calAt !== stale.current ? <p class="okText">Offset {a.cal.offsetMs.toFixed(0)} ms · spread {a.cal.spreadMs.toFixed(0)} ms · {a.cal.matched}/16 strums. {a.message}</p> : null}
       {mine && a.phase === 'error' ? <p class="error">{a.message}</p> : null}
       {!compact && list.length ? (
         <ul class="list callist">{list.map(c => <li>{c.input_route} · {c.posture}<small>{c.offset_ms.toFixed(0)} ms (±{c.spread_ms.toFixed(0)}) · {new Date(c.measured_at).toLocaleDateString()}</small></li>)}</ul>
