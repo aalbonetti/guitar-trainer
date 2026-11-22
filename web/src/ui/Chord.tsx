@@ -23,7 +23,7 @@ const heardName = (id: string, names: Record<string, string>) =>
 
 /** Diagrams of the shapes to play (as fretted, the capo is shown separately). Hidden on a number chart. */
 function Shapes({ setup, v }: { setup: ChordSetup; v: ChordVariant | null }) {
-  const refs = setup.kind === 'changes' ? [...new Set(setup.pairs.flat())] : [...new Set(v!.chords)];
+  const refs = setup.kind === 'changes' ? [...new Set(setup.pairs.flat())] : setup.ex.pick === 'random' ? [...new Set(setup.ex.variants.flatMap(x => x.chords))] : [...new Set(v!.chords)];
   return <div class="chords">{refs.map(r => { const vo = setup.ex.voicings[r]; return vo.frets.map((f, i) => <ChordDiagram name={vo.frets.length > 1 ? `${vo.name} (${i + 1})` : vo.name} shape={{ frets: f }} />); })}</div>;
 }
 
@@ -106,7 +106,7 @@ export function ChordPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Les
           {setup.ex.variants.map((x, i) => <option value={i}>{x.capo ? `${x.label}` : `${x.label} (no capo)`}</option>)}</select></label> : null}
         {setup.kind === 'accuracy' && setup.ex.pick === 'random' ? <p class="muted small">When you start, the app names a key ({setup.ex.variants.map(x => x.key).join(', ')}){setup.ex.show === 'numbers' ? ' and shows the numbers' : ' and the capo and shapes for it'}.</p> : null}
         {setup.kind === 'changes' ? <p class="chordline">{setup.pairs.map(p => <span>{p.map(x => setup.ex.voicings[x].name).join(' ↔ ')}</span>)}</p>
-          : setup.ex.show === 'chords' && v ? <p class="chordline">{v.capo ? <span class="capo">capo {v.capo}</span> : null}{v.chords.map(x => <span>{setup.ex.voicings[x].name}</span>)}</p> : null}
+          : setup.ex.show === 'chords' && v && setup.ex.pick !== 'random' ? <p class="chordline">{v.capo ? <span class="capo">capo {v.capo}</span> : null}{v.chords.map(x => <span>{setup.ex.voicings[x].name}</span>)}</p> : null}
         {setup.kind === 'changes' || setup.ex.show === 'chords' ? <details class="shapes"><summary>Shapes</summary><Shapes setup={setup} v={v} /></details> : null}
         <div class="row wrap"><button class="primary" onClick={start}>{r ? 'Go again' : 'Start'}{tempo ? ` at ${tempo} BPM` : ''}</button></div>
         <p class="muted small">Listening {cap.label ? `with ${routeLabel()}` : 'with the selected input'} · {posture()} · <a href="#/settings">input & grading</a></p>
