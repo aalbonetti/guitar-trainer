@@ -189,10 +189,19 @@ PICKING = [
 ]
 
 # ---------------- exercises (tab events) ----------------
-def ev(beat, string, fret, dur=0.5, tech=None):
+def ev(beat, string, fret, dur=0.5, tech=None, bend=None):
     e = dict(beat=beat, string=string, fret=fret, dur=dur)
     if tech: e['tech'] = tech
+    if bend: e['bend'] = bend  # semitones the note is bent up (tech='bend')
     return e
+
+# Sounding MIDI of a tab event (what the pitch grader expects to hear). A natural harmonic sounds
+# above the open string: fret 12 = +12, fret 7 = +19, fret 5 = +24. A bend's target is fret + bend.
+HARMONIC_UP = {12: 12, 7: 19, 5: 24}
+def ev_midi(e):
+    o = OPEN[6 - e['string']]
+    if e.get('tech') == 'harmonic': return o + HARMONIC_UP[e['fret']]
+    return o + e['fret'] + (e.get('bend') or 0)
 
 spider = []
 b = 0.0
@@ -216,8 +225,26 @@ EXERCISES = [
                  for beat in range(4) for s, f in zip([3,2,1], shape)],
          chords=['G','D','Em','C'], loop=True),
     dict(id='EX_octaves_G_major', name='G major scale in octaves (strings 4 & 2)', type='tab', meter='4/4',
-         tempo=dict(start=60, target=100, step=4),
+         tempo=dict(start=65, target=100, step=4),
          events=[e for i, f in enumerate([5,7,9,10,12,14,16,17]) for e in (ev(i*1.0, 4, f, 1.0), ev(i*1.0, 2, f+3, 1.0))],
+         loop=False),
+    # M7 pitch exercises. No tempo = played at your own pace (the grader waits for each note in order).
+    dict(id='EX_bends_G', name='Bends in the G box: whole, whole, half', type='tab', meter='4/4',
+         events=[ev(0, 3, 2, 2.0, tech='bend', bend=2), ev(2, 2, 3, 2.0, tech='bend', bend=2), ev(4, 3, 4, 2.0, tech='bend', bend=1)],
+         loop=False),
+    dict(id='EX_sixths_G_major', name='G major in 6ths (strings 3 & 1)', type='tab', meter='4/4',
+         events=[e for i, (a, b) in enumerate([(0,0),(2,2),(4,3),(5,5),(7,7),(9,8),(11,10),(12,12)]) for e in (ev(i*1.0, 3, a, 1.0), ev(i*1.0, 1, b, 1.0))],
+         loop=False),
+    # Amazing Grace (NEW BRITAIN, public domain), lines 1-2, low octave in the G box. Pickup on beat 3.
+    dict(id='EX_amazing_grace_lines12', name='Amazing Grace melody, lines 1–2 (G box)', type='tab', meter='3/4',
+         tempo=dict(start=52, target=80, step=4),
+         events=[ev(b, s, f, d) for b, s, f, d in [
+             (2,5,5,1), (3,4,5,2), (5,3,4,.5), (5.5,4,5,.5), (6,3,4,2), (8,3,2,1), (9,4,5,2), (11,4,2,1), (12,5,5,2),
+             (14,5,5,1), (15,4,5,2), (17,3,4,.5), (17.5,4,5,.5), (18,3,4,2), (20,3,2,1), (21,2,3,3)]],
+         loop=False),
+    dict(id='EX_harmonics_swells', name='Harmonics at frets 12, 7, 5 (strings 3-2-1), then three swelled notes', type='tab', meter='4/4',
+         events=[ev(i*2.0, s, f, 2.0, tech='harmonic') for i, (f, s) in enumerate([(f, s) for f in (12, 7, 5) for s in (3, 2, 1)])]
+                + [ev(18 + i*2.0, s, f, 2.0, tech='swell') for i, (s, f) in enumerate([(2,3),(2,5),(1,3)])],
          loop=False),
 ]
 # verify triad exercise chords and octave scale
@@ -232,6 +259,35 @@ for s, f in [(4,5),(5,5),(4,2),(5,3)]:
     pass
 if [NOTES[(OPEN[6-s]+f)%12] for s, f in [(4,5),(5,5),(4,2),(5,3)]] != ['G','D','E','C']:
     errors.append('root pulse roots wrong')
+# pitch exercises: the notes the grader expects must be the music the lesson teaches
+EXB = {e['id']: e for e in EXERCISES}
+def ex_notes(xid): return [ev_midi(e) for e in EXB[xid]['events']]
+oc = EXB['EX_octaves_G_major']['events']
+for lo, hi in zip(oc[::2], oc[1::2]):
+    if lo['beat'] != hi['beat'] or ev_midi(hi) - ev_midi(lo) != 12: errors.append(f"octave exercise: beat {lo['beat']} is not an octave")
+bends = EXB['EX_bends_G']['events']
+if [(NOTES[(ev_midi(e) - e['bend']) % 12], NOTES[ev_midi(e) % 12]) for e in bends] != [('A','B'), ('D','E'), ('B','C')]:
+    errors.append('bend exercise: should be A->B, D->E, B->C as in EL.05')
+for e in bends:
+    if e.get('tech') != 'bend' or e.get('bend') not in (1, 2): errors.append(f"bend exercise: bad bend {e}")
+sx = EXB['EX_sixths_G_major']['events']
+for lo, hi in zip(sx[::2], sx[1::2]):
+    a, b = ev_midi(lo), ev_midi(hi)
+    if lo['beat'] != hi['beat'] or b - a not in (8, 9) or a % 12 not in gmaj or b % 12 not in gmaj:
+        errors.append(f"sixths exercise: beat {lo['beat']} is not a 6th in G major ({a}, {b})")
+if [NOTES[ev_midi(e) % 12] for e in sx[::2]] != ['G','A','B','C','D','E','F#','G']:
+    errors.append('sixths exercise: lower notes should walk up G major')
+# NEW BRITAIN lines 1-2 in G, scale degrees 5 | 1 3 1 3 2 1 6 5 | 5 | 1 3 1 3 2 5(high)
+deg = {1:'G', 2:'A', 3:'B', 5:'D', 6:'E'}
+ag = ex_notes('EX_amazing_grace_lines12')
+if [NOTES[m % 12] for m in ag] != [deg[d] for d in [5,1,3,1,3,2,1,6,5, 5,1,3,1,3,2,5]] or ag[-1] - ag[0] != 12:
+    errors.append('Amazing Grace exercise: melody notes wrong')
+ag_ev = EXB['EX_amazing_grace_lines12']['events']
+if any(abs((a['beat'] + a['dur']) - b['beat']) > 1e-9 for a, b in zip(ag_ev, ag_ev[1:])) or (ag_ev[-1]['beat'] + ag_ev[-1]['dur']) % 3 != 0:
+    errors.append('Amazing Grace exercise: rhythm has gaps or does not fill whole 3/4 bars')
+hs = EXB['EX_harmonics_swells']['events']
+if [ev_midi(e) for e in hs if e.get('tech') == 'harmonic'] != [67, 71, 76, 74, 78, 83, 79, 83, 88]:
+    errors.append('harmonics exercise: pitches wrong (fret 12 = +12, 7 = +19, 5 = +24)')
 
 # ---------------- songs (public domain) ----------------
 SONGS = [dict(
@@ -307,14 +363,14 @@ LESSONS = [
     L('EL.01','Major pentatonic, position 1',['F.07'],P('timing',bpm=80,subdivision=8,max_err_ms=40,bars=4),{'scales':['G_major_pent_pos2']}),
     L('EL.02','Relative minor pentatonic + positions 2 & 5',['EL.01'],P('timing',bpm=80,subdivision=8,max_err_ms=40,bars=4),{'scales':['Am_pent_pos1','Am_pent_pos2','Am_pent_pos5']}),
     L('EL.03','Hammer-ons, pull-offs, slides',['EL.01'],P('timing',bpm=70,subdivision=8,max_err_ms=50,bars=4)),
-    L('EL.04','Octave melodies',['EL.01','ER.04'],P('pitch',note_accuracy=0.9),{'exercises':['EX_octaves_G_major']}),
-    L('EL.05','Bends & vibrato',['EL.03'],P('pitch',cents=15)),
-    L('EL.06','Double stops: 3rds & 6ths',['EL.04'],P('pitch',note_accuracy=0.9)),
-    L('EL.07','Hymn melody as a lead line',['EL.04'],P('pitch',note_accuracy=0.9),{'songs':['SONG_amazing_grace']}),
+    L('EL.04','Octave melodies',['EL.01','ER.04'],P('pitch',note_accuracy=0.9,bpm=100),{'exercises':['EX_octaves_G_major']}),
+    L('EL.05','Bends & vibrato',['EL.03'],P('pitch',cents=15),{'exercises':['EX_bends_G']}),
+    L('EL.06','Double stops: 3rds & 6ths',['EL.04'],P('pitch',note_accuracy=0.9),{'exercises':['EX_sixths_G_major']}),
+    L('EL.07','Hymn melody as a lead line',['EL.04'],P('pitch',note_accuracy=0.9,bpm=80,any_octave=True),{'songs':['SONG_amazing_grace'],'exercises':['EX_amazing_grace_lines12']}),
     L('EL.08','Lead lines with dotted-eighth delay',['EL.07','ER.03'],P('timing',bpm=100,subdivision=8,max_err_ms=30,bars=8)),
     L('EL.09','Major scale + chord-tone targeting',['EL.02','T.02'],P('quiz',score=0.9),{'scales':['G_major_pos2']}),
     L('EL.10','Writing intro & tag hooks',['EL.07'],P('self_check')),
-    L('EL.11','Ambient lead: harmonics & swells',['ER.07','EL.05'],P('pitch',note_accuracy=0.9)),
+    L('EL.11','Ambient lead: harmonics & swells',['ER.07','EL.05'],P('pitch',note_accuracy=0.9),{'exercises':['EX_harmonics_swells']}),
     L('T.01','Intervals & the fretboard',['F.07'],P('quiz',score=0.9),{'quizzes':['Q_intervals']}),
     L('T.02','Major scale & diatonic chords',['T.01'],P('quiz',score=0.9),{'quizzes':['Q_diatonic']}),
     L('T.03','Nashville Number System',['T.02'],P('quiz',score=0.9),{'quizzes':['Q_nashville']}),
@@ -397,11 +453,26 @@ for l in LESSONS:
 EX_BY_ID = {e['id']: e for e in EXERCISES}
 for l in LESSONS:
     pc = l['pass_criteria']
-    if pc['type'] != 'timing': continue
+    if pc['type'] != 'timing' and not (pc['type'] == 'pitch' and 'bpm' in pc): continue
     for x in l['assets'].get('exercises', []):
         t = EX_BY_ID.get(x, {}).get('tempo')
         if t and (t['target'] != pc['bpm'] or t['start'] != round(0.65 * pc['bpm'])):
             errors.append(f"{l['id']}: exercise {x} tempo {t['start']}->{t['target']} should be {round(0.65 * pc['bpm'])}->{pc['bpm']} (the lesson's tempo ladder)")
+# Every pitch lesson needs something to verify against (the grader never guesses): all six strings,
+# or an exercise with notes. Cents lessons hold notes (bends); timed ones (bpm) need an exercise tempo.
+for l in LESSONS:
+    pc = l['pass_criteria']
+    if pc['type'] != 'pitch': continue
+    exs = [EX_BY_ID[x] for x in l['assets'].get('exercises', []) if x in EX_BY_ID and EX_BY_ID[x].get('events')]
+    if pc.get('scope') != 'all_strings' and len(exs) != 1: errors.append(f"{l['id']}: a pitch lesson needs scope all_strings or exactly one exercise with notes")
+    if ('cents' in pc) == ('note_accuracy' in pc): errors.append(f"{l['id']}: pitch needs either cents or note_accuracy")
+    if 'cents' in pc and pc.get('scope') != 'all_strings' and not all(e.get('tech') == 'bend' for x in exs for e in x['events']):
+        errors.append(f"{l['id']}: a cents lesson's exercise must be bends (held targets)")
+    if 'bpm' in pc and not all(x.get('tempo') for x in exs): errors.append(f"{l['id']}: bpm set but the exercise has no tempo")
+    if 'bpm' not in pc and any(x.get('tempo') for x in exs): errors.append(f"{l['id']}: exercise has a tempo but the lesson has no bpm (ladder target)")
+    for x in exs:
+        for e in x['events']:
+            if e.get('tech') == 'harmonic' and e['fret'] not in HARMONIC_UP: errors.append(f"{x['id']}: harmonic at fret {e['fret']}")
 for e in EXERCISES:
     for pair in e.get('pairs', []):
         for c in pair:

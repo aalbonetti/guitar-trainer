@@ -16,7 +16,7 @@ Playing a melody as **octaves** (the same note on two strings at once) sounds bi
 ### G major scale in octaves
 {{exercise:EX_octaves_G_major}}
 
-{{tool:metronome:bpm=60,beats=4,sub=1}}
+{{tool:metronome:bpm=ladder,beats=4,sub=1}}
 
 ### Make a hook
 Take three notes from the G major pentatonic, play them as octaves on strings 4 and 2, add the dotted-eighth delay (T.07) and a little drive. That's an intro.
