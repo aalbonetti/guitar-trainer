@@ -8,7 +8,7 @@ import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
 import { getSetList, importSetList, clearSetList, thisWeekSongs, thisWeekIndex } from '../setlist';
 import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
-import { progress, recordAttempt, saveStatus, streakInfo } from '../progressStore';
+import { progress, recordAttempt, saveStatus, streakInfo, firstPracticeDay } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
 import { exportAll, importAll, downloadBackup, shareBackup, canShareBackup } from '../db';
 import { TimingPanel, CalibrationCard, usePracticeTempo } from './Timing';
@@ -73,10 +73,11 @@ function BackupNudge() {
   const [, bump] = useState(0);
   const [msg, setMsg] = useState('');
   const last = persisted<number | null>('gt_last_backup', null).get();
-  const has = pr.days.length > 0 || Object.keys(pr.lp).length > 0;
   const days = last ? Math.floor((Date.now() - last) / 86400000) : null;
+  // Never backed up: wait until there are 14 days of practice history worth protecting (not on day one).
+  const first = firstPracticeDay(), since = first ? Math.floor((Date.parse(dayOf() + 'T12:00:00') - Date.parse(first + 'T12:00:00')) / 86400000) : -1;
   if (msg) return <section class="card nudge"><p class="okText">{msg}</p></section>;
-  if (!has || (days !== null && days < 14) || Date.now() < snoozePref.get()) return null;
+  if (since < 0 || (days === null ? since < 14 : days < 14) || Date.now() < snoozePref.get()) return null;
   const share = canShareBackup();
   return (
     <section class="card nudge">

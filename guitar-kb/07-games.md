@@ -15,13 +15,13 @@ A **game** section that turns the curriculum's skills into short replayable roun
 
 Each game remembers the mode you last used. Play-mode scores are kept apart from tap scores, because they're different skills.
 
-**Play mode rules (G2, 2026-11-22; proposed, Connor to confirm):**
+**Play mode rules (G2, 2026-11-22; proposed, to confirm):**
 - The app checks each played note against the answer it expects (exact octave), never open-ended. A note is a wrong answer only when it was clearly picked; a scrape, or the last note still ringing, never costs a life.
 - **Note Drop:** a note name; any octave the highlighted zone holds is right (it's a note-names game). An octave outside the zone is a miss.
 - **Fret Finder:** the app hears pitch, not strings, so it walks the strings (6 → 1) and you play every place on the lit string. On one string each place is a different octave, so the octave is checked.
 - **Octave Jump:** answer with the octave (2 strings over, 2 frets up), played on its own: the high note sits on the low note's overtone, so it can't be heard under it (the same reason EL.04 is assisted). Playing the low note first is allowed and doesn't count either way. Tap mode is the fallback.
 - **Box Runner** and **In the Pocket** are play only: tapping a screen in time isn't the same skill as picking or strumming in time.
-- Either mode's ★★ opens the next level.
+- Either mode's ★★ opens the next level. A game's first-listed mode is its default: tap for the G1 games, play for Octave Jump (tap is its fallback).
 
 ## 2. Games
 Every game's **first level is open from the start**; each next level opens with ★★ on the level before it (decided 2026-11-21). The game's `unlock_lesson` is shown as "Taught in …", a pointer, not a lock.
@@ -53,7 +53,7 @@ Every game's **first level is open from the start**; each next level opens with 
 
 ## 4. Progression (whole app, lessons included)
 - **XP:**
-  - Game score ÷ 100.
+  - Game score ÷ 500, at most 30 a round (G2 rebalance, proposed: ÷ 100 let one click-timed round give ~460 XP, ten lesson passes' worth).
   - Lesson pass +50.
   - Review passed +20.
   - Daily Challenge finished +30.
@@ -62,7 +62,7 @@ Every game's **first level is open from the start**; each next level opens with 
 - **Streak:** any day with ≥ 5 minutes of practice, games included.
   - **Sunday counts:** a "Played a service today" button keeps the streak on days you play at church without opening the app.
   - One **streak freeze** is earned per 7-day streak, holding at most 2.
-  - *How it's counted (G2):* practice minutes come from an activity clock (app on screen and touched in the last minute, or the click, tuner or mic running). Days logged before the clock existed still count. A freeze covers a missed day automatically; the frozen day doesn't add to the streak. Everything is recomputed from the day rows, so there's no streak row to drift.
+  - *How it's counted (G2):* practice minutes come from an activity clock (app on screen and touched in the last minute, or the click, tuner or mic running; with the screen off, the time the click actually played or the mic actually listened is added when the app is seen again). A day counts as practiced only when it meets the rule, so opening the app isn't a practice day. Days logged before the clock existed still count. A freeze covers a missed day automatically; the frozen day doesn't add to the streak. Everything is recomputed from the day rows, so there's no streak row to drift.
 - **Daily Challenge:** a 10-minute mix built from your weak spots: misses in `quiz_item_stats`, your slowest chord changes, and lessons whose reviews are due. It's the same every time it's opened that day.
 - **Fretboard heatmap** (Progress screen): your own accuracy and speed for each string and fret, from Note Drop and Fret Finder. Hard spots get weighted into the Daily Challenge.
 

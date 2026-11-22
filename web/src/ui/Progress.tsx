@@ -29,7 +29,7 @@ export function Progress({ cat }: { cat: Catalog }) {
   const days = new Set(pr.days), svc = new Set(pr.services);
   const sk = streakInfo(today), frozen = new Set(sk.frozen);
   const last28 = Array.from({ length: 28 }, (_, i) => addDays(today, i - 27));
-  const dayClass = (x: string) => (qualifies(pr.active[x] === undefined ? (days.has(x) ? { day: x } : undefined) : { day: x, active_s: pr.active[x] }, svc.has(x)) ? 'on' : frozen.has(x) ? 'frozen' : days.has(x) ? 'part' : '');
+  const dayClass = (x: string) => (qualifies(pr.active[x] === undefined ? (days.has(x) ? { day: x } : undefined) : { day: x, active_s: pr.active[x] }, svc.has(x)) ? 'on' : frozen.has(x) ? 'frozen' : (pr.active[x] || 0) > 0 ? 'part' : '');
 
   // minutes per week, last 8 weeks: practice time tracked per day; days from before that use practice sessions
   const weeks = Array.from({ length: 8 }, (_, i) => addDays(mondayOf(today), -7 * (7 - i)));

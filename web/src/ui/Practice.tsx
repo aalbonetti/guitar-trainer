@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { chime, capture } from '../audio/engine';
 import type { Catalog } from '../catalog';
 import { useStore } from '../store';
-import { progress, markPracticed } from '../progressStore';
+import { progress } from '../progressStore';
 import { computeStates, dayOf, isReviewDue } from '../progress';
 import { getSetList } from '../setlist';
 import { buildQueue, totalMinutes, itemHref, session, startSession, endSession, goTo, songLastPref, normRoutine, type Routine, type Item } from '../practice';
@@ -117,7 +117,7 @@ export function SessionBar() {
   if (!s || !it) return null;
   const last = s.idx >= s.items.length - 1;
   const fmt = (x: number) => `${x < 0 ? '+' : ''}${Math.floor(Math.abs(x) / 60)}:${String(Math.abs(x) % 60).padStart(2, '0')}`;
-  const next = () => { void markPracticed(); if (last) { goTo(s.idx, true); void endSession(); location.hash = '#/today'; } else { goTo(s.idx + 1, true); location.hash = itemHref(s.items[s.idx + 1]); } };
+  const next = () => { if (last) { goTo(s.idx, true); void endSession(); location.hash = '#/today'; } else { goTo(s.idx + 1, true); location.hash = itemHref(s.items[s.idx + 1]); } };
   return (
     <div class="sessionbar">
       <a href={itemHref(it)} class="where"><small>{s.idx + 1}/{s.items.length}</small> {it.title}</a>
