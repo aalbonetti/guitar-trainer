@@ -153,3 +153,14 @@ ol.queue li.done b { color:var(--muted); text-decoration:line-through; } ol.queu
 .trackbar { display:grid; grid-template-columns:1fr 2fr auto; gap:8px; align-items:center; margin:6px 0; font-size:14px; }
 .trackbar div { display:flex; height:10px; background:var(--card2); border-radius:6px; overflow:hidden; } .trackbar i.p { background:var(--ok); } .trackbar i.ip { background:#7a6528; }
 .ladder { height:6px; background:var(--card2); border-radius:4px; margin-top:4px; overflow:hidden; } .ladder i { display:block; height:100%; background:var(--accent); }
+
+/* M6: chart import + chart view */
+textarea.paste { width:100%; min-height:220px; font:14px/1.4 ui-monospace,Menlo,Consolas,monospace; color:var(--ink); background:#14161a; border:1px solid var(--line); border-radius:10px; padding:10px; }
+.prevsec { font-size:14px; margin:3px 0; }
+.chart .section h3 { margin-top:16px; }
+.cline { display:flex; flex-wrap:wrap; align-items:flex-end; margin:2px 0 6px; font-size:18px; line-height:1.25; }
+.cline .seg { display:inline-flex; flex-direction:column; white-space:pre; }
+.cline .seg b { color:var(--accent); font-size:16px; min-height:1.2em; padding-right:4px; }
+.cline.chordsonly { gap:14px; } .cline.chordsonly b { color:var(--accent); font-size:20px; }
+.cline.lyriconly { color:var(--muted); }
+@media (max-width:599px) { .chartpage .cline { font-size:17px; } }

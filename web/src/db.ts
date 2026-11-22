@@ -1,5 +1,5 @@
 // Minimal promise wrapper over IndexedDB. Tables follow guitar-kb/catalog/SCHEMA.md (on-device data).
-const NAME = 'guitar-trainer', VERSION = 3;
+const NAME = 'guitar-trainer', VERSION = 4;
 let dbp: Promise<IDBDatabase> | null = null;
 function open(): Promise<IDBDatabase> {
   if (dbp) return dbp;
@@ -9,6 +9,7 @@ function open(): Promise<IDBDatabase> {
       const d = r.result;
       if (e.oldVersion < 2 && !d.objectStoreNames.contains('calibration')) d.createObjectStore('calibration', { keyPath: 'key' });
       if (e.oldVersion < 3 && !d.objectStoreNames.contains('practice_session')) { const ps = d.createObjectStore('practice_session', { keyPath: 'id' }); ps.createIndex('day', 'day'); }
+      if (e.oldVersion < 4 && !d.objectStoreNames.contains('imported_chart')) d.createObjectStore('imported_chart', { keyPath: 'id' });
       if (e.oldVersion >= 1) return;
       d.createObjectStore('lesson_progress', { keyPath: 'lesson_id' });
       const a = d.createObjectStore('attempt', { keyPath: 'id', autoIncrement: true }); a.createIndex('lesson_id', 'lesson_id');
@@ -22,10 +23,11 @@ function open(): Promise<IDBDatabase> {
   return dbp;
 }
 const req = <T,>(r: IDBRequest<T>) => new Promise<T>((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-export const STORES = ['lesson_progress', 'attempt', 'practice_day', 'quiz_item_stats', 'kv', 'calibration', 'practice_session'] as const;
+export const STORES = ['lesson_progress', 'attempt', 'practice_day', 'quiz_item_stats', 'kv', 'calibration', 'practice_session', 'imported_chart'] as const;
 export async function getAll<T>(store: string): Promise<T[]> { const d = await open(); return req(d.transaction(store).objectStore(store).getAll()) as Promise<T[]>; }
 export async function get<T>(store: string, key: IDBValidKey): Promise<T | undefined> { const d = await open(); return req(d.transaction(store).objectStore(store).get(key)) as Promise<T | undefined>; }
 export async function put(store: string, value: unknown): Promise<void> { const d = await open(); await req(d.transaction(store, 'readwrite').objectStore(store).put(value)); }
+export async function del(store: string, key: IDBValidKey): Promise<void> { const d = await open(); await req(d.transaction(store, 'readwrite').objectStore(store).delete(key)); }
 export async function clear(store: string): Promise<void> { const d = await open(); await req(d.transaction(store, 'readwrite').objectStore(store).clear()); }
 
 /** Backup: every table, plus the small settings kept in localStorage (gt_* keys: set list, input, prefs). */
