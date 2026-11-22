@@ -17,7 +17,7 @@ import { xp } from '../xp';
 import { levelFor } from '../games/core';
 import { MyCharts } from './Charts';
 import { charts, loadCharts, chartFor } from '../charts';
-import { noteSongOpened } from '../practice';
+import { noteSongOpened, songPool, songOfWeek } from '../practice';
 import { attempt } from '../grading/runner';
 
 export const trackVisibleFor = (cat: Catalog) => (id: string) => trackVisible(cat, id);
@@ -53,8 +53,11 @@ export function Today({ cat }: { cat: Catalog }) {
               <button class="primary" onClick={() => go('#/tools/metronome')}>⏱ Metronome</button>
             </div>
           </section>
+          {(() => { const pool = songPool({ cat, setlist: sl }); const id = songOfWeek(pool.ids, new Date()); const o = id ? cat.outlineById[id] : null;
+            return o ? <section class="card"><h2>Song of the week</h2><p><a class="big-link" href={`#/song/${o.id}`}>{o.title}</a> <small class="muted">{o.artist}</small></p>
+              <p class="muted small">Picked at random from {pool.fromList ? 'your church’s song list' : 'the song library'}. A new one every Monday at 12:01 am.</p></section> : null; })()}
           <section class="card">
-            <h2>This week's songs {weekLabel ? <small class="muted">{weekLabel}</small> : null}</h2>
+            <h2>This week's set {weekLabel ? <small class="muted">{weekLabel}</small> : null}</h2>
             {sl ? (recent.length ? (
               <ul class="list">{recent.map(s => <li>{s.outlineId ? <a href={`#/song/${s.outlineId}`}>{s.name}</a> : <span class="muted">{s.name} (no outline)</span>}</li>)}</ul>
             ) : <p class="muted">No songs listed for this week. Import the updated set-list CSV in <a href="#/settings">Settings</a>.</p>)
