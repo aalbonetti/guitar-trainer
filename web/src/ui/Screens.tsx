@@ -5,7 +5,7 @@ import { describePass, lessonTempo } from '../catalog';
 import { shapeFor, transposeChord, keyUsesFlats, pcOf, keyName, KEY_NAMES, capoOptions, type Shape } from '../music';
 import { ChordDiagram, ScaleDiagram, StrumGrid } from './Diagrams';
 import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
-import { getSetList, importSetList, clearSetList, recentSongs } from '../setlist';
+import { getSetList, importSetList, clearSetList, thisWeekSongs, thisWeekIndex } from '../setlist';
 import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
 import { progress, recordAttempt } from '../progressStore';
@@ -29,7 +29,8 @@ export function Today({ cat }: { cat: Catalog }) {
   const { pr, states } = useStates(cat);
   const day = dayOf();
   const sl = getSetList();
-  const recent = sl ? recentSongs(sl, 4) : [];
+  const recent = sl ? thisWeekSongs(sl) : [];
+  const weekLabel = sl ? sl.weeks[thisWeekIndex(sl)] : '';
   const streak = (() => { let n = 0, d = day; const set = new Set(pr.days); if (!set.has(d)) d = addDaysLocal(d, -1); while (set.has(d)) { n++; d = addDaysLocal(d, -1); } return n; })();
   const passed = Object.values(states).filter(s => s === 'passed').length;
   const vis = (id: string) => trackVisible(cat, id);
@@ -48,11 +49,11 @@ export function Today({ cat }: { cat: Catalog }) {
             </div>
           </section>
           <section class="card">
-            <h2>This month's songs</h2>
+            <h2>This week's songs {weekLabel ? <small class="muted">{weekLabel}</small> : null}</h2>
             {sl ? (recent.length ? (
-              <ul class="list">{recent.map(s => <li>{s.outlineId ? <a href={`#/song/${s.outlineId}`}>{s.name}</a> : <span class="muted">{s.name} (no outline)</span>} <small class="muted">{s.last}</small></li>)}</ul>
-            ) : <p class="muted">No songs in the last 4 weeks of your imported list.</p>)
-              : <p class="muted">Import your set-list CSV in <a href="#/settings">Settings</a> to see what you're playing this month. It stays on this phone.</p>}
+              <ul class="list">{recent.map(s => <li>{s.outlineId ? <a href={`#/song/${s.outlineId}`}>{s.name}</a> : <span class="muted">{s.name} (no outline)</span>}</li>)}</ul>
+            ) : <p class="muted">No songs listed for this week. Import the updated set-list CSV in <a href="#/settings">Settings</a>.</p>)
+              : <p class="muted">Import your set-list CSV in <a href="#/settings">Settings</a> to see what you're playing this week. It stays on this phone.</p>}
           </section>
         </div>
       </div>
@@ -163,6 +164,17 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
   const states = computeStates(cat.lessons, cat.tracks, pr.lp);
   const att = useStore(attempt);
   const mark = async (mode: 'auto' | 'self') => { const ev = await recordAttempt(l, { met: true, atTarget: true, score: 1, mode }); setMsg(EVENT_TEXT[ev] || 'Logged. It counts once per day.'); };
+  if (states[l.id] === 'locked') {
+    const need = l.prereqs.filter(id => states[id] !== 'passed');
+    const t = cat.tracks.find(x => x.id === l.track);
+    const needF = t?.requires?.includes('F') && cat.lessons.some(x => x.track === 'F' && states[x.id] !== 'passed');
+    const nextUp = cat.lessons.find(x => states[x.id] === 'in_progress') || cat.lessons.find(x => states[x.id] === 'available');
+    return (
+      <section class="card"><h2>🔒 Not unlocked yet</h2>
+        <p class="muted">Read ahead if you like. Attempts open once you've passed {need.length ? need.map((id, i) => <span>{i ? ', ' : ''}<a href={`#/lesson/${id}`}>{id} {cat.lessonById[id]?.title}</a></span>) : null}{need.length && needF ? ' and ' : ''}{needF ? 'all of Foundations' : ''}.</p>
+        {nextUp ? <a class="btn primary" href={`#/lesson/${nextUp.id}`}>Go to your lesson: {nextUp.id} {nextUp.title}</a> : null}
+      </section>);
+  }
   if (type === 'quiz') return (
     <section class="card"><h2>Pass it</h2><p class="muted">Pass the quiz on this page on two different days. {due ? 'A review is due: take the quiz again today.' : ''}</p>
       {states[l.id] === 'locked' ? <p class="muted">Tip: finish the earlier lessons first ({l.prereqs.join(', ')}).</p> : null}</section>);
@@ -193,22 +205,22 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
 // ---------- Songs ----------
 export function Songs({ cat, selected }: { cat: Catalog; selected?: string }) {
   const [q, setQ] = useState('');
-  const [tab, setTab] = useState<'month' | 'all'>(getSetList() ? 'month' : 'all');
+  const [tab, setTab] = useState<'week' | 'all'>(getSetList() ? 'week' : 'all');
   const sl = getSetList();
-  const month = sl ? recentSongs(sl, 4) : [];
-  const list = tab === 'month'
-    ? month.map(s => ({ id: s.outlineId, title: s.name, sub: s.last || '' }))
+  const week = sl ? thisWeekSongs(sl) : [];
+  const list = tab === 'week'
+    ? week.map(s => ({ id: s.outlineId, title: s.name, sub: sl!.weeks[thisWeekIndex(sl!)] }))
     : cat.outlines.filter(o => !q || (o.title + ' ' + o.artist + ' ' + (o.ccli || '')).toLowerCase().includes(q.toLowerCase())).map(o => ({ id: o.id, title: o.title, sub: `${o.chart_key}${o.bpm ? ' · ' + o.bpm : ''}` }));
   return (
     <div class={`page songs ${selected ? 'has-sel' : ''}`}>
       <div class="songlist">
         <h1>Songs</h1>
         <div class="tabs">
-          <button class={tab === 'month' ? 'sel' : ''} onClick={() => setTab('month')}>This month</button>
+          <button class={tab === 'week' ? 'sel' : ''} onClick={() => setTab('week')}>This week</button>
           <button class={tab === 'all' ? 'sel' : ''} onClick={() => setTab('all')}>All ({cat.outlines.length})</button>
         </div>
         {tab === 'all' ? <input type="search" placeholder="Search title, artist, CCLI" value={q} onInput={e => setQ((e.target as HTMLInputElement).value)} /> : null}
-        {tab === 'month' && !sl ? <p class="muted">Import your set-list CSV in <a href="#/settings">Settings</a>.</p> : null}
+        {tab === 'week' && !sl ? <p class="muted">Import your set-list CSV in <a href="#/settings">Settings</a>.</p> : null}
         <ul class="list">
           {list.map(s => <li class={s.id === selected ? 'sel' : ''}>{s.id ? <a href={`#/song/${s.id}`}>{s.title}<small>{s.sub}</small></a> : <span class="muted">{s.title} <small>no outline yet</small></span>}</li>)}
         </ul>
