@@ -19,7 +19,8 @@ const dev = () => inputPref.get() || undefined;
 export function usePracticeTempo(l: Lesson): { bpm: number; goal: number; atGoal: boolean } | null {
   const a = useStore(attempt); const pr = useStore(progress);
   const [ladder, setLadder] = useState<Ladder | null>(null);
-  const timing = l.pass_criteria.type === 'timing';
+  // timing lessons, and pitch lessons played to a click (they have a bpm and a tempo ladder)
+  const timing = l.pass_criteria.type === 'timing' || (l.pass_criteria.type === 'pitch' && !!l.pass_criteria.bpm);
   useEffect(() => { if (timing) void getLadder(l).then(setLadder); }, [l.id, a.phase]);
   if (!timing) return null;
   const goal = (l.pass_criteria as unknown as TimingCriteria).bpm;
@@ -29,7 +30,7 @@ export function usePracticeTempo(l: Lesson): { bpm: number; goal: number; atGoal
   return { bpm, goal, atGoal: atGoal || bpm >= goal };
 }
 
-function Beats({ n, on, count }: { n: number; on: number; count: boolean }) {
+export function Beats({ n, on, count }: { n: number; on: number; count: boolean }) {
   return <div class={`attbeats ${count ? 'count' : ''}`}>{Array.from({ length: n }, (_, i) => <i class={`${on === i ? 'on' : ''} ${i === 0 ? 'one' : ''}`} />)}</div>;
 }
 

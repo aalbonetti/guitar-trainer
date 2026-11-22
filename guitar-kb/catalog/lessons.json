@@ -901,7 +901,8 @@
   ],
   "pass_criteria": {
    "type": "pitch",
-   "note_accuracy": 0.9
+   "note_accuracy": 0.9,
+   "bpm": 100
   },
   "assets": {
    "exercises": [
@@ -928,7 +929,11 @@
    "type": "pitch",
    "cents": 15
   },
-  "assets": {},
+  "assets": {
+   "exercises": [
+    "EX_bends_G"
+   ]
+  },
   "content": "content/EL.05.md",
   "review_days": [
    1,
@@ -949,7 +954,11 @@
    "type": "pitch",
    "note_accuracy": 0.9
   },
-  "assets": {},
+  "assets": {
+   "exercises": [
+    "EX_sixths_G_major"
+   ]
+  },
   "content": "content/EL.06.md",
   "review_days": [
    1,
@@ -968,11 +977,16 @@
   ],
   "pass_criteria": {
    "type": "pitch",
-   "note_accuracy": 0.9
+   "note_accuracy": 0.9,
+   "bpm": 80,
+   "any_octave": true
   },
   "assets": {
    "songs": [
     "SONG_amazing_grace"
+   ],
+   "exercises": [
+    "EX_amazing_grace_lines12"
    ]
   },
   "content": "content/EL.07.md",
@@ -1067,7 +1081,11 @@
    "type": "pitch",
    "note_accuracy": 0.9
   },
-  "assets": {},
+  "assets": {
+   "exercises": [
+    "EX_harmonics_swells"
+   ]
+  },
   "content": "content/EL.11.md",
   "review_days": [
    1,

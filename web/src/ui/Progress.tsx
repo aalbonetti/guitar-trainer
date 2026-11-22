@@ -35,7 +35,7 @@ export function Progress({ cat }: { cat: Catalog }) {
   const mins = weeks.map(w => Math.round(sessions.filter(s => s.day >= w && s.day < addDays(w, 7)).reduce((a, s) => a + s.total_s, 0) / 60));
   const maxM = Math.max(30, ...mins);
 
-  const timingLessons = cat.lessons.filter(l => l.pass_criteria.type === 'timing' && (ladders[l.id] || attempts.some(a => a.lesson_id === l.id)));
+  const timingLessons = cat.lessons.filter(l => (l.pass_criteria.type === 'timing' || (l.pass_criteria.type === 'pitch' && !!l.pass_criteria.bpm)) && (ladders[l.id] || attempts.some(a => a.lesson_id === l.id)));
   return (
     <div class="page">
       <h1>Progress</h1>
@@ -69,7 +69,7 @@ export function Progress({ cat }: { cat: Catalog }) {
             <h2>Recent attempts</h2>
             {attempts.length ? <ul class="list">{attempts.slice(0, 15).map(a => { const m = safe(a.metrics_json);
               return <li><a href={`#/lesson/${a.lesson_id}`}><b>{a.met_target ? '✓' : '·'} <span class="lid">{a.lesson_id}</span> {cat.lessonById[a.lesson_id]?.title}</b>
-                <small>{a.day} · {a.grader_mode === 'self' ? 'self-marked' : a.criterion_type}{m.bpm ? ` · ${m.bpm} BPM` : ''}{m.maeMs !== undefined ? ` · ${m.maeMs} ms` : ''}{a.criterion_type === 'quiz' ? ` · ${Math.round(a.score * 100)}%` : ''}</small></a></li>; })}</ul>
+                <small>{a.day} · {a.grader_mode === 'self' ? 'self-marked' : a.criterion_type}{m.bpm ? ` · ${m.bpm} BPM` : ''}{m.maeMs !== undefined ? ` · ${m.maeMs} ms` : ''}{a.criterion_type === 'quiz' || a.criterion_type === 'pitch' ? ` · ${Math.round(a.score * 100)}%` : ''}{a.grader_mode === 'assisted' ? ' · confirmed by you' : ''}</small></a></li>; })}</ul>
               : <p class="muted">No attempts yet.</p>}
           </section>
         </div>

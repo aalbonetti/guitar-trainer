@@ -786,7 +786,7 @@
   "type": "tab",
   "meter": "4/4",
   "tempo": {
-   "start": 60,
+   "start": 65,
    "target": 100,
    "step": 4
   },
@@ -886,6 +886,347 @@
     "string": 2,
     "fret": 20,
     "dur": 1.0
+   }
+  ],
+  "loop": false
+ },
+ {
+  "id": "EX_bends_G",
+  "name": "Bends in the G box: whole, whole, half",
+  "type": "tab",
+  "meter": "4/4",
+  "events": [
+   {
+    "beat": 0,
+    "string": 3,
+    "fret": 2,
+    "dur": 2.0,
+    "tech": "bend",
+    "bend": 2
+   },
+   {
+    "beat": 2,
+    "string": 2,
+    "fret": 3,
+    "dur": 2.0,
+    "tech": "bend",
+    "bend": 2
+   },
+   {
+    "beat": 4,
+    "string": 3,
+    "fret": 4,
+    "dur": 2.0,
+    "tech": "bend",
+    "bend": 1
+   }
+  ],
+  "loop": false
+ },
+ {
+  "id": "EX_sixths_G_major",
+  "name": "G major in 6ths (strings 3 & 1)",
+  "type": "tab",
+  "meter": "4/4",
+  "events": [
+   {
+    "beat": 0.0,
+    "string": 3,
+    "fret": 0,
+    "dur": 1.0
+   },
+   {
+    "beat": 0.0,
+    "string": 1,
+    "fret": 0,
+    "dur": 1.0
+   },
+   {
+    "beat": 1.0,
+    "string": 3,
+    "fret": 2,
+    "dur": 1.0
+   },
+   {
+    "beat": 1.0,
+    "string": 1,
+    "fret": 2,
+    "dur": 1.0
+   },
+   {
+    "beat": 2.0,
+    "string": 3,
+    "fret": 4,
+    "dur": 1.0
+   },
+   {
+    "beat": 2.0,
+    "string": 1,
+    "fret": 3,
+    "dur": 1.0
+   },
+   {
+    "beat": 3.0,
+    "string": 3,
+    "fret": 5,
+    "dur": 1.0
+   },
+   {
+    "beat": 3.0,
+    "string": 1,
+    "fret": 5,
+    "dur": 1.0
+   },
+   {
+    "beat": 4.0,
+    "string": 3,
+    "fret": 7,
+    "dur": 1.0
+   },
+   {
+    "beat": 4.0,
+    "string": 1,
+    "fret": 7,
+    "dur": 1.0
+   },
+   {
+    "beat": 5.0,
+    "string": 3,
+    "fret": 9,
+    "dur": 1.0
+   },
+   {
+    "beat": 5.0,
+    "string": 1,
+    "fret": 8,
+    "dur": 1.0
+   },
+   {
+    "beat": 6.0,
+    "string": 3,
+    "fret": 11,
+    "dur": 1.0
+   },
+   {
+    "beat": 6.0,
+    "string": 1,
+    "fret": 10,
+    "dur": 1.0
+   },
+   {
+    "beat": 7.0,
+    "string": 3,
+    "fret": 12,
+    "dur": 1.0
+   },
+   {
+    "beat": 7.0,
+    "string": 1,
+    "fret": 12,
+    "dur": 1.0
+   }
+  ],
+  "loop": false
+ },
+ {
+  "id": "EX_amazing_grace_lines12",
+  "name": "Amazing Grace melody, lines 1\u20132 (G box)",
+  "type": "tab",
+  "meter": "3/4",
+  "tempo": {
+   "start": 52,
+   "target": 80,
+   "step": 4
+  },
+  "events": [
+   {
+    "beat": 2,
+    "string": 5,
+    "fret": 5,
+    "dur": 1
+   },
+   {
+    "beat": 3,
+    "string": 4,
+    "fret": 5,
+    "dur": 2
+   },
+   {
+    "beat": 5,
+    "string": 3,
+    "fret": 4,
+    "dur": 0.5
+   },
+   {
+    "beat": 5.5,
+    "string": 4,
+    "fret": 5,
+    "dur": 0.5
+   },
+   {
+    "beat": 6,
+    "string": 3,
+    "fret": 4,
+    "dur": 2
+   },
+   {
+    "beat": 8,
+    "string": 3,
+    "fret": 2,
+    "dur": 1
+   },
+   {
+    "beat": 9,
+    "string": 4,
+    "fret": 5,
+    "dur": 2
+   },
+   {
+    "beat": 11,
+    "string": 4,
+    "fret": 2,
+    "dur": 1
+   },
+   {
+    "beat": 12,
+    "string": 5,
+    "fret": 5,
+    "dur": 2
+   },
+   {
+    "beat": 14,
+    "string": 5,
+    "fret": 5,
+    "dur": 1
+   },
+   {
+    "beat": 15,
+    "string": 4,
+    "fret": 5,
+    "dur": 2
+   },
+   {
+    "beat": 17,
+    "string": 3,
+    "fret": 4,
+    "dur": 0.5
+   },
+   {
+    "beat": 17.5,
+    "string": 4,
+    "fret": 5,
+    "dur": 0.5
+   },
+   {
+    "beat": 18,
+    "string": 3,
+    "fret": 4,
+    "dur": 2
+   },
+   {
+    "beat": 20,
+    "string": 3,
+    "fret": 2,
+    "dur": 1
+   },
+   {
+    "beat": 21,
+    "string": 2,
+    "fret": 3,
+    "dur": 3
+   }
+  ],
+  "loop": false
+ },
+ {
+  "id": "EX_harmonics_swells",
+  "name": "Harmonics at frets 12, 7, 5 (strings 3-2-1), then three swelled notes",
+  "type": "tab",
+  "meter": "4/4",
+  "events": [
+   {
+    "beat": 0.0,
+    "string": 3,
+    "fret": 12,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 2.0,
+    "string": 2,
+    "fret": 12,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 4.0,
+    "string": 1,
+    "fret": 12,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 6.0,
+    "string": 3,
+    "fret": 7,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 8.0,
+    "string": 2,
+    "fret": 7,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 10.0,
+    "string": 1,
+    "fret": 7,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 12.0,
+    "string": 3,
+    "fret": 5,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 14.0,
+    "string": 2,
+    "fret": 5,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 16.0,
+    "string": 1,
+    "fret": 5,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 18.0,
+    "string": 2,
+    "fret": 3,
+    "dur": 2.0,
+    "tech": "swell"
+   },
+   {
+    "beat": 20.0,
+    "string": 2,
+    "fret": 5,
+    "dur": 2.0,
+    "tech": "swell"
+   },
+   {
+    "beat": 22.0,
+    "string": 1,
+    "fret": 3,
+    "dur": 2.0,
+    "tech": "swell"
    }
   ],
   "loop": false
