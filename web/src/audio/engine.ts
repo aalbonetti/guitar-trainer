@@ -136,11 +136,13 @@ export interface CaptureState { on: boolean; label: string; error: string | null
 export const capture = new Store<CaptureState>({ on: false, label: '', error: null, gaps: 0, channels: 1, channel: 0 });
 /** Channel to analyze, per input route (track label). Default channel 1 (index 0). */
 export const channelPref = persisted<Record<string, number>>('gt_input_channel', {});
-export function channelFor(label: string): number { return channelPref.get()[label] ?? 0; }
+export function channelFor(label: string, deviceId?: string): number { const p = channelPref.get(); return p[label] ?? p[deviceKey(deviceId)] ?? 0; }
+/** The choice is also kept under the chosen device id, so Settings can show it before the input is opened. */
+export const deviceKey = (deviceId?: string) => `id:${deviceId || 'default'}`;
 /** Pick the channel to grade from, for the input that's open now. Remembered for that input. */
 export function setInputChannel(ch: number) {
   const label = capture.get().label;
-  if (label) channelPref.set({ ...channelPref.get(), [label]: ch });
+  if (label) channelPref.set({ ...channelPref.get(), [label]: ch, [deviceKey(openDevice)]: ch });
   node?.port.postMessage({ ch });
   capture.set({ channel: Math.min(ch, Math.max(0, capture.get().channels - 1)) });
 }
@@ -203,10 +205,10 @@ export async function acquireCapture(who: string, deviceId?: string): Promise<vo
     }
     await workletReady;
     node = new AudioWorkletNode(c, 'cap', { numberOfInputs: 1, numberOfOutputs: 1, channelCountMode: 'max' }); wAbs = 0;
-    const want = channelFor(label);
+    const want = channelFor(label, deviceId);
     node.port.postMessage({ ch: want });
     node.port.onmessage = (e: MessageEvent) => {
-      if (e.data.chs != null) { const n = e.data.chs as number; capture.set({ channels: n, channel: Math.min(channelFor(capture.get().label), n - 1) }); return; }
+      if (e.data.chs != null) { const n = e.data.chs as number; capture.set({ channels: n, channel: Math.min(channelFor(capture.get().label, openDevice), n - 1) }); return; }
       const { f, d, pk } = e.data as { f: number; d: Float32Array; pk?: Float32Array };
       if (levelWatchers && pk) {
         pk.forEach((v, i) => { levelAcc[i] = Math.max(levelAcc[i] || 0, v); });

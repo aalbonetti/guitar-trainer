@@ -24,7 +24,7 @@ The graded attempt plays these two lines with a click in 3/4 (one bar of count-i
 
 {{scale:G_major_pent_pos2}}
 
-{{tool:metronome:bpm=80,beats=3,sub=1}}
+{{tool:metronome:bpm=ladder,beats=3,sub=1}}
 
 > Play the melody slightly *behind* the singer in your head, like a violin answering a vocal. That's the feel of a good worship lead.
 

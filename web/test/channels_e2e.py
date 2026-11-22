@@ -33,9 +33,11 @@ async def main():
         saved=await pg.evaluate("localStorage.getItem('gt_input_channel')"); check('channel saved per input', saved and json.loads(saved).get('simulated input')==2, saved)
         await pg.click('.chanpick button:has-text("Done")')
         await pg.reload(); await pg.wait_for_selector('text=Choose input channel')
+        txt=await pg.inner_text('.chanpick'); check('input closed after reload: picker shows the saved channel 3', 'channel 3 (saved for this input)' in txt, txt)
         await pg.click('button:has-text("Choose input channel")'); await pg.wait_for_selector('text=4 channels', timeout=8000); await pg.wait_for_timeout(600)
         sel=await pg.inner_text('.chanlist button.sel'); check('remembered after reload', 'Ch 3' in sel, sel)
-        f=await freq(pg); check('still analyzing channel 3 after reload (no decoy)', not f or abs(f-440)>5, f)
+        await pg.evaluate("__gtSimNotes([{midi:57,t:__gtCtxNow()+0.05,dur:1.6,gain:0.6}])"); await pg.wait_for_timeout(700)
+        f=await freq(pg); check('still analyzing channel 3 after reload: hears the A3 note (220 Hz), not the decoy', f and abs(f-220)<1.5, f)
         await pg.click('.chanpick button:has-text("Done")')
         # ---- metronome: 6/8 + accent editing ----
         await pg.goto(base+'#/tools/metronome'); await pg.wait_for_selector('.metro')

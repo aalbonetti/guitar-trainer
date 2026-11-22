@@ -1,6 +1,6 @@
 // Tuner and metronome UI: full panels (Tools screen) and the compact bar/sheet used inside lessons and songs.
 import { useEffect, useState } from 'preact/hooks';
-import { metro, tuner, capture, levels, startMetronome, stopMetronome, setMetro, tapTempo, startTuner, stopTuner, playReference, listInputs, acquireCapture, releaseCapture, setInputChannel, watchLevels, channelPref, type MetroPreset } from '../audio/engine';
+import { metro, tuner, capture, levels, startMetronome, stopMetronome, setMetro, tapTempo, startTuner, stopTuner, playReference, listInputs, acquireCapture, releaseCapture, setInputChannel, watchLevels, channelPref, deviceKey, type MetroPreset } from '../audio/engine';
 import { METERS, meterInfo, subOptions, toggleAccent } from '../audio/meter';
 import { useStore, persisted } from '../store';
 
@@ -144,11 +144,14 @@ function ChannelPicker({ device }: { device: string }) {
     acquireCapture('settings', device || undefined).catch(e => { setErr((e as Error).message || 'Microphone not available'); setShow(false); });
     return () => { off(); releaseCapture('settings'); };
   }, [show, device]);
-  const saved = Object.entries(channelPref.get()).filter(([, ch]) => ch > 0);
+  const saved = Object.entries(channelPref.get()).filter(([k, ch]) => ch > 0 && !k.startsWith('id:'));
+  // input closed (e.g. after a reload): show the channel saved for the selected input, which is what grading will use
+  const savedHere = channelPref.get()[deviceKey(device || undefined)];
+  const showCh = cap.on && cap.channels > 1 ? `channel ${cap.channel + 1} of ${cap.channels}` : !cap.on && savedHere !== undefined ? `channel ${savedHere + 1} (saved for this input)` : 'channel 1';
   return (
     <div class="chanpick">
       {!show ? <>
-        <p class="muted small">Grading listens to {cap.on && cap.channels > 1 ? `channel ${cap.channel + 1} of ${cap.channels}` : 'channel 1'} of the input{saved.length ? ` · saved: ${saved.map(([l, ch]) => `${l} → ch ${ch + 1}`).join(', ')}` : ''}.</p>
+        <p class="muted small">Grading listens to {showCh} of the input{saved.length ? ` · saved: ${saved.map(([l, ch]) => `${l} → ch ${ch + 1}`).join(', ')}` : ''}.</p>
         <button class="small" onClick={() => setShow(true)}>Choose input channel</button>
       </> : <>
         <p class="small">{cap.on ? <><b>{cap.label}</b>: {cap.channels} channel{cap.channels === 1 ? '' : 's'}.</> : 'Opening the input…'} {cap.channels > 1 ? 'Play a few notes; the bar that moves is your guitar. Tap it to grade from that channel. On the Kemper pick a dry or clean channel (no delay or reverb).' : cap.on ? 'Nothing to choose: this input has one channel.' : ''}</p>
