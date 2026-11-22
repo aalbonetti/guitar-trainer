@@ -19,5 +19,10 @@ A congregation usually sings it in **A** or **Bb**: capo 2 or 3 with the same G 
 ### The three-chord hymn set
 Many old hymns use only 1, 4 and 5. Once Amazing Grace is solid, try the same chords on other hymns you know.
 
+### Pass it
+Strum the waltz pattern through the chords to the click, one bar per chord. Without a capo it's in G; pick capo 2 or 3 if you want the A or Bb version.
+
+{{exercise:EX_amazing_grace_chords}}
+
 ### Goal
 The whole hymn at tempo, chords changing on time.

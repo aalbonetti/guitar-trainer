@@ -26,5 +26,9 @@ The Am shape with the index barring from string 5. Root on **string 5**: fret 2 
 ### Use it
 Replace Fmaj7 with F in **C – Am – F – G**, and the partial Bm with a full Bm in **D – Bm – G – A**.
 
+{{exercise:EX_barre_F_Bm}}
+
+> The app checks that each strum sounds like the chord (F, not your old Fmaj7), not each string. Check for dead strings yourself, one at a time.
+
 ### Goal
 80% of strums ring clean on F and Bm.

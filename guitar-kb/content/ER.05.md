@@ -16,5 +16,9 @@ The same idea one string set lower: a bit warmer and fuller, good for verses and
 
 {{tool:metronome:bpm=70,beats=4,sub=1}}
 
+Graded version: these four shapes, one bar each, to the click at 70 BPM.
+
+{{exercise:EX_triads_432_G}}
+
 ### Goal
 90% clean on the 4-3-2 shapes, changing on time.

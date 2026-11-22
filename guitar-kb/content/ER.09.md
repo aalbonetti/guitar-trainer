@@ -26,5 +26,7 @@ Name each chord from the note under your index finger (F.07).
 
 {{tool:metronome:bpm=80,beats=4,sub=2}}
 
+{{exercise:EX_barre_progression_G}}
+
 ### Goal
 90% of strums ring clean through the progression.
