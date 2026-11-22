@@ -19,8 +19,8 @@ const dev = () => inputPref.get() || undefined;
 export function usePracticeTempo(l: Lesson): { bpm: number; goal: number; atGoal: boolean } | null {
   const a = useStore(attempt); const pr = useStore(progress);
   const [ladder, setLadder] = useState<Ladder | null>(null);
-  // timing lessons, and pitch lessons played to a click (they have a bpm and a tempo ladder)
-  const timing = l.pass_criteria.type === 'timing' || (l.pass_criteria.type === 'pitch' && !!l.pass_criteria.bpm);
+  // timing lessons, and pitch/chord lessons played to a click (they have a bpm and a tempo ladder)
+  const timing = l.pass_criteria.type === 'timing' || ((l.pass_criteria.type === 'pitch' || l.pass_criteria.type === 'chord_accuracy') && !!l.pass_criteria.bpm);
   useEffect(() => { if (timing) void getLadder(l).then(setLadder); }, [l.id, a.phase]);
   if (!timing) return null;
   const goal = (l.pass_criteria as unknown as TimingCriteria).bpm;

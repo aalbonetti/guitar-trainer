@@ -159,9 +159,15 @@ function PickGrid({ p }: { p: { id: string; name?: string; meter: string; grid: 
 
 /** Tab for `tab` exercises (one column per eighth or sixteenth), chord pairs for `chord_changes`. */
 function ExerciseView({ e, cat }: { e: Exercise & { events?: { beat: number; string: number; fret: number; dur: number; tech?: string }[] }; cat: Catalog }) {
+  const vname = (id: string) => e.voicings?.[id]?.name || cat.chords.find(c => c.id === id)?.name.replace(/\s*\(.*\)$/, '') || id;
   if (e.type === 'chord_changes' && e.pairs) {
-    const name = (id: string) => cat.chords.find(c => c.id === id)?.name.replace(/\s*\(.*\)$/, '') || id;
-    return <div class="card inset"><b>{e.name}</b><p class="muted">60 seconds per pair, as many clean changes as you can:</p><div class="chordline">{e.pairs.map(p => <span>{p.map(name).join(' ↔ ')}</span>)}</div></div>;
+    return <div class="card inset"><b>{e.name}</b><p class="muted">60 seconds per pair, as many clean changes as you can:</p><div class="chordline">{e.pairs.map(p => <span>{p.map(vname).join(' ↔ ')}</span>)}</div></div>;
+  }
+  if (e.type === 'chord_progression' && e.variants) {
+    const v = e.variants[0], nums = e.show === 'numbers';
+    return <div class="card inset"><b>{e.name}</b>
+      <p class="muted">{e.pace === 'timed' ? `To a click${e.bpm ? ` at ${e.bpm} BPM` : e.tempo ? `, ${e.tempo.start} → ${e.tempo.target} BPM` : ''}, one chord per ${e.meter === '3/4' ? 'bar of 3' : 'bar'}.` : `At your own pace, ${e.strums_per_chord} strums per chord.`}{e.variants.length > 1 ? ` ${nums ? 'Keys' : 'Options'}: ${e.variants.map(x => (nums ? x.key : x.label.replace('Key of ', ''))).join(' · ')}.` : ''}</p>
+      <div class="chordline">{v.capo ? <span class="capo">capo {v.capo}</span> : null}{v.chords.map((c, i) => <span>{nums && v.numbers ? v.numbers[i] : vname(c)}</span>)}</div></div>;
   }
   const ev = e.events || [];
   if (!ev.length) return <div class="card inset"><b>{e.name}</b></div>;
