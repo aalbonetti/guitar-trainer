@@ -3,7 +3,6 @@
 import type { Catalog, Lesson } from './catalog';
 import { isReviewDue, type LessonProgress, type State } from './progress';
 import type { SetList } from './setlist';
-import { thisWeekSongs } from './setlist';
 import { Store, persisted } from './store';
 import * as db from './db';
 
@@ -72,21 +71,45 @@ export function buildQueue(q: QueueInput, routine: Routine): Item[] {
 /** Small deterministic hash, so "random" picks stay put for the whole day. */
 export function dayHash(str: string): number { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 
-function pickSong(q: QueueInput, lessonIds: string[]): { id: string; title: string; why: string } | null {
+// ---------- song of the week ----------
+// One song per week, picked at random from the church song list, rolling over Monday 12:01 am Central.
+export const WEEK_TZ = 'America/Chicago';
+/** Date (YYYY-MM-DD) of the Monday that starts the song week containing `now`, in Central time. */
+export function songWeekStart(now: Date): string {
+  const t = new Date(now.getTime() - 60_000); // 12:00–12:00:59 am Monday still belongs to last week
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: WEEK_TZ, year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' }).formatToParts(t).map(x => [x.type, x.value]));
+  const back = ({ Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 } as Record<string, number>)[p.weekday];
+  const d = new Date(Date.UTC(+p.year, +p.month - 1, +p.day - back));
+  return d.toISOString().slice(0, 10);
+}
+/** Random but fixed for the week. The list is shuffled into a random order and walked one song per week, so
+ *  every song gets a turn before any repeats; each pass reshuffles, and a pass never starts with the song that
+ *  ended the previous one. */
+export function songOfWeek(pool: string[], now: Date): string | null {
+  const ids = [...new Set(pool)].sort(), n = ids.length;
+  if (!n) return null;
+  const w = Math.round((Date.parse(songWeekStart(now) + 'T12:00:00Z') - Date.parse('2024-01-01T12:00:00Z')) / (7 * 86400000)); // 2024-01-01 is a Monday
+  const order = (cycle: number) => {
+    const a = [...ids]; let h = dayHash('song-cycle|' + cycle + '|' + ids.join(','));
+    for (let i = n - 1; i > 0; i--) { h = Math.imul(h ^ (h >>> 13), 1597334677) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  };
+  const cycle = Math.floor(w / n), o = order(cycle);
+  if (n > 1 && cycle > 0 && o[0] === order(cycle - 1)[n - 1]) [o[0], o[1]] = [o[1], o[0]];
+  return o[((w % n) + n) % n];
+}
+/** The pool: every song on the imported church list that has a chart outline (else all outlines with lessons). */
+export function songPool(q: Pick<QueueInput, 'cat' | 'setlist'>): { ids: string[]; fromList: boolean } {
   const has = (id: string | null): id is string => !!id && q.cat.outlines.some(o => o.id === id);
-  const title = (id: string) => q.cat.outlines.find(o => o.id === id)!.title;
-  const choose = (ids: string[]) => ids[dayHash(q.day + '|' + ids.join(',')) % ids.length];
-  if (q.setlist) {
-    const week = [...new Set(thisWeekSongs(q.setlist, q.today).map(s => s.outlineId).filter(has))];
-    if (week.length) { const id = choose(week); return { id, title: title(id), why: 'On this week’s set list' }; }
-    const all = [...new Set(q.setlist.songs.map(s => s.outlineId).filter(has))];
-    if (all.length) { const id = choose(all); return { id, title: title(id), why: 'From your church’s song list' }; }
-  }
-  const linked = q.cat.outlines.filter(o => o.practice_for.some(id => lessonIds.includes(id))).map(o => o.id);
-  const pool = linked.length ? linked : q.cat.outlines.filter(o => o.practice_for.length).map(o => o.id);
-  if (!pool.length) return null;
-  const id = choose(pool);
-  return { id, title: title(id), why: linked.length ? 'Uses what you’re working on' : 'Song practice' };
+  const list = q.setlist ? q.setlist.songs.map(s => s.outlineId).filter(has) : [];
+  return list.length ? { ids: list, fromList: true } : { ids: q.cat.outlines.filter(o => o.practice_for.length).map(o => o.id), fromList: false };
+}
+
+function pickSong(q: QueueInput, _lessonIds: string[]): { id: string; title: string; why: string } | null {
+  const { ids, fromList } = songPool(q);
+  const id = songOfWeek(ids, q.today || new Date());
+  if (!id) return null;
+  return { id, title: q.cat.outlines.find(o => o.id === id)!.title, why: fromList ? 'Song of the week, from your church’s list' : 'Song of the week' };
 }
 
 export const totalMinutes = (items: Item[]) => items.reduce((s, i) => s + (i.minutes || 0), 0);
