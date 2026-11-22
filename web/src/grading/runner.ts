@@ -137,7 +137,7 @@ export async function runTimingAttempt(l: Lesson, cat: Catalog, opts: { bpm?: nu
     const next = bpm === ladder.bpm ? ladderStep(ladder, crit.bpm, r) : r.clean && bpm > ladder.bpm ? { bpm: Math.min(bpm, crit.bpm), clean: 0, sloppy: 0 } : ladder;
     await saveLadder(l, next);
     const event = await recordAttempt(l, { met: r.met, atTarget, score: Math.round(r.slotsRight * 100) / 100, mode: 'auto',
-      metrics: { bpm, maeMs: +r.maeMs.toFixed(1), biasMs: +r.biasMs.toFixed(1), hitRatio: +r.hitRatio.toFixed(3), extras: r.extras, offsetMs: cal.offset_ms, route: cal.input_route, posture: cal.posture } });
+      metrics: { bpm, maeMs: +r.maeMs.toFixed(1), biasMs: +r.biasMs.toFixed(1), hitRatio: +r.hitRatio.toFixed(3), extras: r.extras, offsetMs: cal.offset_ms, route: cal.input_route, ch: capture.get().channel, posture: cal.posture } });
     attempt.set({ phase: 'result', result: r, event, ladder: next, prevLadderBpm: ladder.bpm, beat: -1, step: -1 });
   } catch (err) {
     finish(); if (!sig.cancelled) attempt.set({ phase: 'error', message: (err as Error).message || 'Microphone not available' });

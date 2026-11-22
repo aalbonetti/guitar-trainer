@@ -48,7 +48,7 @@ export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
       <a class="back-narrow" href="#/songs">‹ Songs</a>
       <h2 class="title">{o.title}</h2>
       <p class="muted">{o.artist}{o.ccli ? ` · CCLI ${o.ccli}` : ''} · original key {o.original_key}{o.bpm ? ` · ${o.bpm} BPM` : ''}{o.meter ? ` · ${o.meter}` : ''}</p>
-      <ToolBar preset={{ bpm: o.bpm || 72, beats, sub }} label={o.bpm ? 'song tempo' : 'tap to set'} />
+      <ToolBar preset={{ bpm: o.bpm || 72, beats, sub, meter: o.meter || '4/4' }} label={o.bpm ? 'song tempo' : 'tap to set'} />
       <div class="row wrap">
         <label class="field inline">Key <select value={key} onChange={e => setKey((e.target as HTMLSelectElement).value)}>{KEY_NAMES.map(k => <option value={k}>{k}{k === o.chart_key ? ' (chart)' : ''}</option>)}</select></label>
         <label class="field inline">Capo <select value={capo} onChange={e => save({ capo: +(e.target as HTMLSelectElement).value })}>

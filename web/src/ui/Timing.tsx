@@ -5,7 +5,7 @@ import { useStore } from '../store';
 import { attempt, runCalibration, runTimingAttempt, cancelAttempt, getCalibration, getLadder, allCalibrations, posture, routeName, type Calibration } from '../grading/runner';
 import { lessonFeel, coachLine, type TimingCriteria, type TimingResult } from '../grading/timing';
 import type { Ladder } from '../grading/timing';
-import { bluetoothOutputLikely, tunedThisSession, capture } from '../audio/engine';
+import { bluetoothOutputLikely, tunedThisSession, capture, routeLabel } from '../audio/engine';
 import { inputPref, TunerPanel } from './Tools';
 import { EVENT_TEXT } from '../progress';
 import { saveStatus, progress } from '../progressStore';
@@ -155,7 +155,7 @@ export function TimingPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Le
       <div class="row wrap">
         <button class="primary" onClick={() => start(ladderBpm)}>{r ? 'Go again' : 'Start'} at {ladderBpm} BPM</button>
       </div>
-      <p class="muted small">Grading {cap.label ? `with ${cap.label}` : 'with the selected input'} · {posture()} · <a href="#/settings">calibration</a></p>
+      <p class="muted small">Grading {cap.label ? `with ${routeLabel()}` : 'with the selected input'} · {posture()} · <a href="#/settings">calibration</a></p>
     </div>
   );
 }
