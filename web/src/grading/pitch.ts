@@ -253,9 +253,14 @@ export function verifySegment(seg: Segment, e: Pick<Expected, 'midis'>, anyOctav
 // ---------- note_accuracy ----------
 export interface NoteResult { label: string; where: string; t: number; ok: boolean; heard: string | null; cents: number | null; offMs: number | null; why?: Verify['why'] }
 export interface NotesGrade {
-  mode: 'timed' | 'free'; notes: NoteResult[]; matched: number; expected: number; accuracy: number; extras: number;
+  mode: 'timed' | 'free'; notes: NoteResult[]; matched: number; expected: number; accuracy: number; extras: number; tooManyExtras: boolean;
   met: boolean; clean: boolean; sloppy: boolean; great: boolean; meanOffMs: number | null; heardNotes: number;
 }
+/** At your own pace there's no clock to rule notes out, so spraying notes could match everything in order.
+ *  A free-mode attempt fails with more extra notes than this. First guess: tune it after the real-phone test
+ *  (slides and swells may split into a few extra pieces on a real guitar). */
+export const FREE_EXTRAS_MIN = 3, FREE_EXTRAS_RATIO = 0.5;
+export const freeExtrasCap = (expected: number) => Math.max(FREE_EXTRAS_MIN, Math.ceil(expected * FREE_EXTRAS_RATIO));
 /** Window (s) within which a timed note must start: half a beat, between 150 and 450 ms. */
 export const noteTolerance = (beatS: number) => Math.min(0.45, Math.max(0.15, 0.5 * beatS));
 /** Match expected notes to heard notes in order (an alignment, so one missed or extra note doesn't shift the rest).
@@ -296,8 +301,9 @@ export function gradeNotes(segs: Segment[], exp: Expected[], o: { target: number
   const extras = segs.filter((s, j) => !used.has(j) && s.t1 - s.t0 >= 0.08 && s.voiced >= 0.5).length; // `used` has matched and heard-instead notes
   const accuracy = E ? matched / E : 0;
   const offs = notes.filter(n => n.offMs !== null).map(n => n.offMs!);
-  const met = E > 0 && accuracy >= o.target - 1e-9;
-  return { mode: o.timed ? 'timed' : 'free', notes, matched, expected: E, accuracy, extras, met, clean: met, sloppy: accuracy < 0.8, great: E > 0 && matched === E,
+  const tooManyExtras = !o.timed && extras > freeExtrasCap(E);
+  const met = E > 0 && accuracy >= o.target - 1e-9 && !tooManyExtras;
+  return { mode: o.timed ? 'timed' : 'free', notes, matched, expected: E, accuracy, extras, tooManyExtras, met, clean: met, sloppy: accuracy < 0.8, great: E > 0 && matched === E,
     meanOffMs: offs.length ? mean(offs) : null, heardNotes: segs.length };
 }
 
@@ -332,7 +338,8 @@ export class HoldTracker {
     if (f.rms < this.floorRms) { if (++this.quiet >= 3) { this.restart(); this.lastRaw = null; } return { progress: 0, done: false, cents: null, heard: null, rose: false }; }
     this.quiet = 0;
     let d = raw;
-    if (d !== null && this.target.octaveSlack) d -= 1200 * Math.round(d / 1200);
+    // tuning: accept only the one slip YIN makes on a low string (reading its octave above), not any octave
+    if (d !== null && this.target.octaveSlack && Math.abs(d - 1200) <= this.cents + 25) d -= 1200;
     if (raw !== null) this.minRel = Math.min(this.minRel, raw);
     this.win.push({ t: f.t, d });
     while (this.win.length && this.win[0].t < f.t - this.holdS - 1e-6) this.win.shift();
@@ -371,6 +378,7 @@ export function buildNotePlan(exp: Expected[], bpm: number, beatsPerBar: number,
 
 /** Plain-language summary for the result card. */
 export function pitchCoach(g: NotesGrade): string {
+  if (g.tooManyExtras) return `I heard ${g.extras} notes that aren't in the exercise. Play just these notes, one at a time, and let each ring.`;
   if (g.heardNotes < g.expected * 0.4) return 'I heard very few notes. Pick a bit harder, or move the phone closer to the amp or guitar.';
   const misses = g.notes.filter(n => !n.ok);
   if (!misses.length) return g.mode === 'timed' ? 'Every note right and in its place.' : 'Every note right.';
