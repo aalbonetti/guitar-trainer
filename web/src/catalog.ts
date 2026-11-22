@@ -10,7 +10,12 @@ export interface Strum { id: string; name?: string; meter: string; grid: number;
 export interface Picking { id: string; name?: string; meter: string; grid: number; steps: Record<string, string | number>[] }
 export interface PdSong { id: string; title: string; words: string; tune: string; key: string; meter: string; tempo: number; sections: { name: string; bars: string[]; numbers: string[]; lyrics: string[] }[] }
 export interface Quiz { id: string; lesson: string; type: string; prompt: string; params: Record<string, unknown> }
-export interface Exercise { id: string; name: string; type: string; meter?: string; tempo?: { start: number; target: number; step: number }; pairs?: string[][] }
+export interface Exercise {
+  id: string; name: string; type: string; meter?: string; tempo?: { start: number; target: number; step: number }; pairs?: string[][]; bpm?: number;
+  /** chord exercises (M8): every chord ref resolved to its voicing by build_catalog.py */
+  voicings?: Record<string, { name: string; frets: number[][]; where: string }>;
+  variants?: { key: string; capo: number; chords: string[]; numbers?: string[]; label: string }[]; show?: string; pace?: string; strums_per_chord?: number;
+}
 export interface Section { name: string; chords_in_chart_key: string[]; numbers: string[] }
 export interface Outline {
   id: string; title: string; artist: string; ccli: number | null; original_key: string; bpm: number | null; meter: string | null;
@@ -50,7 +55,7 @@ export function describePass(p: PassCriteria): string {
     case 'timing': return `In time with the click: ${n('bars')} bars at ${n('bpm')} BPM, ${({ 4: 'quarter notes', 6: 'triplet feel', 8: 'eighth notes', 16: 'sixteenth notes' } as Record<number, string>)[n('subdivision')] || n('subdivision') + 'ths'}, average error ≤ ${n('max_err_ms')} ms`;
     case 'pitch': return p.cents ? `Pitch: hold ${p.scope === 'all_strings' ? 'every open string' : 'each bend'} within ±${n('cents')} cents for half a second`
       : `Notes: ${Math.round(n('note_accuracy') * 100)}% of the exercise's notes right, in order${p.bpm ? `, with the click at ${n('bpm')} BPM` : ', at your own pace'}`;
-    case 'chord_accuracy': return `Chords: ${Math.round(n('ratio') * 100)}% of strums ring as the right chord`;
+    case 'chord_accuracy': return `Chords: ${Math.round(n('ratio') * 100)}% of strums ring as the right chord${p.bpm ? `, with the click at ${n('bpm')} BPM` : ''}`;
     case 'changes_per_min': return `Chord changes: ${n('target')} a minute${p.pair ? ` (${(p.pair as string[]).join(' ↔ ')})` : ''}`;
     default: return p.type;
   }
@@ -75,7 +80,8 @@ export function lessonTempo(l: Lesson, cat: Pick<Catalog, 'exercises' | 'strums'
   const p = l.pass_criteria;
   const ex = (l.assets.exercises || []).map(id => cat.exercises.find(e => e.id === id)).find(e => e && e.tempo);
   const song = (l.assets.songs || []).map(id => cat.songs.find(s => s.id === id)).find(Boolean);
-  const bpm = (p.bpm as number) || (ex && ex.tempo ? ex.tempo.start : 0) || song?.tempo || 80;
+  const fixed = (l.assets.exercises || []).map(id => cat.exercises.find(e => e.id === id)).find(e => e && e.bpm);
+  const bpm = (p.bpm as number) || (ex && ex.tempo ? ex.tempo.start : 0) || fixed?.bpm || song?.tempo || 80;
   const meter = lessonMeter(l, cat);
   const compound = meter === '6/8';
   const beats = compound ? 2 : Math.max(1, parseInt(meter, 10) || 4);

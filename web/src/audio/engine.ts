@@ -393,6 +393,31 @@ function simNoteBuffer(c: AudioContext, n: SimNote): AudioBuffer {
   }
   return buf;
 }
+/** Test-only: strummed chords into the simulated input. Each sounding string is a Karplus-Strong pluck at its
+ *  MIDI note (frets 6 → 1, -1 muted, plus `capo`), strummed 12–25 ms apart (down: low to high, `up`: reverse),
+ *  each string 0.6–1.4 × `gain`. Like a real guitar, striking a string stops its previous note; strings the next
+ *  chord doesn't strum keep ringing. `drop` = strings (6..1) missed by the pick. Times are context seconds. */
+export interface SimChord { frets: number[]; t: number; capo?: number; gain?: number; dur?: number; drop?: number[]; up?: boolean; spread?: number }
+const simStrings: (AudioBufferSourceNode | null)[] = [null, null, null, null, null, null];
+(globalThis as any).__gtSimChords = (list: SimChord[]) => {
+  if (!SIM) return false;
+  const c = audioContext(); simBus = simBus || c.createGain();
+  const OPEN = [40, 45, 50, 55, 59, 64];
+  for (const ch of [...list].sort((a, b) => a.t - b.t)) {
+    const spread = ch.spread ?? 0.012 + Math.random() * 0.013;
+    const order = ch.frets.map((_, i) => i).filter(i => ch.frets[i] >= 0 && !(ch.drop || []).includes(6 - i));
+    if (ch.up) order.reverse();
+    order.forEach((i, k) => {
+      const at = Math.max(c.currentTime, ch.t + k * spread);
+      const s = c.createBufferSource(); s.buffer = pluckBuffer(c, OPEN[i] + ch.frets[i] + (ch.capo || 0) + (Math.random() - 0.5) * 0.1, ch.dur ?? 1.6);
+      const g = c.createGain(); g.gain.value = (ch.gain ?? 0.8) * (0.6 + 0.8 * Math.random());
+      s.connect(g); g.connect(simBus!);
+      const prev = simStrings[i]; if (prev) { try { prev.stop(at + 0.005); } catch { /* already stopped */ } }
+      s.start(at); simStrings[i] = s;
+    });
+  }
+  return true;
+};
 /** Soft two-note bell for "time's up" on a practice item. Quiet enough not to startle, clear over a strummed guitar. */
 export function chime() {
   const c = audioContext(), t0 = c.currentTime + 0.02;

@@ -13,7 +13,8 @@ import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../pr
 import { exportAll, importAll, downloadBackup, shareBackup, canShareBackup } from '../db';
 import { TimingPanel, CalibrationCard, usePracticeTempo } from './Timing';
 import { PitchPanel } from './Pitch';
-import { GRADERS, graderMode, setGraderMode, pitchGraderKey, type GraderMode } from '../grading/modes';
+import { ChordPanel } from './Chord';
+import { GRADERS, graderMode, setGraderMode, pitchGraderKey, chordGraderKey, isChordLesson, type GraderMode } from '../grading/modes';
 import { PracticeCard } from './Practice';
 import { xp } from '../xp';
 import { levelFor } from '../games/core';
@@ -172,7 +173,7 @@ export function LessonView({ cat, id }: { cat: Catalog; id: string }) {
           {triads.length ? <section class="card"><h2>Triads</h2><div class="chords">{triads.map(t => <ChordDiagram name={`${t!.root}${t!.quality === 'minor' ? 'm' : ''} (${t!.strings.join('-')})`} shape={triadShape(t!)} />)}</div></section> : null}
           {scales.length ? <section class="card"><h2>Scales</h2>{scales.map(s => <ScaleDiagram scale={s!} />)}</section> : null}
           {strums.length ? <section class="card"><h2>Rhythm</h2>{strums.map(s => <StrumGrid strum={s!} />)}</section> : null}
-          {exercises.length ? <section class="card"><h2>Exercises</h2><ul class="list">{exercises.map(e => <li><b>{e!.name}</b>{e!.tempo ? <small>start {e!.tempo.start} → target {e!.tempo.target} BPM</small> : null}{e!.pairs ? <small>{e!.pairs.map(p => p.join(' ↔ ')).join(' · ')}</small> : null}</li>)}</ul></section> : null}
+          {exercises.length ? <section class="card"><h2>Exercises</h2><ul class="list">{exercises.map(e => <li><b>{e!.name}</b>{e!.tempo ? <small>start {e!.tempo.start} → target {e!.tempo.target} BPM</small> : null}{e!.pairs ? <small>{e!.pairs.map(p => p.map(r => e!.voicings?.[r]?.name ?? r).join(' ↔ ')).join(' · ')}</small> : null}{e!.bpm ? <small>{e!.bpm} BPM</small> : null}</li>)}</ul></section> : null}
           {songs.length ? <section class="card"><h2>Songs that use this</h2><ul class="list">{songs.map(o => <li><a href={`#/song/${o.id}`}>{o.title}</a> <small class="muted">{o.artist}</small></li>)}</ul></section> : null}
         </aside>
       </div>
@@ -235,12 +236,23 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
         <p class="muted">Mark it yourself when you can play it. Self-marked passes are recorded as such.</p>
         <button disabled={doneToday} onClick={() => mark('self')}>{doneToday ? 'Marked today ✓' : 'I can do this'}</button></details> : null}
     </section>);
+  if (isChordLesson(l) && graderMode(chordGraderKey(l)) !== 'self') return (
+    <section class="card">
+      <h2>Pass it {due ? <small class="badge b-due">review due</small> : null}</h2>
+      {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''}. Practice any time.</p> : null}
+      {doneToday && !(att.lessonId === l.id && att.phase === 'result') ? <p class="okText">Passed once today ✓ Pass it again on another day to complete the lesson.</p> : null}
+      <ChordPanel cat={cat} l={l} reviewDue={due} passed={p?.state === 'passed'} />
+      {msg ? <p class="note">{msg}</p> : null}
+      {p?.state !== 'passed' || due ? <details class="selfmark"><summary>Can't use the mic right now?</summary>
+        <p class="muted">Mark it yourself when you can play it. Self-marked passes are recorded as such.</p>
+        <button disabled={doneToday} onClick={() => mark('self')}>{doneToday ? 'Marked today ✓' : 'I can do this'}</button></details> : null}
+    </section>);
   const graded = type !== 'self_check';
-  const selfByChoice = type === 'pitch';
+  const selfByChoice = type === 'pitch' || isChordLesson(l);
   return (
     <section class="card">
       <h2>Pass it {due ? <small class="badge b-due">review due</small> : null}</h2>
-      {selfByChoice ? <p class="muted">Pitch grading is set to self-mark in <a href="#/settings">Settings</a>. Mark it yourself when you can do it, on two different days.</p>
+      {selfByChoice ? <p class="muted">{type === 'pitch' ? 'Pitch' : 'Chord'} grading is set to self-mark in <a href="#/settings">Settings</a>. Mark it yourself when you can do it, on two different days.</p>
         : graded ? <p class="muted">Automatic grading for this lesson ({describePass(l.pass_criteria).split(':')[0].toLowerCase()}) arrives in a later update. Until then, mark it yourself when you can do it at the goal above, on two different days.</p>
         : <p class="muted">When it feels solid, mark it. Do that on two different days to pass.</p>}
       {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''}.</p>
@@ -335,7 +347,7 @@ function AudioCheckCard() {
     <section class={`card ${done ? '' : 'attn'}`}>
       <h2>Phone audio check {done ? <small class="okText">done {new Date(done).toLocaleDateString()} ✓</small> : <small class="badge b-due">to do</small>}</h2>
       {!done ? <>
-        <p>The tuner, timing grader and pitch grader have only been tested on synthetic audio. A 15-minute check with your guitar confirms they work on this phone before more grading is built on them.</p>
+        <p>The tuner, timing, pitch and chord graders have only been tested on synthetic audio. A 15-minute check with your guitar confirms they work on this phone before more grading is built on them.</p>
         <ol class="small">
           <li>Quiet room, guitar in hand, phone on a stand about an arm's length away.</li>
           <li>Open the check page and run each test, first folded, then unfolded.</li>
