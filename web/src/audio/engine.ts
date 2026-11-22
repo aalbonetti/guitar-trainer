@@ -207,7 +207,10 @@ function tunerLoop(ts: number) {
 }
 /** Has the tuner been used since the app was opened? (The attempt runner offers a quick tune if not.) */
 export let tunedThisSession = false;
-tuner.subscribe(t => { if (t.note) tunedThisSession = true; });
+tuner.subscribe(t => { if (t.note && !tunedThisSession) { tunedThisSession = true; tunedHook?.(); } });
+let tunedHook: (() => void) | null = null;
+/** Lets the practice session note when you tuned, without the engine importing it. */
+export function onFirstTune(f: () => void) { tunedHook = f; }
 
 // ---------- click plans (graded attempts) ----------
 // A fixed list of clicks at exact context times, scheduled by the same ~200 ms look-ahead loop as the
