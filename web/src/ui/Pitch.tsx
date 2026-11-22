@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import type { Catalog, Lesson } from '../catalog';
 import { useStore } from '../store';
 import { attempt, runPitchAttempt, cancelAttempt, confirmPitch, skipPitchTarget, finishPitchNow, getLadder, posture } from '../grading/runner';
-import { pitchSetup, pitchCoach } from '../grading/pitch';
+import { pitchSetup, pitchCoach, noteKind } from '../grading/pitch';
 import { graderMode, pitchGraderKey } from '../grading/modes';
 import type { Ladder } from '../grading/timing';
 import { bluetoothOutputLikely, tunedThisSession, capture, routeLabel } from '../audio/engine';
@@ -69,7 +69,8 @@ export function PitchPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Les
         {setup.mode === 'hold' ? <>
           <div class="holdbar" role="progressbar" aria-valuenow={Math.round(p.progress * 100)}><i style={{ width: `${Math.round(p.progress * 100)}%` }} /></div>
           <p class="muted small">{setup.targets[cur]?.from !== undefined ? 'Pick the starting note, bend up to the target and hold it.' : 'Pluck the string and let it ring.'} Hold within ±{crit.cents}¢ for half a second.</p>
-        </> : setup.mode === 'timed' ? <p>{a.phase === 'playing' ? <b>Play!</b> : a.phase === 'countin' ? 'Count-in: 1 bar, then play' : 'Opening the mic…'}</p>
+        </> : setup.mode === 'timed' ? <p>{a.phase === 'starting' ? 'Opening the mic…' : p.cue === 'play' ? <b>Play!</b>
+          : p.firstBeat && p.firstBeat > 1 ? (a.phase === 'countin' ? `Count-in… the first note comes in on beat ${p.firstBeat} of the next bar` : `Get ready: first note on beat ${p.firstBeat}`) : 'Count-in: 1 bar, then play'}</p>
           : <p><b>Play the notes in order, at your own pace.</b></p>}
         <Chips labels={p.labels} wheres={p.wheres} status={p.status} idx={cur} live />
         <div class="row">
@@ -83,6 +84,8 @@ export function PitchPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Les
   const r = mine && a.phase === 'result' ? a.pitchResult : null;
   const atGoal = r && setup.mode === 'timed' ? (r.bpm ?? 0) >= crit.bpm! : true;
   const pct = Math.round((crit.note_accuracy ?? 1) * 100);
+  const octaveShapes = setup.expected.some(e => noteKind(e) === 'octave');
+  const octaveNote = octaveShapes ? <p class="muted small">The app hears only the <b>low note</b> of each octave shape (the high note is its overtone), so it can't tell whether the octave rang. You confirm that.</p> : null;
   return (
     <div>
       {r ? (
@@ -96,6 +99,7 @@ export function PitchPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Les
           {r.grade ? <Chips labels={r.grade.notes.map(n => n.label)} wheres={r.grade.notes.map(n => n.where)} status={r.grade.notes.map(n => (n.ok ? 'ok' : 'miss'))} idx={-1} live={false} notes={r.grade.notes} />
             : <ul class="list heldlist">{r.held.map(h => <li class={h.ok ? 'okText' : 'error'}>{h.ok ? '✓' : '✗'} {h.label} <small>{h.where}{h.ok && h.cents !== null ? ` · ${h.cents >= 0 ? '+' : ''}${h.cents.toFixed(1)}¢ · ${h.secs!.toFixed(1)} s` : h.ok ? '' : ' · not held in time'}</small></li>)}</ul>}
           {r.grade ? <p>{pitchCoach(r.grade)}</p> : <p>{r.met ? 'All in tune.' : 'Try the missed ones again; the tuner shows how close you are.'}</p>}
+          {octaveNote}
           {a.pending ? <div class="assist">
             <p class="note">Assisted mode: the app thinks this {r.met ? 'meets' : 'misses'} the goal. Does that match what you played?</p>
             <div class="row"><button class="primary" onClick={() => void confirmPitch(true)}>Count it ✓</button><button onClick={() => void confirmPitch(false)}>Doesn't count</button></div>
@@ -114,6 +118,7 @@ export function PitchPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Les
         <p class="muted">{setup.mode === 'hold' ? `${items.length} targets, one at a time: ${items.map(t => t.label).join(', ')}. Hold each within ±${crit.cents}¢ for half a second.`
           : setup.mode === 'timed' ? `${items.length} notes to a click, ${goalOnly || tempo! >= crit.bpm! ? `at the goal tempo, ${crit.bpm} BPM` : `at ${tempo} BPM, working up to ${crit.bpm}`}. One bar of count-in.${crit.any_octave ? ' Any octave counts.' : ''}`
           : `${items.length} notes at your own pace, in order.`} {gm === 'assisted' ? 'Assisted mode: you confirm each result.' : ''}</p>
+        {!r ? octaveNote : null}
         <div class="row wrap"><button class="primary" onClick={start}>{r ? 'Go again' : 'Start'}{tempo ? ` at ${tempo} BPM` : ''}</button></div>
         <p class="muted small">Listening {cap.label ? `with ${routeLabel()}` : 'with the selected input'} · {posture()} · <a href="#/settings">input & grading</a></p>
       </> : null}
