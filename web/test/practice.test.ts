@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
-import { buildQueue, totalMinutes, sessionRow, normRoutine, songWeekStart, songOfWeek, type QueueInput } from '../src/practice';
+import { buildQueue, totalMinutes, sessionRow, normRoutine, songWeekStart, songOfWeek, songPool, type QueueInput } from '../src/practice';
 import { weekDate, thisWeekIndex, thisWeekSongs } from '../src/setlist';
 import { computeStates, type LessonProgress } from '../src/progress';
 
@@ -13,11 +13,12 @@ const input = (lp: Record<string, LessonProgress>, over: Partial<QueueInput> = {
 const allF = Object.fromEntries(lessons.filter((l: any) => l.track === 'F').map((l: any) => [l.id, passed(l.id)]));
 
 describe('practice queue', () => {
-  it('brand new player: next Foundations lesson + a song, no warm-up yet (spider still locked)', () => {
+  it('brand new player: next Foundations lesson gets the whole 10 min; no warm-up yet (spider still locked), no song step', () => {
     const q = buildQueue(input({}), 10);
     expect(q.find(i => i.kind === 'warmup')).toBeUndefined();
     expect(q.filter(i => i.kind === 'lesson').map(i => i.lessonId)).toEqual(['F.01']);
-    expect(q.some(i => i.kind === 'song')).toBe(true);
+    expect(q.some(i => i.kind === 'song')).toBe(false);
+    expect(q[0].minutes).toBe(10);
   });
   it('after passing F.01 today the plan moves on to the next lesson, not F.01 again', () => {
     const lp = { 'F.01': { lesson_id: 'F.01', state: 'in_progress', first_pass_day: '2026-11-21', review_index: 0, mastered: false, updated_at: 0 } as LessonProgress };
@@ -55,13 +56,15 @@ describe('practice queue', () => {
   const sl = (weeks: string[], played: string[][]) => ({ weeks, importedAt: '', songs: ids.map((id: string, i: number) => ({ name: 'x' + i, plays: 1, isNew: false, weeks: played[i] || [], last: null, lastIndex: -1, outlineId: id })) });
   it('song of the week: from the whole church list, fixed all week, rolls over Monday 12:01 am Central', () => {
     const setlist = sl(['Nov 8', 'Nov 15'], [['Nov 8'], ['Nov 15'], [], [], []]);
-    const song = (iso: string) => buildQueue(input({}, { setlist, day: iso.slice(0, 10), today: new Date(iso) }), 10).find(i => i.kind === 'song')!;
+    const pool = songPool({ cat: { lessons, tracks, outlines }, setlist });
+    expect(pool.fromList).toBe(true);
+    const song = (iso: string) => ({ songId: songOfWeek(pool.ids, new Date(iso))! });
     // Mon Nov 23 12:01 am CST = 06:01 UTC
     const week = ['2026-11-23T06:01:00Z', '2026-11-25T18:00:00Z', '2026-11-29T23:00:00Z', '2026-11-30T06:00:30Z'].map(t => song(t).songId);
     expect(new Set(week).size).toBe(1);                                   // same song Mon 12:01 am → Mon 12:00 am next week
     expect(song('2026-11-30T06:01:00Z').songId).not.toBe(week[0]);        // new pick at 12:01 am, never a repeat
     expect(song('2026-11-23T06:00:30Z').songId).toBe(song('2026-11-21T12:00:00Z').songId); // 12:00 am Monday is still last week
-    expect(ids).toContain(week[0]); expect(song('2026-11-25T18:00:00Z').why).toMatch(/Song of the week/);
+    expect(ids).toContain(week[0]);
   });
   it('week start is the Monday in Central time, across DST', () => {
     expect(songWeekStart(new Date('2026-11-23T06:01:00Z'))).toBe('2026-11-23');

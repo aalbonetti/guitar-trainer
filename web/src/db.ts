@@ -63,13 +63,30 @@ export async function importAll(data: Record<string, unknown>) {
   const local = data._local as Record<string, string> | undefined;
   if (local) try { for (const [k, v] of Object.entries(local)) if (k.startsWith('gt_')) localStorage.setItem(k, v); } catch { /* ignore */ }
 }
+function backupFile(data: unknown): File {
+  const n = new Date(), name = `guitar-trainer-backup-${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}.json`;
+  return new File([JSON.stringify(data)], name, { type: 'application/json' });
+}
+const stamp = () => { try { localStorage.setItem('gt_last_backup', JSON.stringify(Date.now())); } catch { /* ignore */ } };
 /** Save the backup as a .json file (Downloads on the phone). */
 export async function downloadBackup(): Promise<string> {
-  const data = await exportAll();
-  const n = new Date(), name = `guitar-trainer-backup-${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}.json`;
-  const url = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
-  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  const f = backupFile(await exportAll());
+  const url = URL.createObjectURL(f);
+  const a = document.createElement('a'); a.href = url; a.download = f.name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
-  try { localStorage.setItem('gt_last_backup', JSON.stringify(Date.now())); } catch { /* ignore */ }
-  return name;
+  stamp();
+  return f.name;
+}
+/** Can this phone hand a file to the share sheet (Drive, Gmail…)? */
+export function canShareBackup(): boolean {
+  try { return !!navigator.canShare && navigator.canShare({ files: [new File(['{}'], 'x.json', { type: 'application/json' })] }); } catch { return false; }
+}
+/** Open the share sheet with the backup file (pick Drive to keep it safe). Falls back to a download. */
+export async function shareBackup(): Promise<{ name: string; how: 'shared' | 'downloaded' | 'cancelled' }> {
+  const f = backupFile(await exportAll());
+  if (canShareBackup()) {
+    try { await navigator.share({ files: [f], title: 'Guitar Trainer backup' }); stamp(); return { name: f.name, how: 'shared' }; }
+    catch (e) { if ((e as Error).name === 'AbortError') return { name: f.name, how: 'cancelled' }; }
+  }
+  return { name: await downloadBackup(), how: 'downloaded' };
 }

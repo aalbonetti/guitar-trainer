@@ -201,13 +201,13 @@ for s in [6,5,4,3,2,1]:
         spider.append(ev(b, s, f)); b += 0.5
 EXERCISES = [
     dict(id='EX_spider', name='Spider 1-2-3-4 (ascending)', type='tab', meter='4/4',
-         tempo=dict(start=50, target=120, step=4), events=spider, loop=True),
+         tempo=dict(start=39, target=60, step=4), events=spider, loop=True),
     dict(id='EX_changes_gfamily', name='G-family one-minute changes', type='chord_changes',
          pairs=[['G_4f','Cadd9'],['G_4f','Dsus4'],['Em7','Cadd9'],['Dsus4','Em7']], duration_s=60, target_per_min=30),
     dict(id='EX_changes_open', name='Open-chord one-minute changes', type='chord_changes',
          pairs=[['Em','Am'],['A','D'],['D','G'],['G','C'],['C','Am'],['E','Am'],['D','Dm'],['C','Fmaj7']], duration_s=60, target_per_min=30),
     dict(id='EX_root_pulse_G', name='Root pulse, I–V–vi–IV in G (dotted-eighth delay)', type='tab', meter='4/4',
-         tempo=dict(start=72, target=120, step=4), fx=dict(delay='dotted_eighth', feedback=0.3, mix=0.4),
+         tempo=dict(start=65, target=100, step=4), fx=dict(delay='dotted_eighth', feedback=0.3, mix=0.4),
          events=[ev(bar*4 + i*0.5, s, f, tech='palm_mute_light') for bar, (s, f) in enumerate([(4,5),(5,5),(4,2),(5,3)]) for i in range(8)],
          chords=['G','D','Em','C'], loop=True),
     dict(id='EX_triads_I_V_vi_IV_G', name='Top-string triads, I–V–vi–IV in G (nearest voicings)', type='tab', meter='4/4',
@@ -393,6 +393,15 @@ for l in LESSONS:
     for kind, refs in l['assets'].items():
         for r in refs:
             if r not in ids[kind]: errors.append(f"{l['id']}: unknown {kind} {r}")
+# A timing lesson's exercise tempo must match its tempo ladder (app spec §5): start at 65% of the goal, end at the goal.
+EX_BY_ID = {e['id']: e for e in EXERCISES}
+for l in LESSONS:
+    pc = l['pass_criteria']
+    if pc['type'] != 'timing': continue
+    for x in l['assets'].get('exercises', []):
+        t = EX_BY_ID.get(x, {}).get('tempo')
+        if t and (t['target'] != pc['bpm'] or t['start'] != round(0.65 * pc['bpm'])):
+            errors.append(f"{l['id']}: exercise {x} tempo {t['start']}->{t['target']} should be {round(0.65 * pc['bpm'])}->{pc['bpm']} (the lesson's tempo ladder)")
 for e in EXERCISES:
     for pair in e.get('pairs', []):
         for c in pair:

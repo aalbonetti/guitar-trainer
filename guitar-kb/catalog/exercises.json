@@ -5,8 +5,8 @@
   "type": "tab",
   "meter": "4/4",
   "tempo": {
-   "start": 50,
-   "target": 120,
+   "start": 39,
+   "target": 60,
    "step": 4
   },
   "events": [
@@ -229,8 +229,8 @@
   "type": "tab",
   "meter": "4/4",
   "tempo": {
-   "start": 72,
-   "target": 120,
+   "start": 65,
+   "target": 100,
    "step": 4
   },
   "fx": {

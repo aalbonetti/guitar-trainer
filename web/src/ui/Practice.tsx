@@ -1,5 +1,6 @@
 // Today's practice: routine picker + queue, the session bar that follows you across screens, and the summary.
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { chime, capture } from '../audio/engine';
 import type { Catalog } from '../catalog';
 import { useStore } from '../store';
 import { progress, markPracticed } from '../progressStore';
@@ -9,7 +10,7 @@ import { buildQueue, totalMinutes, itemHref, session, startSession, endSession, 
 import { persisted } from '../store';
 
 const routinePref = persisted<Routine>('gt_routine', 10);
-const KIND_ICON: Record<Item['kind'], string> = { warmup: '🔥', review: '↻', lesson: '◐', song: '♪', ear: '👂' };
+const KIND_ICON: Record<Item['kind'], string> = { warmup: '🔥', review: '↻', lesson: '🎸', song: '♪', ear: '👂' };
 
 export function useQueue(cat: Catalog, routine: Routine, visibleTrack: (id: string) => boolean) {
   const pr = useStore(progress);
@@ -98,11 +99,23 @@ export function SessionBar() {
   const ss = useStore(session);
   const [, tick] = useState(0);
   useEffect(() => { const t = setInterval(() => tick(x => x + 1), 1000); return () => clearInterval(t); }, []);
+  const cap = useStore(capture);
+  const alerted = useRef('');
   const s = ss.s;
-  if (!s) return null;
-  const it = s.items[s.idx];
+  const it = s ? s.items[s.idx] : null;
+  const secs = s && it && it.minutes ? it.minutes * 60 - Math.floor((Date.now() - s.itemStart) / 1000) : null;
+  // Time's up on this item: chime + buzz once, so you don't have to watch the screen while playing.
+  // Never while the mic is open (a graded attempt or the tuner would hear it); it waits until the mic closes.
+  const mark = s ? `${s.id}|${s.idx}|${s.itemStart}` : '';
+  useEffect(() => {
+    if (secs === null || secs > 0 || alerted.current === mark || cap.on) return;
+    alerted.current = mark;
+    if (secs < -120) return; // came back long after: no point ringing now
+    try { chime(); } catch { /* audio not started yet */ }
+    try { navigator.vibrate?.([180, 90, 180]); } catch { /* not supported */ }
+  }, [secs !== null && secs <= 0, mark, cap.on]);
+  if (!s || !it) return null;
   const last = s.idx >= s.items.length - 1;
-  const secs = it.minutes ? it.minutes * 60 - Math.floor((Date.now() - s.itemStart) / 1000) : null;
   const fmt = (x: number) => `${x < 0 ? '+' : ''}${Math.floor(Math.abs(x) / 60)}:${String(Math.abs(x) % 60).padStart(2, '0')}`;
   const next = () => { void markPracticed(); if (last) { goTo(s.idx, true); void endSession(); location.hash = '#/today'; } else { goTo(s.idx + 1, true); location.hash = itemHref(s.items[s.idx + 1]); } };
   return (

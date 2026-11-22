@@ -13,6 +13,8 @@ import { onFirstTune } from './audio/engine';
 import { MetroStrip } from './ui/Tools';
 import { loadProgress, saveStatus } from './progressStore';
 import { useStore } from './store';
+import { update, applyUpdate } from './update';
+import { attempt } from './grading/runner';
 
 const NAV = [
   { h: '#/today', label: 'Today', icon: '☀' },
@@ -36,6 +38,9 @@ export function App() {
   const [, bump] = useState(0);
   const hash = useHash();
   const save = useStore(saveStatus);
+  const upd = useStore(update);
+  const att = useStore(attempt);
+  const busy = att.phase === 'countin' || att.phase === 'playing' || att.phase === 'starting';
   useEffect(() => {
     void expireIdle(); void loadProgress(); void loadCharts(); void loadXp(); void loadBests(); loadCatalog().then(setCat).catch(e => setErr(String(e)));
     onFirstTune(() => noteTuned());
@@ -56,7 +61,7 @@ export function App() {
   else if (route === 'import') body = <ImportView cat={cat} />;
   else if (route === 'chart') body = <ChartView cat={cat} id={decodeURIComponent(arg || '')} />;
   else if (route === 'song') body = <Songs cat={cat} selected={decodeURIComponent(arg || '')} />;
-  else if (route === 'tools') body = <Tools which={arg} />;
+  else if (route === 'tools') body = <Tools which={arg} cat={cat} />;
   else if (route === 'arcade') body = arg ? <GameScreen cat={cat} gameId={decodeURIComponent(arg)} levelId={decodeURIComponent(hash.split('/')[3] || '')} /> : <ArcadeHome cat={cat} />;
   else if (route === 'progress') body = <Progress cat={cat} />;
   else if (route === 'settings') body = <Settings cat={cat} onChange={() => bump(x => x + 1)} />;
@@ -67,7 +72,7 @@ export function App() {
         <div class="brand">Guitar<span>Trainer</span></div>
         {NAV.map(n => <a href={n.h} class={active === n ? 'on' : ''}><i>{n.icon}{n.label === 'Today' && due ? <b class="navbadge" aria-label={`${due} reviews due`}>{due}</b> : null}</i><span>{n.label}</span></a>)}
       </nav>
-      <main class="main">{save.state === 'error' || save.state === 'blocked' ? <div class="savebanner">⚠ {save.msg} <button class="small" onClick={() => location.reload()}>Retry</button></div> : null}{body}</main>
+      <main class="main">{upd.ready && !busy ? <div class="updatebanner">✨ Update ready <button class="small primary" onClick={applyUpdate}>Reload now</button></div> : null}{save.state === 'error' || save.state === 'blocked' ? <div class="savebanner">⚠ {save.msg} <button class="small" onClick={() => location.reload()}>Retry</button></div> : null}{body}</main>
       <div class="bottombars"><SessionBar /><MetroStrip /></div>
     </div>
   );

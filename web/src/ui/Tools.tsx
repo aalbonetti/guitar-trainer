@@ -65,7 +65,7 @@ export function MetronomePanel({ compact = false }: { compact?: boolean }) {
 }
 
 /** Tuner + metronome buttons for lessons and songs; the metronome is pre-set from the page. */
-export function ToolBar({ preset, label }: { preset: { bpm: number; beats: number; sub: number }; label?: string }) {
+export function ToolBar({ preset, label, goal }: { preset: { bpm: number; beats: number; sub: number }; label?: string; goal?: number }) {
   const [open, setOpen] = useState<'tuner' | 'metro' | null>(null);
   const m = useStore(metro);
   useEffect(() => () => { if (tuner.get().on) stopTuner(); }, []);
@@ -75,6 +75,7 @@ export function ToolBar({ preset, label }: { preset: { bpm: number; beats: numbe
         <button class={open === 'tuner' ? 'sel' : ''} onClick={() => setOpen(open === 'tuner' ? null : 'tuner')}>🎚 Tuner</button>
         <button class={open === 'metro' ? 'sel' : ''} onClick={() => { if (!m.running) setMetro(preset); setOpen(open === 'metro' ? null : 'metro'); }}>⏱ Metronome</button>
         <button class="chip" onClick={() => { setMetro(preset); startMetronome(preset); setOpen('metro'); }}>▶ {preset.bpm} BPM{label ? ` · ${label}` : ''}</button>
+        {goal && goal !== preset.bpm ? <button class="chip ghost" onClick={() => { const p = { ...preset, bpm: goal }; setMetro(p); startMetronome(p); setOpen('metro'); }}>🎯 {goal} goal</button> : null}
       </div>
       {open === 'tuner' ? <div class="sheet"><TunerPanel compact /></div> : null}
       {open === 'metro' ? <div class="sheet"><MetronomePanel compact /></div> : null}

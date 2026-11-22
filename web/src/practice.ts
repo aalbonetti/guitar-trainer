@@ -20,12 +20,13 @@ const WARMUP = 'F.05', EAR = ['T.06', 'T.05'];
 
 // Minutes per part. Lessons get whatever is left of the routine's total.
 const PLAN = {
-  10: { total: 10, warmup: 2, review: 2, maxReviews: 1, song: 3, ear: 0, maxLessons: 1 },
-  20: { total: 20, warmup: 3, review: 2, maxReviews: 2, song: 5, ear: 2, maxLessons: 2 },
-  free: { total: 0, warmup: 0, review: 0, maxReviews: 3, song: 0, ear: 0, maxLessons: 99 },
+  10: { total: 10, warmup: 2, review: 2, maxReviews: 1, ear: 0, maxLessons: 1 },
+  20: { total: 20, warmup: 3, review: 2, maxReviews: 2, ear: 2, maxLessons: 2 },
+  free: { total: 0, warmup: 0, review: 0, maxReviews: 3, ear: 0, maxLessons: 99 },
 } as const;
 
-/** Today's queue, in a fixed order: warm-up → due reviews → current lesson(s) → this week's song (→ ear quiz in 20 min). */
+/** Today's queue, in a fixed order: warm-up → due reviews → current lesson(s) (→ ear quiz in 20 min).
+ *  The song of the week has its own box on Today (Connor's call), so it isn't a step here; its minutes go to the lessons. */
 export function buildQueue(q: QueueInput, routine: Routine): Item[] {
   const { cat, lp, states, day } = q;
   const P = PLAN[routine], timed = routine !== 'free';
@@ -52,18 +53,15 @@ export function buildQueue(q: QueueInput, routine: Routine): Item[] {
   const cands = tracks.map(t => pick(t.id)).filter((l): l is Lesson => !!l).sort((a, b) => rank(a) - rank(b)).slice(0, P.maxLessons);
   for (const l of cands) used.add(l.id);
 
-  // this week's song
-  const song = pickSong(q, [...used]);
   // ear quiz (20 min) when unlocked
   const ear = P.ear ? EAR.map(L).find(l => l && states[l.id] !== 'locked' && q.visibleTrack(l.track) && !used.has(l.id)) : undefined;
 
-  const fixed = items.reduce((a, i) => a + (i.minutes || 0), 0) + (song ? P.song : 0) + (ear ? P.ear : 0);
+  const fixed = items.reduce((a, i) => a + (i.minutes || 0), 0) + (ear ? P.ear : 0);
   const left = Math.max(cands.length * 3, P.total - fixed);
   cands.forEach((l, i) => {
     const m = timed ? Math.floor(left / cands.length) + (i < left % cands.length ? 1 : 0) : null;
     items.push({ kind: 'lesson', lessonId: l.id, title: l.title, why: lp[l.id]?.first_pass_day ? 'Passed once on an earlier day: pass it today to complete it' : states[l.id] === 'in_progress' ? 'Keep going' : 'Next up', minutes: m });
   });
-  if (song) items.push({ kind: 'song', songId: song.id, title: song.title, why: song.why, minutes: timed ? P.song : null });
   if (ear) items.push({ kind: 'ear', lessonId: ear.id, title: `Ear training: ${ear.title}`, why: 'Two minutes of listening', minutes: P.ear });
   return items;
 }
@@ -103,13 +101,6 @@ export function songPool(q: Pick<QueueInput, 'cat' | 'setlist'>): { ids: string[
   const has = (id: string | null): id is string => !!id && q.cat.outlines.some(o => o.id === id);
   const list = q.setlist ? q.setlist.songs.map(s => s.outlineId).filter(has) : [];
   return list.length ? { ids: list, fromList: true } : { ids: q.cat.outlines.filter(o => o.practice_for.length).map(o => o.id), fromList: false };
-}
-
-function pickSong(q: QueueInput, _lessonIds: string[]): { id: string; title: string; why: string } | null {
-  const { ids, fromList } = songPool(q);
-  const id = songOfWeek(ids, q.today || new Date());
-  if (!id) return null;
-  return { id, title: q.cat.outlines.find(o => o.id === id)!.title, why: fromList ? 'Song of the week, from your church’s list' : 'Song of the week' };
 }
 
 export const totalMinutes = (items: Item[]) => items.reduce((s, i) => s + (i.minutes || 0), 0);
