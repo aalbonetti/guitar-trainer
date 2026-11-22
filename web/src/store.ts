@@ -12,7 +12,9 @@ export class Store<T extends object> {
 
 export function useStore<T extends object>(s: Store<T>): T {
   const [v, setV] = useState(s.get());
-  useEffect(() => s.subscribe(setV), [s]);
+  // Re-read after subscribing: the store may have changed between render and this effect
+  // (e.g. loadProgress() finishing on app start), and that change would otherwise be missed.
+  useEffect(() => { const off = s.subscribe(setV); setV(s.get()); return off; }, [s]);
   return v;
 }
 
