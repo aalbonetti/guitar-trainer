@@ -15,6 +15,8 @@ import { loadProgress, saveStatus } from './progressStore';
 import { useStore } from './store';
 import { update, applyUpdate } from './update';
 import { attempt } from './grading/runner';
+import { startActivityClock } from './activity';
+import { ears } from './games/listen';
 
 const NAV = [
   { h: '#/today', label: 'Today', icon: '☀' },
@@ -40,10 +42,12 @@ export function App() {
   const save = useStore(saveStatus);
   const upd = useStore(update);
   const att = useStore(attempt);
-  const busy = att.phase === 'countin' || att.phase === 'playing' || att.phase === 'starting';
+  const ear = useStore(ears);
+  const busy = att.phase === 'countin' || att.phase === 'playing' || att.phase === 'starting' || ear.on;
   useEffect(() => {
     void expireIdle(); void loadProgress(); void loadCharts(); void loadXp(); void loadBests(); loadCatalog().then(setCat).catch(e => setErr(String(e)));
     onFirstTune(() => noteTuned());
+    startActivityClock();
     const vis = () => { if (document.visibilityState === 'visible') void expireIdle(); };
     document.addEventListener('visibilitychange', vis);
     return () => document.removeEventListener('visibilitychange', vis);
