@@ -7,6 +7,9 @@ import { session, noteAttempt } from './practice';
 import { addXp } from './xp';
 import { XP } from './games/core';
 
+/** Did the last save reach the phone's storage? Shown to the user, never silent. */
+export const saveStatus = new Store<{ state: 'idle' | 'saved' | 'error' | 'blocked'; at: number; msg: string }>({ state: 'idle', at: 0, msg: '' });
+db.onBlocked(() => saveStatus.set({ state: 'blocked', at: Date.now(), msg: 'Another copy of Guitar Trainer is open (an older tab or the home-screen app). Close it so your progress can be saved.' }));
 export const progress = new Store<{ ready: boolean; lp: Record<string, LessonProgress>; days: string[] }>({ ready: false, lp: {}, days: [] });
 
 export async function loadProgress() {
@@ -14,7 +17,7 @@ export async function loadProgress() {
     const rows = await db.getAll<LessonProgress>('lesson_progress');
     const days = (await db.getAll<{ day: string }>('practice_day')).map(d => d.day).sort();
     progress.set({ ready: true, lp: Object.fromEntries(rows.map(r => [r.lesson_id, r])), days });
-  } catch { progress.set({ ready: true }); }
+  } catch (e) { progress.set({ ready: true }); saveStatus.set({ state: 'error', at: Date.now(), msg: `Couldn't open saved progress (${(e as Error)?.message || 'storage unavailable'}).` }); }
 }
 
 export async function recordAttempt(lesson: Lesson, r: AttemptResult): Promise<Event> {
@@ -25,7 +28,8 @@ export async function recordAttempt(lesson: Lesson, r: AttemptResult): Promise<E
     await db.put('lesson_progress', lp);
     await db.put('attempt', { session_id: session.get().s?.id ?? null, lesson_id: lesson.id, criterion_type: lesson.pass_criteria.type, grader_mode: r.mode, score: r.score, met_target: r.met, at_target_tempo: r.atTarget, metrics_json: JSON.stringify(r.metrics || {}), event, day, at: Date.now() });
     await markPracticed(day);
-  } catch { /* storage unavailable: progress still updates for this visit */ }
+    saveStatus.set({ state: 'saved', at: Date.now(), msg: '' });
+  } catch (e) { saveStatus.set({ state: 'error', at: Date.now(), msg: `Couldn't save to this phone (${(e as Error)?.message || 'storage unavailable'}). Progress will be lost when you leave. Check that you're not in Incognito, then save a backup in Settings.` }); }
   progress.set({ lp: { ...progress.get().lp, [lesson.id]: lp } });
   noteAttempt(lesson.id, r.met);
   if (event === 'passed') void addXp('lesson_pass', lesson.id, XP.lessonPass);

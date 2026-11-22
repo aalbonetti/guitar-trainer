@@ -12,9 +12,10 @@ export type Event = 'none' | 'first_pass' | 'passed' | 'review_passed' | 'review
 export function dayOf(d = new Date()): string { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 export function addDays(day: string, n: number): string { const [y, m, d] = day.split('-').map(Number); return dayOf(new Date(y, m - 1, d + n)); }
 
-/** Locked/available from prereqs. Tracks A/ER/EL also need every Foundations lesson passed. */
+/** Locked/available from prereqs (passed, or passed once). Tracks A/ER/EL also need every Foundations lesson passed once. */
 export function computeStates(lessons: Lesson[], tracks: Track[], lp: Record<string, LessonProgress>): Record<string, State> {
-  const passed = (id: string) => lp[id]?.state === 'passed';
+  // A first pass is enough to move on; the second-day pass completes the lesson and starts its reviews.
+  const passed = (id: string) => lp[id]?.state === 'passed' || !!lp[id]?.first_pass_day;
   const allF = lessons.filter(l => l.track === 'F').every(l => passed(l.id));
   const out: Record<string, State> = {};
   for (const l of lessons) {
@@ -61,7 +62,7 @@ export function applyAttempt(prev: LessonProgress | undefined, lesson: Lesson, r
 
 export const EVENT_TEXT: Record<Event, string> = {
   none: '',
-  first_pass: 'First pass! Pass it again on another day to complete the lesson.',
+  first_pass: 'First pass! The next lessons are open. Pass this one again on another day (tomorrow or later) to complete it.',
   passed: 'Lesson passed. A quick review is scheduled so it sticks.',
   review_passed: 'Review passed. The next one is further out.',
   review_failed: 'Not quite this time; we’ll review it again tomorrow.',
