@@ -3,6 +3,7 @@ import { Store } from './store';
 import * as db from './db';
 import { applyAttempt, dayOf, type AttemptResult, type LessonProgress, type Event } from './progress';
 import type { Lesson } from './catalog';
+import { session, noteAttempt } from './practice';
 
 export const progress = new Store<{ ready: boolean; lp: Record<string, LessonProgress>; days: string[] }>({ ready: false, lp: {}, days: [] });
 
@@ -20,10 +21,11 @@ export async function recordAttempt(lesson: Lesson, r: AttemptResult): Promise<E
   const { lp, event } = applyAttempt(prev, lesson, r, day);
   try {
     await db.put('lesson_progress', lp);
-    await db.put('attempt', { lesson_id: lesson.id, criterion_type: lesson.pass_criteria.type, grader_mode: r.mode, score: r.score, met_target: r.met, at_target_tempo: r.atTarget, metrics_json: JSON.stringify(r.metrics || {}), event, day, at: Date.now() });
+    await db.put('attempt', { session_id: session.get().s?.id ?? null, lesson_id: lesson.id, criterion_type: lesson.pass_criteria.type, grader_mode: r.mode, score: r.score, met_target: r.met, at_target_tempo: r.atTarget, metrics_json: JSON.stringify(r.metrics || {}), event, day, at: Date.now() });
     await markPracticed(day);
   } catch { /* storage unavailable: progress still updates for this visit */ }
   progress.set({ lp: { ...progress.get().lp, [lesson.id]: lp } });
+  noteAttempt(lesson.id, r.met);
   return event;
 }
 
