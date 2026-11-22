@@ -61,6 +61,17 @@ describe('timing grade', () => {
 });
 
 describe('tempo ladder', () => {
+  it('fast track: a great attempt jumps 8 BPM right away (capped at target)', () => {
+    expect(ladderStep(ladderStart(80), 80, { clean: true, sloppy: false, great: true }).bpm).toBe(60);
+    expect(ladderStep({ bpm: 76, clean: 2, sloppy: 0 }, 80, { clean: true, sloppy: false, great: true })).toEqual({ bpm: 80, clean: 0, sloppy: 0 });
+    // from 52 to 80 takes 4 great attempts instead of 21 clean ones
+    let l = ladderStart(80), n = 0; while (l.bpm < 80) { l = ladderStep(l, 80, { clean: true, sloppy: false, great: true }); n++; } expect(n).toBe(4);
+  });
+  it('great needs tight timing, not just a pass', () => {
+    const plan = buildPlan(lessonFeel(L('A.05'), cat), 80, 8, 2);
+    expect(gradeTiming(play(plan, 0, 8), plan, 0, 40).great).toBe(true);
+    const ok = gradeTiming(play(plan, 0.03, 4), plan, 0, 40); expect(ok.met).toBe(true); expect(ok.great).toBe(false);
+  });
   const clean = { clean: true, sloppy: false }, sloppy = { clean: false, sloppy: true }, mid = { clean: false, sloppy: false };
   it('starts at 65%, climbs 4 after 3 clean, capped at target', () => {
     let l = ladderStart(80); expect(l.bpm).toBe(52);

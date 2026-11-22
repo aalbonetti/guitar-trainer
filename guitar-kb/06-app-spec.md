@@ -99,8 +99,9 @@ Every Lesson screen (and the Song view) has a **tool bar** with two buttons: **T
 - **Pass:** the criterion is met **at target tempo** in **2 practice sessions on different calendar days**. The first success sets `first_pass_at`; the second sets `passed_at`.
 - **Reviews:** scheduled at `passed_at + review_days[i]` (1, 3, 7, 14, 30). Passing a review advances to the next interval. Failing a review restarts the schedule at 1 day. The lesson stays passed and dependents stay unlocked. After the 30-day review the lesson is "mastered" and has no more reviews.
 - **Tempo ladder** (for `timing`, and for `pitch` exercises that have a tempo):
-  - Start at `round(0.65 × target_bpm)`.
+  - Start at `round(0.65 × target_bpm)`. Graded attempts always run at the ladder tempo (no skip-to-goal); reviews and practice after passing run at the target.
   - **Clean** = criterion met at the current tempo. After 3 clean attempts in a row, add 4 BPM (capped at target).
+  - **Fast track** = clean with mean error ≤ ½ `max_err_ms` and ≥ 97% of slots right. Adds 8 BPM straight away (capped at target), so a strong player isn't held at 65% for a dozen attempts.
   - **Sloppy** = mean error > 1.5 × `max_err_ms`, or detection rate < 80%. After 2 sloppy attempts in a row, subtract 8 BPM (floor: 50% of target).
   - Anything between clean and sloppy leaves the tempo unchanged.
   - Attempts below target tempo build the ladder but never count toward a pass.
