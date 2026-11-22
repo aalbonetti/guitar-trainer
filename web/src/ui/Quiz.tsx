@@ -3,7 +3,8 @@ import { useState } from 'preact/hooks';
 import type { Catalog } from '../catalog';
 import { makeQuestion, rng, type Question } from '../quiz';
 import { playChords } from '../audio/engine';
-import { recordAttempt, bumpQuizItem, quizWeights } from '../progressStore';
+import { recordAttempt, bumpQuizItem, quizWeights, progress } from '../progressStore';
+import { computeStates } from '../progress';
 import { EVENT_TEXT } from '../progress';
 import { ChordDiagram } from './Diagrams';
 
@@ -45,7 +46,9 @@ export function QuizCard({ id, lessonId, cat }: { id: string; lessonId: string; 
     const meanS = log.reduce((a, b) => a + b.ms, 0) / log.length / 1000;
     const met = score >= (pass?.score ?? 0.9) && (!pass?.max_s || meanS <= pass.max_s);
     let msg = `${correct}/${log.length} correct · ${meanS.toFixed(1)} s per answer. `;
-    if (grades && lesson) {
+    const locked = lesson ? computeStates(cat.lessons, cat.tracks, progress.get().lp)[lesson.id] === 'locked' : false;
+    if (grades && lesson && locked) msg += 'Practice round: this lesson isn’t unlocked yet, so it doesn’t count.';
+    else if (grades && lesson) {
       const ev = await recordAttempt(lesson, { met, atTarget: true, score, mode: 'auto', metrics: { correct, total: log.length, meanS } });
       msg += met ? (EVENT_TEXT[ev] || 'Target met.') : `Target is ${Math.round((pass?.score ?? 0.9) * 100)}%${pass?.max_s ? ` and ≤ ${pass.max_s} s per answer` : ''}. Try again.`;
     } else msg += 'Practice round.';

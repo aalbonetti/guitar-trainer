@@ -131,10 +131,9 @@ export function TimingPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Le
         <div class="quicktune">{tune ? <TunerPanel compact /> : <p class="muted">Not tuned yet this session. <button class="small" onClick={() => setTune(true)}>Quick tune</button> <button class="small" onClick={() => setSkipTune(true)}>Skip</button></p>}</div>
       ) : null}
       {a.kind === 'calibration' && a.phase === 'result' && a.cal ? <p class="okText">Calibrated: {a.cal.offsetMs.toFixed(0)} ms offset. Ready when you are.</p> : null}
-      <p class="muted">{goalOnly || ladderBpm >= crit.bpm ? `${reviewDue ? 'Review' : 'Play'} at the goal tempo, ${crit.bpm} BPM.` : `Practice tempo ${ladderBpm} BPM, working up to ${crit.bpm}. 3 clean attempts in a row speed it up.`} Prop the phone near the guitar; one bar of count-in.</p>
+      <p class="muted">{goalOnly || ladderBpm >= crit.bpm ? `${reviewDue ? 'Review' : 'Play'} at the goal tempo, ${crit.bpm} BPM.` : `Practice tempo ${ladderBpm} BPM, working up to ${crit.bpm}. The app raises it after 3 clean attempts in a row.`} Prop the phone near the guitar; one bar of count-in.</p>
       <div class="row wrap">
         <button class="primary" onClick={() => start(ladderBpm)}>{r ? 'Go again' : 'Start'} at {ladderBpm} BPM</button>
-        {!goalOnly && ladderBpm < crit.bpm ? <button onClick={() => start(crit.bpm)}>Try at goal ({crit.bpm})</button> : null}
       </div>
       <p class="muted small">Grading {cap.label ? `with ${cap.label}` : 'with the selected input'} · {posture()} · <a href="#/settings">calibration</a></p>
     </div>
