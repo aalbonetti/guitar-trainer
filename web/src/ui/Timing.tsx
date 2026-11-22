@@ -112,7 +112,8 @@ export function TimingPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Le
     <div><p class="error">Bluetooth audio looks active. Its delay (150–300 ms) makes timing grades meaningless, so graded attempts are off.</p>
       <p class="muted">Switch to the phone speaker or wired headphones, then <button class="small" onClick={() => void bluetoothOutputLikely().then(setBt)}>check again</button>.</p></div>);
 
-  if (needCal || hasCal === false && !busy && !(a.kind === 'calibration')) return (
+  const showingResult = mine && a.phase === 'result'; // a finished result wins, even if the posture changed mid-attempt
+  if (needCal || hasCal === false && !busy && !showingResult && !(a.kind === 'calibration')) return (
     <div><p><b>First, a 30-second calibration</b> for {cap.label || 'this input'} ({posture()}).</p><CalibrationCard compact onDone={() => { setHasCal(true); }} /></div>);
   if (a.kind === 'calibration' && (busy || a.phase === 'error')) return <CalibrationCard compact onDone={() => setHasCal(true)} />;
 
