@@ -24,6 +24,9 @@ Open any song, set the **Key** to the leader's key, then use **Capo** to pick sh
 ### Practice
 1. Open three songs from this month. For each, choose a capo and shapes, and play through the chorus.
 2. Check yourself with the capo quiz from T.04.
+3. Pass it: the app names a key and the capo + shapes for it; put the capo on and play 1–5–6m–4 twice, four strums per chord. It checks the chords as they sound with the capo, so a missing capo shows up.
+
+{{exercise:EX_capo_keys}}
 
 {{quiz:Q_capo}}
 

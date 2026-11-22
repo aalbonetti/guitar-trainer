@@ -18,5 +18,9 @@ In D, the open D and top strings tie the chords together.
 
 {{tool:metronome:bpm=72,beats=4,sub=1}}
 
+{{exercise:EX_changes_drone}}
+
+> Let the open strings ring, and keep the bass note of each voicing: it's what tells these chords apart.
+
 ### Goal
 25 clean changes a minute between drone voicings.
