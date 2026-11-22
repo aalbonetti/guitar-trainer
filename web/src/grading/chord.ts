@@ -81,6 +81,11 @@ export function pairTargets(ex: Pick<ChordChangesEx, 'voicings'>, pair: string[]
 /** Below this cosine a strum doesn't sound like any chord offered (muted scratch, noise, silence). Synthetic
  *  strums of the right chord score 0.87–0.95; a first guess to check on the phone. */
 export const MIN_SCORE = 0.7;
+/** A decoy (a stand-in the lesson warns against, or the shapes without the capo) must beat the expected chord by
+ *  this much to count as heard: the expected chord's own overtones can land on the decoy's extra note (a barre F's
+ *  A3 and C3 put energy on E, Fmaj7's extra note). Synthetic, 6 seeds: a right F was heard as Fmaj7 on 0/60 lone
+ *  strums and 0/24 in the A.12 progression; a played Fmaj7 is caught on 75–100 % of strums (0.04 caught fewer). */
+export const DECOY_MARGIN = 0.02;
 /** changes_per_min: a strum counts as one chord of the pair only if it beats the other by this much. */
 export const MIN_MARGIN = 0.015;
 const dot = (a: number[], b: number[]) => { let s = 0; for (let i = 0; i < 12; i++) s += a[i] * b[i]; return s; };
@@ -89,11 +94,11 @@ export const scoreChord = (ch: number[], t: ChordTarget): number => Math.max(...
 export interface ChordVerdict { ok: boolean; expected: string; heard: string | null; score: number; best: number; margin: number; why?: 'other' | 'unclear' | 'silent' }
 /** Does this strum's chroma match the expected chord better than every alternative (and well enough)?
  *  `heard` is the best-scoring chord when it clears MIN_SCORE, else null. */
-export function verifyChord(ch: number[] | null, expected: ChordTarget, others: ChordTarget[], minScore = MIN_SCORE): ChordVerdict {
+export function verifyChord(ch: number[] | null, expected: ChordTarget, others: ChordTarget[], minScore = MIN_SCORE, decoyMargin = DECOY_MARGIN): ChordVerdict {
   if (!ch || !ch.some(x => x > 0)) return { ok: false, expected: expected.id, heard: null, score: 0, best: 0, margin: 0, why: 'silent' };
   const exp = scoreChord(ch, expected);
   let bestOther = -1, bestId: string | null = null;
-  for (const o of others) { if (o.id === expected.id) continue; const s = scoreChord(ch, o); if (s > bestOther) { bestOther = s; bestId = o.id; } }
+  for (const o of others) { if (o.id === expected.id) continue; const s = scoreChord(ch, o) - (o.decoy ? decoyMargin : 0); if (s > bestOther) { bestOther = s; bestId = o.id; } }
   const top = Math.max(exp, bestOther), margin = exp - Math.max(0, bestOther);
   const heard = top < minScore ? null : exp >= bestOther ? expected.id : bestId;
   const ok = heard === expected.id;
@@ -105,6 +110,14 @@ export interface Strum { t: number; chroma: number[] | null; level: number; fram
 /** Ringing compensation: how much of the pre-onset spectrum is assumed still ringing, and the share of energy that
  *  must be new for the compensated chroma to be used. */
 export const RING_KEEP = 0.9, FRESH_MIN = 0.3;
+/** …and only when the chord changed: if what rang before already sounds like what's heard now (the same chord
+ *  strummed again), subtracting it would leave a random handful of strings (whichever were hit harder this time),
+ *  and three strings of G can look like Bm. */
+export const SAME_CHORD_COS = 0.9;
+/** A slow strum spreads over 50–150 ms of strings, and the flux detector can fire twice inside it. One strum per
+ *  150 ms is still faster than eighths at 200 BPM, so onsets closer than that are one strum (own-pace boxes would
+ *  otherwise advance early and every later chord would be checked against the wrong box). */
+export const STRUM_MIN_GAP_S = 0.15;
 export interface StrumOpts { winStart?: number; winEnd?: number; fftN?: number; stepS?: number; ringS?: number; latencyS?: number }
 /** Capture blocks in, strums out. Each onset's chroma is averaged over [onset + 60 ms, min(onset + 450 ms, next
  *  onset)]; when the next strum comes sooner than one 8192-sample frame fits, one frame from onset + 30 ms is
@@ -116,7 +129,7 @@ export class StrumAnalyzer {
   /** Called as soon as a strum's onset is detected (seconds), before its chroma is ready. */
   onOnset: ((t: number) => void) | null = null;
   constructor(sr: number, o: StrumOpts = {}, det?: InstanceType<typeof OnsetDetector>) {
-    this.sr = sr; this.det = det ?? new OnsetDetector(sr);
+    this.sr = sr; this.det = det ?? new OnsetDetector(sr, { minGap: STRUM_MIN_GAP_S });
     this.o = { winStart: 0.06, winEnd: 0.45, fftN: 8192, stepS: 0.02, ringS: 3, latencyS: 0.03, ...o };
     this.ring = new Float32Array(Math.ceil(this.o.ringS * sr));
   }
@@ -153,23 +166,25 @@ export class StrumAnalyzer {
   /** Ringing compensation: strings the new chord doesn't strike keep sounding the old chord. The spectrum just
    *  before the onset is that ringing; peaks that didn't get louder after the onset are left out (a string can
    *  only get louder by being struck again). When that leaves little (the same notes struck again, e.g. an
-   *  upstrum on the same chord), M0's plain chroma is used. */
+   *  upstrum on the same chord), or the same chord was strummed again, M0's plain chroma is used. */
   private analyze(on: number, a: number, b: number): Strum {
     const sr = this.sr, N = this.o.fftN, step = Math.round(this.o.stepS * sr);
     const acc = new Array(12).fill(0); let frames = 0, e = 0, n = 0;
     const frame = new Float32Array(N);
     const pre = this.read(Math.round(on - 0.005 * sr) - N, frame) ? magSpectrum(frame) : null;
+    const preCh = pre ? chromaFromMag(pre, sr, N) : null;
     for (let s = Math.round(a); s + N <= Math.round(b) + 1 && s + N <= this.end; s += step) {
       if (!this.read(s, frame)) continue;
       if (frames === 0) { for (let i = 0; i < N; i++) e += frame[i] * frame[i]; n = N; }
       let ch: number[] | null = null;
-      if (pre) {
+      const plain = chroma(frame, sr);
+      if (pre && preCh && dot(preCh, plain) < SAME_CHORD_COS) {
         const post = magSpectrum(frame), fresh = new Float64Array(post.length);
         let ep = 0, ef = 0;
         for (let k = 0; k < post.length; k++) { const d = post[k] - RING_KEEP * pre[k]; fresh[k] = d > 0 ? d : 0; ep += post[k] * post[k]; ef += fresh[k] * fresh[k]; }
         if (ef >= FRESH_MIN * ep) ch = chromaFromMag(fresh, sr, N);
       }
-      (ch ?? chroma(frame, sr)).forEach((v, i) => { acc[i] += v; });
+      (ch ?? plain).forEach((v, i) => { acc[i] += v; });
       frames++;
     }
     return { t: on / sr, chroma: frames ? normalize(acc) : null, level: n ? Math.sqrt(e / n) : 0, frames };
@@ -314,7 +329,10 @@ export function chordCoach(g: ChordGrade, names: Record<string, string>): string
   wrong.sort((a, b) => b[2] - a[2]);
   if (!wrong.length) return 'Every strum sounded like the right chord.';
   const [e, h] = wrong[0];
-  if (h.startsWith('nocapo:')) return 'Some chords sounded as if the capo wasn’t on (or was on the wrong fret). Check the capo, then play the same shapes.';
+  // a forgotten (or misplaced) capo also makes some shapes sound like other chords of the key, so look at the
+  // share of wrong strums that match a shape without the capo, not just the most common confusion
+  const total = wrong.reduce((a, w) => a + w[2], 0), noCapo = wrong.filter(w => w[1].startsWith('nocapo:')).reduce((a, w) => a + w[2], 0);
+  if (noCapo >= total / 3 || h.startsWith('nocapo:')) return 'Some chords sounded as if the capo wasn’t on (or was on the wrong fret). Check the capo, then play the same shapes.';
   if (h === 'none') return `No strums were heard on ${n(e)}. Keep strumming through the changes, even if the chord isn't ready yet.`;
   if (h === 'unclear') return `Some ${n(e)} strums didn't sound like any of the chords. Check that every string in the shape rings (a muted or buzzing string blurs the chord).`;
   return g.met ? `Nearly all right. A few ${n(e)} strums sounded more like ${n(h)}.` : `Several ${n(e)} strums sounded like ${n(h)}. Check the fingers that differ between them, and let the chord ring before changing.`;
