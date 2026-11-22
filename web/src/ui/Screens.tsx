@@ -13,6 +13,8 @@ import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../pr
 import { exportAll, importAll, downloadBackup } from '../db';
 import { TimingPanel, CalibrationCard } from './Timing';
 import { PracticeCard } from './Practice';
+import { MyCharts } from './Charts';
+import { charts, loadCharts, chartFor } from '../charts';
 import { noteSongOpened } from '../practice';
 import { attempt } from '../grading/runner';
 
@@ -203,9 +205,11 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
 }
 
 // ---------- Songs ----------
-export function Songs({ cat, selected }: { cat: Catalog; selected?: string }) {
+export function Songs({ cat, selected, initialTab }: { cat: Catalog; selected?: string; initialTab?: string }) {
   const [q, setQ] = useState('');
-  const [tab, setTab] = useState<'week' | 'all'>(getSetList() ? 'week' : 'all');
+  const [tab, setTab] = useState<'week' | 'all' | 'mine'>(initialTab === 'mine' ? 'mine' : getSetList() ? 'week' : 'all');
+  const ch = useStore(charts);
+  useEffect(() => { if (!ch.ready) void loadCharts(); }, []);
   const sl = getSetList();
   const week = sl ? thisWeekSongs(sl) : [];
   const list = tab === 'week'
@@ -218,10 +222,12 @@ export function Songs({ cat, selected }: { cat: Catalog; selected?: string }) {
         <div class="tabs">
           <button class={tab === 'week' ? 'sel' : ''} onClick={() => setTab('week')}>This week</button>
           <button class={tab === 'all' ? 'sel' : ''} onClick={() => setTab('all')}>All ({cat.outlines.length})</button>
+          <button class={tab === 'mine' ? 'sel' : ''} onClick={() => setTab('mine')}>My charts{ch.list.length ? ` (${ch.list.length})` : ''}</button>
         </div>
+        {tab === 'mine' ? <MyCharts /> : null}
         {tab === 'all' ? <input type="search" placeholder="Search title, artist, CCLI" value={q} onInput={e => setQ((e.target as HTMLInputElement).value)} /> : null}
         {tab === 'week' && !sl ? <p class="muted">Import your set-list CSV in <a href="#/settings">Settings</a>.</p> : null}
-        <ul class="list">
+        <ul class="list" hidden={tab === 'mine'}>
           {list.map(s => <li class={s.id === selected ? 'sel' : ''}>{s.id ? <a href={`#/song/${s.id}`}>{s.title}<small>{s.sub}</small></a> : <span class="muted">{s.title} <small>no outline yet</small></span>}</li>)}
         </ul>
       </div>
@@ -234,6 +240,7 @@ const songKeyPref = persisted<Record<string, string>>('gt_song_keys', {});
 export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
   const [key, setKeyState] = useState(songKeyPref.get()[o.id] || o.chart_key);
   useEffect(() => { noteSongOpened(o.id); }, [o.id]);
+  useStore(charts); const myChart = chartFor(o.id);
   const [nash, setNash] = useState(false);
   const [capo, setCapo] = useState(0);
   const setKey = (k: string) => { setKeyState(k); setCapo(0); const all = songKeyPref.get(); all[o.id] = k; songKeyPref.set(all); };
@@ -263,7 +270,8 @@ export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
           <div class="chordline">{(nash ? s.numbers : s.chords_in_chart_key.map(show)).map(c => <span>{c}</span>)}</div>
         </section>
       ))}
-      {o.chords_verified !== 'full' ? <p class="muted">Main sections only. Import your SongSelect chart for the full song (coming in a later update).</p> : null}
+      {myChart ? <p><a class="btn primary" href={`#/chart/${myChart.id}`}>Open your full chart</a></p>
+        : o.chords_verified !== 'full' ? <p class="muted">Main sections only. <a href="#/import">Import your SongSelect chart</a> for the full song with words.</p> : <p class="muted small"><a href="#/import">Import your chart</a> to see the words with the chords.</p>}
       {o.notes ? <p class="note">{o.notes}</p> : null}
       <h3>Chords{capo ? ` (shapes with capo ${capo})` : ''}</h3>
       <div class="chords">{used.map(c => <ChordDiagram name={c} shape={shapeFor(c)} size={0.9} />)}</div>
