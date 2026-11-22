@@ -382,7 +382,8 @@ LESSONS = [
 
 
 # ---------------- games (07-games.md) ----------------
-# G1 ships tap mode for six games; the rest are listed so the Arcade shows what's coming (milestone G2/G3).
+# G1 ships tap mode for six games, G2 play mode for the single-note games plus Octave Jump, Box Runner and In the
+# Pocket; the G3 games are listed so the Arcade shows what's coming.
 def lvl(id, name, params, target_score, round_s=None, lives=None, unlock_lesson=None, review_for=None):
     d = dict(id=id, name=name, params=params, target_score=target_score)
     if round_s: d['round_s'] = round_s
@@ -429,9 +430,31 @@ GAMES = [
         lvl('dm3', 'Quarter, eighth, dotted eighth', {'bpm': [60, 140], 'notes': ['quarter', 'eighth', 'dotted8']}, 1500, round_s=60, review_for=['T.07']),
     ], review_for=['T.07']),
     game('G_triad_hunt', 'Triad Hunt', 'Find the triad on a string set, any inversion.', 'ER.04', 'G3', [], modes=('tap', 'play')),
-    game('G_octave_jump', 'Octave Jump', 'Play the octave of a note on string 6 or 5, against the clock.', 'EL.04', 'G2', [], modes=('play',)),
-    game('G_box_runner', 'Box Runner', 'Run the pentatonic box in time with the click.', 'EL.01', 'G2', [], modes=('play',)),
-    game('G_in_the_pocket', 'In the Pocket', 'Strum to the click, then keep time when the click drops out.', 'A.05', 'G2', [], modes=('play',)),
+    # G2. Octave Jump: a note on string 6 or 5; answer with its octave (the shape's high note, 2 strings over and
+    # 2 frets up). Play mode checks the exact octave; tap mode is the fallback (07-games.md §1: tap in every game).
+    game('G_octave_jump', 'Octave Jump', 'A note on string 6 or 5: play its octave, 2 strings over and 2 frets up, against the clock.', 'EL.04', 'G2', [
+        lvl('oj1', 'String 6, frets 0–7, fret shown', {**Z([6], 0, 7), 'show_fret': True}, 4200, round_s=60),
+        lvl('oj2', 'Strings 6 & 5, frets 0–7, fret shown', {**Z([6, 5], 0, 7), 'show_fret': True}, 3600, round_s=60),
+        lvl('oj3', 'Strings 6 & 5, frets 0–12, note name only', {**Z([6, 5], 0, 12), 'show_fret': False}, 2700, round_s=60, unlock_lesson='F.07'),
+    ], modes=('play', 'tap')),
+    # Box Runner: the box (scales.json, moved to the key) played as a path to the click; graded per note on pitch
+    # (exact octave: the box fixes it) and timing. Play only: tapping in time isn't the same skill.
+    game('G_box_runner', 'Box Runner', 'The pentatonic box is shown: play the path in time with the click.', 'EL.01', 'G2', [
+        lvl('br1', 'Major box in G, up & down, quarter notes, 70 BPM', {'scale': 'major_pentatonic', 'positions': [2], 'keys': ['G'], 'path': 'updown', 'bpm': 70, 'sub': 1, 'passes': 2}, 14000),
+        lvl('br2', 'Major box in G, up & down, eighths, 80 BPM', {'scale': 'major_pentatonic', 'positions': [2], 'keys': ['G'], 'path': 'updown', 'bpm': 80, 'sub': 2, 'passes': 4}, 15500),
+        lvl('br3', 'Major box in threes, eighths, 70 BPM (G A C D)', {'scale': 'major_pentatonic', 'positions': [2], 'keys': ['G', 'A', 'C', 'D'], 'path': 'threes', 'bpm': 70, 'sub': 2, 'passes': 2}, 22000),
+        lvl('br4', 'Minor box 1, up & down, eighths, 80 BPM (A E G)', {'scale': 'minor_pentatonic', 'positions': [1], 'keys': ['A', 'E', 'G'], 'path': 'updown', 'bpm': 80, 'sub': 2, 'passes': 4}, 15500, unlock_lesson='EL.02'),
+        lvl('br5', 'Minor boxes 2 and 5 in A, eighths, 80 BPM', {'scale': 'minor_pentatonic', 'positions': [2, 5], 'keys': ['A'], 'path': 'updown', 'bpm': 80, 'sub': 2, 'passes': 4}, 15500, unlock_lesson='EL.02'),
+    ], modes=('play',)),
+    # In the Pocket: strum a pattern to the click, graded strum by strum against a window of 1.5 × the lesson's
+    # max_err_ms. Gap Click: the click drops out for gap_bars (click_bars of click between gaps); you keep strumming.
+    game('G_in_the_pocket', 'In the Pocket', 'Strum to the click; the meter shows ahead or behind. Gap Click: keep time when the click drops out.', 'A.05', 'G2', [
+        lvl('pk1', 'Quarter-note downs, 70 BPM', {'pattern': 'S1_quarters', 'bpm': 70, 'bars': 16, 'window_ms': 60}, 19000, unlock_lesson='F.06'),
+        lvl('pk2', 'Straight eighths, 80 BPM', {'pattern': 'S2_eighths', 'bpm': 80, 'bars': 16, 'window_ms': 60}, 21000),
+        lvl('pk3', 'Gap Click: eighths, 80 BPM, gaps of 1, 2, 4 bars', {'pattern': 'S2_eighths', 'bpm': 80, 'gap_bars': [1, 2, 4], 'click_bars': 2, 'window_ms': 60}, 19500),
+        lvl('pk4', 'Worship pattern, 90 BPM', {'pattern': 'S3_worship', 'bpm': 90, 'bars': 16, 'window_ms': 60}, 15500, unlock_lesson='A.06'),
+        lvl('pk5', 'Sixteenth groove, 90 BPM', {'pattern': 'S8_sixteenths', 'bpm': 90, 'bars': 12, 'window_ms': 45}, 16500, unlock_lesson='ER.10'),
+    ], modes=('play',)),
     game('G_change_sprint', 'Change Sprint', '60 seconds of chord changes. Race your best run.', 'A.01', 'G3', [], modes=('play',)),
     game('G_song_run', 'Song Run', 'The boss level: play a set-list song bar by bar at its tempo.', 'A.05', 'G3', [], modes=('play',)),
 ]
@@ -486,15 +509,49 @@ for g in GAMES:
     gids.add(g['id'])
     for ref in [g['unlock_lesson'], *g['review_for'], *[l.get('unlock_lesson') for l in g['levels']], *[r for l in g['levels'] for r in l.get('review_for', [])]]:
         if ref and ref not in lesson_ids: errors.append(f"{g['id']}: unknown lesson {ref}")
-    if g['milestone'] == 'G1' and not g['levels']: errors.append(f"{g['id']}: G1 game without levels")
+    if g['milestone'] in ('G1', 'G2') and not g['levels']: errors.append(f"{g['id']}: {g['milestone']} game without levels")
+    if not g['modes'] or not set(g['modes']) <= {'tap', 'play'}: errors.append(f"{g['id']}: bad modes {g['modes']}")
+    lids = [l['id'] for l in g['levels']]
+    if len(set(lids)) != len(lids): errors.append(f"{g['id']}: duplicate level ids")
     for l in g['levels']:
-        p = l['params']
+        p, where = l['params'], f"{g['id']}/{l['id']}"
         for k in p.get('keys', []) + p.get('shapes', []):
-            if k not in PC: errors.append(f"{g['id']}/{l['id']}: bad key {k}")
+            if k not in PC: errors.append(f"{where}: bad key {k}")
         for n in p.get('numbers', []):
-            if n not in NUMS: errors.append(f"{g['id']}/{l['id']}: bad number {n}")
+            if n not in NUMS: errors.append(f"{where}: bad number {n}")
         z = p.get('zone')
-        if z and (not set(z['strings']) <= {1, 2, 3, 4, 5, 6} or not 0 <= z['frets'][0] < z['frets'][1] <= 15): errors.append(f"{g['id']}/{l['id']}: bad zone")
+        if z and (not set(z['strings']) <= {1, 2, 3, 4, 5, 6} or not 0 <= z['frets'][0] < z['frets'][1] <= 15): errors.append(f"{where}: bad zone")
+        if l['target_score'] <= 0: errors.append(f"{where}: target_score must be positive")
+        if g['id'] == 'G_octave_jump':
+            # the octave shape's high note: 2 strings over, 2 frets up (OCTAVES), so it must stay on the neck
+            if not z or not set(z['strings']) <= {6, 5}: errors.append(f"{where}: octave jump starts on string 6 or 5")
+            elif z['frets'][1] + 2 > 15: errors.append(f"{where}: the octave would land past fret 15")
+            for s in (z or {}).get('strings', []):
+                hi, d = next((h, dd) for lo, h, dd in OCTAVES if lo == s)
+                if (OPEN[6 - hi] + d) - OPEN[6 - s] != 12: errors.append(f"{where}: octave shape from string {s} is wrong")
+        if g['id'] == 'G_box_runner':
+            if p.get('path') not in ('up', 'down', 'updown', 'threes'): errors.append(f"{where}: bad path {p.get('path')}")
+            if p.get('sub') not in (1, 2) or not 40 <= p.get('bpm', 0) <= 200 or p.get('passes', 0) < 1: errors.append(f"{where}: bad sub/bpm/passes")
+            for pos in p.get('positions', []):
+                sc = next((s for s in SCALES if s['kind'] == p.get('scale') and s['position'] == pos and s['root'] == ('G' if p.get('scale') == 'major_pentatonic' else 'A')), None)
+                if not sc: errors.append(f"{where}: no {p.get('scale')} position {pos}"); continue
+                for k in p['keys']:
+                    # same rule as boxFrets() in web/src/games/core.ts: the lowest placement that fits frets 0–15
+                    base = (PC[k] - PC[sc['root']]) % 12
+                    fits = [s for s in (base - 12, base, base + 12) if min(min(x) for x in sc['frets']) + s >= 0 and max(max(x) for x in sc['frets']) + s <= 15]
+                    if not fits: errors.append(f"{where}: {sc['id']} doesn't fit frets 0–15 in {k}"); continue
+                    got = {(OPEN[i] + f + fits[0]) % 12 for i, fl in enumerate(sc['frets']) for f in fl}
+                    if got != {(PC[k] + x) % 12 for x in SCALE_FORMULAS[p['scale']]}: errors.append(f"{where}: {sc['id']} in {k} has the wrong notes")
+        if g['id'] == 'G_in_the_pocket':
+            pat = next((r for r in RHYTHM if r['id'] == p.get('pattern')), None)
+            if not pat: errors.append(f"{where}: unknown pattern {p.get('pattern')}")
+            if not 40 <= p.get('bpm', 0) <= 200 or not 20 <= p.get('window_ms', 0) <= 100: errors.append(f"{where}: bad bpm/window_ms")
+            if 'gap_bars' in p:
+                if not p['gap_bars'] or any(x < 1 for x in p['gap_bars']) or p.get('click_bars', 0) < 1: errors.append(f"{where}: bad gap_bars/click_bars")
+                # generated: bars = click, gap, click, gap, …, click
+                p['bars'] = p['click_bars'] * (len(p['gap_bars']) + 1) + sum(p['gap_bars'])
+            if p.get('bars', 0) < 4: errors.append(f"{where}: bars")
+            if pat and p.get('bars') and not 20 <= p['bars'] * int(pat['meter'][0]) * 60 / p['bpm'] <= 180: errors.append(f"{where}: a round should be 20 s to 3 minutes")
 # cycle check
 state = {}
 def visit(n):
