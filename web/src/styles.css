@@ -77,9 +77,19 @@ svg .fretno { fill:var(--muted); font-size:10px; text-anchor:middle; }
 .tuner.compact .note { font-size:40px; } .tuner.compact .dial { max-width:220px; }
 
 /* metronome */
-.metro .beats { display:flex; justify-content:center; gap:12px; margin:6px 0 10px; }
-.metro .beats i { width:22px; height:22px; border-radius:50%; background:var(--line); transition:background .05s; } .metro .beats i.one { outline:2px solid #4a505b; }
-.metro .beats i.on { background:var(--ok); } .metro .beats i.one.on { background:var(--accent); }
+.metro .beats { display:flex; justify-content:center; align-items:center; gap:12px; margin:6px 0 10px; }
+.metro .beats.compound { gap:8px; }
+/* each light is a 44 px tap target with a dot inside; accented beats get a ring */
+.metro .beats .light { min-height:44px; min-width:36px; padding:0; border:0; background:transparent; justify-content:center; }
+.metro .beats .light::after { content:''; width:22px; height:22px; border-radius:50%; background:var(--line); transition:background .05s; }
+.metro .beats .light.eighth::after { width:14px; height:14px; }
+.metro .beats .light.acc::after { outline:2px solid var(--accent); outline-offset:2px; }
+.metro .beats .light.group { margin-left:14px; }
+.metro .beats .light.on::after { background:var(--ok); } .metro .beats .light.acc.on::after { background:var(--accent); }
+.chanpick { margin-top:8px; }
+.chanlist { list-style:none; margin:6px 0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.chanlist .chan { width:100%; display:grid; grid-template-columns:4em 1fr 4.5em; align-items:center; gap:10px; }
+.chanlist .meter { height:10px; background:var(--line); border-radius:5px; overflow:hidden; } .chanlist .meter i { display:block; height:100%; background:var(--ok); }
 .metro .bpmrow { display:flex; align-items:center; justify-content:center; gap:22px; }
 .metro .bpm { text-align:center; } .metro .bpm b { font-size:56px; line-height:1; font-variant-numeric:tabular-nums; } .metro .bpm span { display:block; color:var(--muted); font-size:13px; }
 .metro.compact .bpm b { font-size:40px; }

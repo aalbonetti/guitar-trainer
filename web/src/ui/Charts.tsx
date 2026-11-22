@@ -109,7 +109,7 @@ export function ChartView({ cat, id }: { cat: Catalog; id: string }) {
       <div class="crumbs"><a href="#/songs/mine">My charts</a></div>
       <h1>{p.title}</h1>
       <p class="muted">{p.artist ? p.artist + ' · ' : ''}chart key {chartKey}{p.tempo ? ` · ${p.tempo} BPM` : ''} · {meter}{p.ccli ? ` · CCLI ${p.ccli}` : ''}</p>
-      <ToolBar preset={{ bpm: Math.round(p.tempo || o?.bpm || 72), beats, sub }} label={p.tempo || o?.bpm ? 'song tempo' : 'tap to set'} />
+      <ToolBar preset={{ bpm: Math.round(p.tempo || o?.bpm || 72), beats, sub, meter }} label={p.tempo || o?.bpm ? 'song tempo' : 'tap to set'} />
       <div class="row wrap">
         <label class="field inline">Key <select value={k} onChange={e => { setKey((e.target as HTMLSelectElement).value); setCapo(0); }}>{KEY_NAMES.map(x => <option value={x}>{x}{x === chartKey ? ' (chart)' : ''}</option>)}</select></label>
         <label class="field inline">Capo <select value={cp} onChange={e => setCapo(+(e.target as HTMLSelectElement).value)}>
