@@ -17,6 +17,8 @@ export type Phase = 'idle' | 'starting' | 'countin' | 'playing' | 'result' | 'er
 export interface PitchLive {
   mode: PitchSetup['mode']; labels: string[]; wheres: string[]; status: ('todo' | 'ok' | 'miss')[]; idx: number;
   hearing: string | null; cents: number | null; progress: number; ends: number | null;
+  /** timed: 'count' until half a beat before the first note (a pickup comes in mid-bar), then 'play' */
+  cue?: 'count' | 'play'; firstBeat?: number;
 }
 export interface PitchOutcome {
   mode: PitchSetup['mode']; met: boolean; score: number; matched: number; total: number; grade: NotesGrade | null;
@@ -276,12 +278,16 @@ async function timedNotes(setup: PitchSetup, bpm: number, sig: { cancelled: bool
   simAuto('pitch-timed', plan.expected.map(e => e.t));
   const lag = (() => { const c = audioContext(); return c.outputLatency || c.baseLatency || 0; })();
   const tol = noteTolerance(plan.beat);
+  const firstT = plan.expected[0]?.t ?? plan.start;
+  setLive({ cue: 'count', firstBeat: Math.round((firstT - plan.start) / plan.beat) % plan.beatsPerBar + 1 });
   let offsetS = (cal?.offset_ms ?? 0) / 1000, gradedAt = 0;
   const beatTimer = window.setInterval(() => {
     const now = ctxNow() - lag; let b = -1; plan.clicks.forEach((c, i) => { if (c.t <= now) b = i; });
     if (b !== attempt.get().beat) attempt.set({ beat: b });
     let idx = 0; plan.expected.forEach((e, i) => { if (e.t <= now + 0.05) idx = i; });
     if (attempt.get().pitch?.idx !== idx) setLive({ idx });
+    const cue = now >= firstT - plan.beat / 2 ? 'play' : 'count';
+    if (attempt.get().pitch?.cue !== cue) setLive({ cue });
     if (now - gradedAt > 0.3 && now > plan.start) {
       gradedAt = now;
       const g = liveGrade(setup, frames.filter(f => f.t > plan.start - tol), onsets, plan.expected, true, tol, offsetS);

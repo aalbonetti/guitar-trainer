@@ -69,7 +69,7 @@ export function Progress({ cat }: { cat: Catalog }) {
             <h2>Recent attempts</h2>
             {attempts.length ? <ul class="list">{attempts.slice(0, 15).map(a => { const m = safe(a.metrics_json);
               return <li><a href={`#/lesson/${a.lesson_id}`}><b>{a.met_target ? '✓' : '·'} <span class="lid">{a.lesson_id}</span> {cat.lessonById[a.lesson_id]?.title}</b>
-                <small>{a.day} · {a.grader_mode === 'self' ? 'self-marked' : a.criterion_type}{m.bpm ? ` · ${m.bpm} BPM` : ''}{m.maeMs !== undefined ? ` · ${m.maeMs} ms` : ''}{a.criterion_type === 'quiz' || a.criterion_type === 'pitch' ? ` · ${Math.round(a.score * 100)}%` : ''}{a.grader_mode === 'assisted' ? ' · confirmed by you' : ''}</small></a></li>; })}</ul>
+                <small>{a.day} · {a.grader_mode === 'self' ? 'self-marked' : a.criterion_type}{m.bpm ? ` · ${m.bpm} BPM` : ''}{m.maeMs !== undefined ? ` · ${m.maeMs} ms` : ''}{a.criterion_type === 'quiz' || a.criterion_type === 'pitch' ? ` · ${Math.round(a.score * 100)}%` : ''}{a.grader_mode === 'assisted' ? (a.met_target ? ' · confirmed by you' : ' · rejected by you') : ''}</small></a></li>; })}</ul>
               : <p class="muted">No attempts yet.</p>}
           </section>
         </div>

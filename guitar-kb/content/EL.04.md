@@ -22,4 +22,4 @@ Playing a melody as **octaves** (the same note on two strings at once) sounds bi
 Take three notes from the G major pentatonic, play them as octaves on strings 4 and 2, add the dotted-eighth delay (T.07) and a little drive. That's an intro.
 
 ### Goal
-Correct notes 90% of the time, with the middle string silent.
+Correct notes 90% of the time, with the middle string silent. The app hears only the low note of each shape (the high note sits on its overtone), so after each attempt you confirm the octave rang cleanly.

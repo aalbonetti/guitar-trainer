@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import { OnsetDetector } from '../src/dsp/dsp.js';
 import {
   PitchTracker, segmentNotes, gradeNotes, verifySegment, HoldTracker, buildNotePlan, pitchSetup, expectedFromEvents, eventMidi,
-  noteKind, noteTolerance, trackerRange, midiName, type PitchFrame, type Expected, type HoldTarget,
+  noteKind, noteTolerance, trackerRange, midiName, freeExtrasCap, type PitchFrame, type Expected, type HoldTarget,
 } from '../src/grading/pitch';
 
 const SR = 48000;
@@ -194,6 +194,30 @@ describe('sustain, slides and swells', () => {
   });
 });
 
+describe('extra notes at your own pace', () => {
+  const s = pitchSetup(L('EL.11'), cat);
+  const harmonic = (e: Expected, t: number): Note => ({ midi: e.midis[0], t, dur: 0.6, amps: [1, 0.08], gain: 0.15 });
+  const grade = (notes: Note[], len: number) => {
+    const { frames, onsets } = analyze(render(notes, len), [50, 90]);
+    return gradeNotes(segmentNotes(frames, onsets), s.expected, { target: 0.9, timed: false });
+  };
+  it('spraying chromatic notes no longer passes (it used to match 11/12 in order)', () => {
+    const spam: Note[] = Array.from({ length: 104 }, (_, k) => ({ midi: 60 + (k % 30), t: 0.1 + k * 0.15, dur: 0.14, decay: 2, gain: 0.3 }));
+    const g = grade(spam, 0.1 + 104 * 0.15 + 0.4);
+    expect(g.matched).toBeGreaterThanOrEqual(10); // order alone would let it through…
+    expect(g.tooManyExtras).toBe(true); expect(g.met).toBe(false); // …the extras cap doesn't
+    expect(g.extras).toBeGreaterThan(freeExtrasCap(12));
+  });
+  it('a couple of stray notes are tolerated; the cap is max(3, half the notes)', () => {
+    expect(freeExtrasCap(12)).toBe(6); expect(freeExtrasCap(4)).toBe(3);
+    const notes: Note[] = [];
+    let t = 0.2;
+    s.expected.forEach((e, i) => { notes.push(harmonic(e, t)); t += 0.8; if (i === 3 || i === 7) { notes.push({ midi: 61, t, dur: 0.4, gain: 0.2 }); t += 0.6; } });
+    const g = grade(notes, t + 0.4);
+    expect(g.extras).toBeGreaterThanOrEqual(2); expect(g.extras).toBeLessThanOrEqual(freeExtrasCap(12)); expect(g.matched).toBe(12); expect(g.met).toBe(true);
+  });
+});
+
 describe('double stops (EL.06, spectral check of both notes)', () => {
   const s = pitchSetup(L('EL.06'), cat);
   const play = (change: (i: number, m: number[]) => number[]) => {
@@ -224,6 +248,11 @@ describe('cents: holding a target', () => {
   });
   it('F.02: a reading an octave up (phone mics on low strings) still tunes', () => {
     expect(hold(E2, 5, [{ midi: 52, cents: -1, t: 0.1, dur: 2, decay: 0.5 }], 2.2)).not.toBeNull();
+  });
+  it('F.02: only the one octave slip upward is accepted: E4 for E2 fails, E3 for the high E4 string fails', () => {
+    expect(hold(E2, 5, [{ midi: 64, t: 0.1, dur: 2, decay: 0.5 }], 2.2)).toBeNull();
+    expect(hold({ midi: 64, label: 'E4', where: '', octaveSlack: true }, 5, [{ midi: 52, t: 0.1, dur: 2, decay: 0.5 }], 2.2)).toBeNull();
+    expect(hold({ midi: 64, label: 'E4', where: '', octaveSlack: true }, 5, [{ midi: 64, cents: 1, t: 0.1, dur: 2, decay: 0.5 }], 2.2)).not.toBeNull();
   });
   it('takes at least half a second of holding', () => {
     const at = hold(E2, 5, [{ midi: 40, t: 0.1, dur: 2, decay: 0.5 }], 2.2)!;
