@@ -182,6 +182,11 @@ describe('verifier: right chord vs similar wrong chords (synthetic strums)', () 
     expect((stand.conf['F>decoy:Fmaj7'] || 0)).toBeGreaterThanOrEqual(2);
     expect(stand.ok).toBeLessThan(right.ok);
   });
+  it('A.11: G vs G7 (G7 holds all of G plus F; G2/G3’s 7th harmonic sits ~31¢ flat of F)', () => {
+    const r = confusion({ G: [3, 2, 0, 0, 0, 3], G7: [3, 2, 0, 0, 0, 1], C: [-1, 3, 2, 0, 1, 0], D: [-1, -1, 0, 2, 3, 2] }, 10); log('A.11 G / G7 / C / D', r);
+    expect(r.acc).toBeGreaterThanOrEqual(0.9);
+    expect(r.conf['G>G7'] || 0).toBeLessThanOrEqual(1);
+  });
   it('a missed string still verifies (G without string 6, Em without string 1, F without string 1)', () => {
     const a = confusion({ G: [3, 2, 0, 0, 0, 3], Em: [0, 2, 2, 0, 0, 0] }, 10, { drop: id => (id === 'G' ? [6] : [1]) }); log('G/Em one string missed', a);
     const b = confusion({ F: [1, 3, 3, 2, 1, 1], C: [-1, 3, 2, 0, 1, 0], G: [3, 2, 0, 0, 0, 3], Am: [-1, 0, 2, 2, 1, 0] }, 6, { drop: id => (id === 'F' ? [1] : []) }); log('F with a dead string 1', b);
@@ -263,6 +268,19 @@ describe('chord_accuracy grading', () => {
     expect(gradeOwnChords(res(32, 30), boxes, 4, 0.9).met).toBe(true);
     const early = gradeOwnChords(res(16, 16), boxes, 4, 0.9);
     expect(early.owed).toBe(16); expect(early.ratio).toBeCloseTo(0.5); expect(early.met).toBe(false);
+  });
+});
+
+describe('A.11 Amazing Grace to a click (3/4, waltz strum)', () => {
+  const ex = EX('EX_amazing_grace_chords') as ChordProgEx;
+  for (const [vi, bpm] of [[0, 80], [0, 52], [2, 80]] as [number, number][]) it(`${ex.variants[vi].label} at ${bpm} BPM passes with the right chords`, () => {
+    const v = ex.variants[vi], tg = progressionTargets(ex, v), plan = buildChordPlan(ex, v, bpm, 3, 0.2);
+    const specs: StrumSpec[] = [];
+    // waltz: D - D U D U (beats 1, 2, 2&, 3, 3&)
+    plan.boxes.forEach(b => [0, 1, 1.5, 2, 2.5].forEach((o, k) => specs.push({ frets: ex.voicings[b.ref].frets[0], capo: v.capo, t: b.t0 + o * plan.beat + 0.05 + (rnd() - 0.5) * 0.02, dur: plan.beat + 0.3, up: o % 1 !== 0, gain: k === 0 ? 1 : 0.7 })));
+    const g = gradeTimedChords(analyze(render(specs, plan.end + 1)), plan, tg, { offsetS: 0.05, ratio: 0.9 });
+    report.push(`A.11 ${v.key} @${bpm}: ${g.correct}/${g.graded} ${g.unit} ${JSON.stringify(Object.fromEntries(Object.entries(g.confusion).map(([e, r]) => [e, Object.fromEntries(Object.entries(r).filter(([h]) => h !== e))]).filter(([, r]) => Object.keys(r).length)))}`);
+    expect(g.met).toBe(true);
   });
 });
 
