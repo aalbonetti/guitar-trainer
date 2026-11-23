@@ -35,7 +35,7 @@ export async function recordAttempt(lesson: Lesson, r: AttemptResult): Promise<E
     await db.put('lesson_progress', lp);
     await db.put('attempt', { session_id: session.get().s?.id ?? null, lesson_id: lesson.id, criterion_type: lesson.pass_criteria.type, grader_mode: r.mode, score: r.score, met_target: r.met, at_target_tempo: r.atTarget, metrics_json: JSON.stringify(r.metrics || {}), event, day, at: Date.now() });
     saveStatus.set({ state: 'saved', at: Date.now(), msg: '' });
-  } catch (e) { saveStatus.set({ state: 'error', at: Date.now(), msg: `Couldn't save to this phone (${(e as Error)?.message || 'storage unavailable'}). Progress will be lost when you leave. Check that you're not in Incognito, then save a backup in Settings.` }); }
+  } catch (e) { saveStatus.set({ state: 'error', at: Date.now(), msg: `Couldn't save to this phone (${(e as Error)?.message || 'storage unavailable'}). Progress will be lost when you leave. Check that you're not in Incognito and that the phone has free space, then reload the app.` }); }
   progress.set({ lp: { ...progress.get().lp, [lesson.id]: lp } });
   noteAttempt(lesson.id, r.met);
   if (event === 'passed') void addXp('lesson_pass', lesson.id, XP.lessonPass);
