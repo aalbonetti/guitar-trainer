@@ -55,7 +55,8 @@ export function CallNumberPlay({ cat, l, round, r, assisted }: { cat: Catalog; l
     const ef = familyOf(q.answer)!;
     return { expected: all[familyKey(ef)] ?? familyTarget(ef, q.answer, open), others: Object.values(all), ef, fams };
   }, [q.id]);
-  const tally = (ok: boolean) => { const k = q.key || '?', t = (round.extra.current.keys ||= {}) as Record<string, [number, number]>; t[k] = [(t[k]?.[0] || 0) + (ok ? 1 : 0), (t[k]?.[1] || 0) + 1]; };
+  const lastKey = useRef('?');
+  const tally = (ok: boolean) => { const k = q.key || '?'; lastKey.current = k; const t = (round.extra.current.keys ||= {}) as Record<string, [number, number]>; t[k] = [(t[k]?.[0] || 0) + (ok ? 1 : 0), (t[k]?.[1] || 0) + 1]; };
   const next = (cur: typeof q) => { setQ(gen(cur)); round.askedAt.current = round.now(); };
   useTick(!round.paused, 300);
   useEffect(() => { if (!round.paused && timedOut.current !== q.id && round.now() - q.start > CN_TIMEOUT_MS) { timedOut.current = q.id; tally(false); setSaid(`Too slow: ${q.prompt} is ${q.answer}`); round.answer(false, q.miss); next(q); } });
@@ -71,7 +72,7 @@ export function CallNumberPlay({ cat, l, round, r, assisted }: { cat: Catalog; l
     else { setSaid(`✗ heard ${name(h.heard)}: ${cur.prompt} is ${cur.answer}`); round.answer(false, `${cur.miss} (heard ${name(h.heard)})`); }
     next(cur);
   });
-  const override = () => { if (round.overrideLast()) { const t = round.extra.current.keys as Record<string, [number, number]>; const k = Object.keys(t).pop(); if (k) t[k][0]++; setSaid('Counted as right'); } };
+  const override = () => { if (round.overrideLast()) { const t = round.extra.current.keys as Record<string, [number, number]>; const k = lastKey.current; if (t[k]) t[k][0]++; setSaid('Counted as right'); } };
   return (
     <>
       <div class="gside">
