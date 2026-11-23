@@ -21,8 +21,6 @@ The signature worship electric sound: you pick steady **eighth notes**, and a de
 
 Starting settings: 2–4 repeats (feedback around 30%), mix just under your dry signal. On the Kemper or a pedal, tap tempo usually has a dotted-eighth division; use that if you have it.
 
-{{tool:delay}}
-
 ### Goal
 90% on the delay-time quiz. Work it out in your head (or on the phone's calculator); within a few ms is close enough to choose the right answer.
 
