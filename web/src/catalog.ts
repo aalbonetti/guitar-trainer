@@ -24,21 +24,24 @@ export interface Outline {
 }
 export interface GameLevel { id: string; name: string; params: Record<string, any>; target_score: number; round_s?: number; lives?: number; unlock_lesson?: string; review_for?: string[] }
 export interface Game { id: string; name: string; blurb: string; unlock_lesson: string; review_for: string[]; modes: string[]; milestone: string; levels: GameLevel[] }
+/** Badges (07-games.md §5): a rule the app checks against its own records (badges.ts). */
+export interface BadgeRule { kind: string; game?: string; level?: string; mode?: string; stars?: number; keys?: string[]; accuracy?: number; min_calls?: number; positions?: number[]; gap_bars?: number; within_ms?: number; in_a_row?: number; streak?: number; days?: number }
+export interface BadgeDef { id: string; name: string; blurb: string; rule: BadgeRule }
 export interface Catalog {
   tracks: Track[]; lessons: Lesson[]; chords: CChord[]; scales: Scale[]; strums: Strum[]; picking: Picking[]; exercises: Exercise[]; songs: PdSong[]; quizzes: Quiz[];
   outlines: Outline[]; shapes: { movable_chords: { id: string }[]; triads: { id: string; root: string; quality: string; strings: number[]; frets: number[] }[] };
-  games: Game[];
+  games: Game[]; badges: BadgeDef[];
   lessonById: Record<string, Lesson>; outlineById: Record<string, Outline>;
 }
 
 const get = (f: string) => fetch(`./catalog/${f}`).then(r => { if (!r.ok) throw new Error(`${f}: ${r.status}`); return r.json(); });
 
 export async function loadCatalog(): Promise<Catalog> {
-  const [tracks, lessons, chords, scales, rhythm, exercises, outlines, shapes, lib, songs, quizzes, games] = await Promise.all(
-    ['tracks', 'lessons', 'chords', 'scales', 'rhythm', 'exercises', 'song_outlines', 'shapes', 'chords-lib', 'songs', 'quizzes', 'games'].map(n => get(n + '.json')));
+  const [tracks, lessons, chords, scales, rhythm, exercises, outlines, shapes, lib, songs, quizzes, games, badges] = await Promise.all(
+    ['tracks', 'lessons', 'chords', 'scales', 'rhythm', 'exercises', 'song_outlines', 'shapes', 'chords-lib', 'songs', 'quizzes', 'games', 'badges'].map(n => get(n + '.json')));
   setChordData(lib, chords);
   const cat: Catalog = {
-    tracks: [...tracks].sort((a: Track, b: Track) => a.order - b.order), lessons, chords, scales, strums: rhythm.strumming, picking: rhythm.picking, exercises, songs, quizzes, games,
+    tracks: [...tracks].sort((a: Track, b: Track) => a.order - b.order), lessons, chords, scales, strums: rhythm.strumming, picking: rhythm.picking, exercises, songs, quizzes, games, badges,
     outlines: [...outlines].sort((a: Outline, b: Outline) => a.title.localeCompare(b.title)), shapes,
     lessonById: Object.fromEntries(lessons.map((l: Lesson) => [l.id, l])),
     outlineById: Object.fromEntries(outlines.map((o: Outline) => [o.id, o])),

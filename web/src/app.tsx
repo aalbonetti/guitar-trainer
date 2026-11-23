@@ -4,6 +4,7 @@ import { Today, Path, LessonView, Songs, Tools, Settings, trackVisibleFor } from
 import { SessionBar, useDueCount } from './ui/Practice';
 import { Progress } from './ui/Progress';
 import { ArcadeHome, GameScreen } from './ui/Arcade';
+import { DailyPage } from './ui/Daily';
 import { loadXp } from './xp';
 import { loadBests } from './arcade';
 import { expireIdle, touch, noteTuned } from './practice';
@@ -55,7 +56,7 @@ export function App() {
   useEffect(() => { touch(); }, [hash]);
   const due = useDueCount(cat, cat ? trackVisibleFor(cat) : () => true);
   const [, route, arg] = hash.split('/');
-  const active = NAV.find(n => n.h.split('/')[1] === route || (route === 'lesson' && n.label === 'Path') || (route === 'song' && n.label === 'Songs'));
+  const active = NAV.find(n => n.h.split('/')[1] === route || (route === 'daily' && n.label === 'Arcade') || (route === 'lesson' && n.label === 'Path') || (route === 'song' && n.label === 'Songs'));
   let body;
   if (err) body = <div class="page"><p class="error">Couldn't load the catalog: {err}</p></div>;
   else if (!cat) body = <div class="page"><p class="muted">Loading…</p></div>;
@@ -64,7 +65,8 @@ export function App() {
   else if (route === 'songs') body = <Songs cat={cat} initialTab={arg} />;
   else if (route === 'song') body = <Songs cat={cat} selected={decodeURIComponent(arg || '')} />;
   else if (route === 'tools') body = <Tools which={arg} cat={cat} />;
-  else if (route === 'arcade') body = arg ? <GameScreen cat={cat} gameId={decodeURIComponent(arg)} levelId={decodeURIComponent(hash.split('/')[3] || '')} /> : <ArcadeHome cat={cat} />;
+  else if (route === 'arcade') body = arg ? <GameScreen key={`${arg}/${hash.split('/')[3] || ''}`} cat={cat} gameId={decodeURIComponent(arg)} levelId={decodeURIComponent(hash.split('/')[3] || '')} fromDaily={hash.split('/')[4] === 'daily'} /> : <ArcadeHome cat={cat} />;
+  else if (route === 'daily') body = <DailyPage cat={cat} visible={trackVisibleFor(cat)} />;
   else if (route === 'progress') body = <Progress cat={cat} />;
   else if (route === 'settings') body = <Settings cat={cat} onChange={() => bump(x => x + 1)} />;
   else body = <Today cat={cat} />;

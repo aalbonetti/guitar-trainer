@@ -533,6 +533,59 @@ if len({s['id'] for s in SONGS}) != len(SONGS): errors.append('duplicate ids')
 if errors:
     print('ERRORS'); print('\n'.join(errors)); sys.exit(1)
 json.dump(SONGS, open(os.path.join(OUT, 'song_outlines.json'), 'w'), indent=1)
+
+# ---------------- Song Run levels (07-games.md §2, G3) ----------------
+# One level per outline, written into games.json (build_catalog.py leaves G_song_run's levels empty for this
+# script). A level holds facts only: the outline id, tempo, meter and round length. The chords come from the outline.
+# The app grades each chord's family (root + major/minor, so G2, Gsus and G/B all count as G), against the
+# song's other families. Mirrors web/src/games/chords.ts (chordFamily, songRunPlan, SONG_BONUS).
+def combo_mult(streak): return min(4, 1 + streak // 8)
+def run_score(n, bonus, acc=1.0):
+    miss_every = round(1 / (1 - acc)) if acc < 1 else 0
+    total, streak = 0, 0
+    for i in range(n):
+        if miss_every and (i + 1) % miss_every == 0: streak = 0; continue
+        total += round(100 * bonus * combo_mult(streak)); streak += 1
+    return total
+def family(chord):
+    m = CHORD_RE.match(chord)
+    if not m: return None
+    root, qual, _ = m.groups()
+    return (PC[root], qual.startswith('m') and not qual.startswith('maj'))
+PULSES = {'4/4': 4, '3/4': 3, '6/8': 2}     # beats per bar as the click counts them (6/8: two dotted quarters)
+SONG_BONUS = 1.6                            # a typical right bar: first right strum ~60–100 ms off the 1
+MIN_ROUND_S, MAX_ROUND_S = 30, 180
+games_path = os.path.join(OUT, 'games.json')
+games = json.load(open(games_path))
+sr = next((g for g in games if g['id'] == 'G_song_run'), None)
+if not sr: errors.append('games.json has no G_song_run (run build_catalog.py first)')
+else:
+    levels = []
+    for s in SONGS:
+        chords = [c for sec in s['sections'] for c in sec['chords_in_chart_key']]
+        fams = [family(c) for c in chords]
+        if None in fams: errors.append(f"Song Run {s['id']}: a chord doesn't parse"); continue
+        if len(set(fams)) < 2: errors.append(f"Song Run {s['id']}: needs at least two different chords"); continue
+        meter = s['meter'] or '4/4'
+        if meter not in PULSES: errors.append(f"Song Run {s['id']}: meter {meter} not supported"); continue
+        bpm = s['bpm'] or 72
+        if not 40 <= bpm <= 200: errors.append(f"Song Run {s['id']}: bpm {bpm}"); continue
+        bar_s = PULSES[meter] * 60 / bpm
+        one = len(chords) * bar_s
+        passes = int(max(1, min(4, -(-MIN_ROUND_S // one)))) if one < MIN_ROUND_S else 1
+        n = len(chords) * passes
+        opts = [o for o, k in (('0.5', 0.5), ('1', 1), ('2', 2)) if n * k * bar_s <= MAX_ROUND_S or o == '1']
+        if n * bar_s > MAX_ROUND_S: errors.append(f"Song Run {s['id']}: {round(n * bar_s)} s at one bar per chord (rounds are 3 minutes at most)")
+        # a box is at most a bar: ½ bar per chord = one box per chord; 2 bars per chord = two boxes per chord
+        targets = {o: run_score(n * (2 if o == '2' else 1), SONG_BONUS, 0.95) // 50 * 50 for o in opts}
+        levels.append(dict(id=s['id'], name=s['title'], params=dict(outline=s['id'], bpm=bpm, bpm_known=s['bpm'] is not None,
+                           meter=meter, meter_known=s['meter'] is not None, passes=int(passes), bars_per_chord=opts, targets=targets),
+                           target_score=targets['1']))
+    sr['levels'] = levels
+    if errors:
+        print('ERRORS'); print('\n'.join(errors)); sys.exit(1)
+    json.dump(games, open(games_path, 'w'), indent=1)
+    print('Song Run:', len(levels), 'levels')
 print('OK', len(SONGS), 'songs')
 print('Non-diatonic / borrowed flags:'); print('\n'.join(sorted(set(warnings))) or ' none')
 for s in SONGS:

@@ -5,8 +5,13 @@ import { addXp } from './xp';
 import { XP, xpForScore, stars as starsFor } from './games/core';
 import { progress, recordAttempt, addServiceDay } from './progressStore';
 import { isReviewDue, dayOf } from './progress';
-import { session, touch } from './practice';
-import type { Catalog, Game, GameLevel } from './catalog';
+import { session, touch, songPool } from './practice';
+import { getSetList } from './setlist';
+import { streakInfo } from './progressStore';
+import { checkBadges } from './badges';
+import { flushHeat } from './heat';
+import { refreshDaily } from './daily';
+import type { BadgeDef, Catalog, Game, GameLevel } from './catalog';
 
 export interface Best { key: string; game_id: string; level_id: string; mode: string; best_score: number; best_stars: number; ghost: [number, number][]; at: number }
 export const bests = new Store<{ ready: boolean; map: Record<string, Best> }>({ ready: false, map: {} });
@@ -22,6 +27,8 @@ export function bestStars(g: Game, l: GameLevel): number {
 /** Every game's first level is open from the start; each next level opens with ★★ on the one before it (either mode). */
 export function unlocked(_cat: Catalog, g: Game, l?: GameLevel): boolean {
   if (!l) return true;
+  // Song Run: every song is its own boss level, open from the start (its practice_for lessons are pointers)
+  if (g.id === 'G_song_run') return true;
   const i = g.levels.indexOf(l);
   if (i <= 0) return true;
   return bestStars(g, g.levels[i - 1]) >= 2;
@@ -39,8 +46,20 @@ export function setModeFor(g: Game, m: Mode) { if (g.modes.includes(m)) modePref
 /** Lesson that teaches this game's skill (shown as a tip, not a lock). */
 export const lessonFor = (g: Game, l?: GameLevel) => l?.unlock_lesson || g.unlock_lesson;
 
-export interface RunResult { score: number; correct: number; total: number; maxCombo: number; finished: boolean; durationS: number; misses: string[]; ghost: [number, number][] }
-export interface RunOutcome { stars: number; accuracy: number; xp: number; pb: boolean; prevBest: number; reviewed: string[] }
+export interface RunResult {
+  score: number; correct: number; total: number; maxCombo: number; finished: boolean; durationS: number; misses: string[]; ghost: [number, number][];
+  /** longest run of right answers (Capo Brain) */
+  maxStreak?: number;
+  /** game-specific detail kept with the run: keys called (All Twelve), box position (Five Boxes), Gap Click landings */
+  extra?: Record<string, unknown>;
+  /** chord games: the grader mode the round ran in (auto / assisted) */
+  graderMode?: string;
+}
+export interface RunOutcome { stars: number; accuracy: number; xp: number; pb: boolean; prevBest: number; reviewed: string[]; badges: BadgeDef[] }
+/** The church list for Set Ready: the set list saved on this phone (songs with outlines), else the song library. */
+export const churchSongs = (cat: Catalog) => songPool({ cat, setlist: getSetList() }).ids;
+/** Check badges against everything saved so far (after a round, and when the Arcade opens). */
+export const checkAllBadges = (cat: Catalog) => checkBadges(cat, { bests: bests.get().map, churchSongs: churchSongs(cat), longestStreak: streakInfo().longest });
 
 export async function finishRun(cat: Catalog, g: Game, l: GameLevel, r: RunResult, mode = 'tap'): Promise<RunOutcome> {
   const accuracy = r.total ? r.correct / r.total : 0;
@@ -57,7 +76,7 @@ export async function finishRun(cat: Catalog, g: Game, l: GameLevel, r: RunResul
     }
   }
   try {
-    await db.add('game_run', { session_id: session.get().s?.id ?? null, game_id: g.id, level_id: l.id, mode, score: r.score, accuracy, max_combo: r.maxCombo, stars, duration_s: Math.round(r.durationS), misses_json: JSON.stringify(r.misses.slice(0, 20)), counted_review_for: reviewed.join(',') || null, at: Date.now() });
+    await db.add('game_run', { session_id: session.get().s?.id ?? null, game_id: g.id, level_id: l.id, mode, score: r.score, accuracy, max_combo: r.maxCombo, max_streak: r.maxStreak ?? null, stars, duration_s: Math.round(r.durationS), misses_json: JSON.stringify(r.misses.slice(0, 20)), extra_json: r.extra ? JSON.stringify(r.extra) : null, grader_mode: r.graderMode ?? null, counted_review_for: reviewed.join(',') || null, at: Date.now() });
     if (pb || (prev && stars > prev.best_stars)) {
       const row: Best = { key, game_id: g.id, level_id: l.id, mode, best_score: Math.max(r.score, prev?.best_score || 0), best_stars: Math.max(stars, prev?.best_stars || 0), ghost: pb ? r.ghost : prev!.ghost, at: Date.now() };
       await db.put('game_best', row); bests.set({ map: { ...bests.get().map, [key]: row } });
@@ -67,7 +86,10 @@ export async function finishRun(cat: Catalog, g: Game, l: GameLevel, r: RunResul
   await addXp('game', g.id, xpForScore(r.score));
   if (pb && prev) await addXp('pb', key, XP.pb);
   touch();
-  return { stars, accuracy, xp: gained, pb, prevBest: prev?.best_score || 0, reviewed };
+  await flushHeat();
+  const badgesNew = await checkAllBadges(cat).catch(() => []);
+  await refreshDaily();
+  return { stars, accuracy, xp: gained, pb, prevBest: prev?.best_score || 0, reviewed, badges: badgesNew };
 }
 
 // ---------- "Played a service today" keeps the streak ----------

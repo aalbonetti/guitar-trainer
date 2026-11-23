@@ -28,7 +28,8 @@ async def main():
         b=await p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--autoplay-policy=no-user-gesture-required']); pg=await b.new_page(viewport={'width':412,'height':880}); errs=[]
         pg.on('pageerror',lambda e: errs.append(str(e))); pg.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade'); await pg.wait_for_selector('text=Note Drop')
-        t=await pg.inner_text('.tiles'); later=await pg.text_content('details.later'); check(t.count('★★ on level')>=10 and 'Coming later' not in t and 'Coming later' in later and 'Song Run' in later and 'Taught in' in t, 'new player: first level of every game open, later levels need ★★, later games marked')
+        # since G3 every game is built: no "Coming later" card, Song Run has its own tile
+        t=await pg.inner_text('.tiles'); later=await pg.locator('details.later').count(); check(t.count('★★ on level')>=10 and later==0 and 'Song Run' in t and 'Taught in' in t, 'new player: first level of every game open, later levels need ★★, every game has a tile')
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_capo_quick/cq1'); await pg.wait_for_selector('text=▶ Start'); check(True, 'new player can open level 1')
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_capo_quick/cq2'); await pg.wait_for_selector('text=Get ★★ on the previous level'); check(True, 'level 2 waits for ★★ on level 1')
         await seedpage(pg, BK)
