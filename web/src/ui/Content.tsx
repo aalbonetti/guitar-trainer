@@ -1,7 +1,7 @@
 // Lesson text renderer: a small, safe markdown subset plus block-level embed tokens on their own line.
 //   {{chord:G_4f}}  {{chords:G_4f,Cadd9,Dsus4}}  {{shape:E_shape_major@3}}  {{triad:tri_321_G_root}}
 //   {{scale:Am_pent_pos1}}  {{rhythm:S3_worship}}  {{exercise:EX_spider}}  {{song:SONG_amazing_grace}}
-//   {{outline:MS_goodness_of_god}}  {{tool:tuner}}  {{tool:metronome:bpm=80,beats=4,sub=2}}  {{tool:delay}}  {{quiz:Q_note_names}}
+//   {{outline:MS_goodness_of_god}}  {{tool:tuner}}  {{tool:metronome:bpm=80,beats=4,sub=2}}  {{quiz:Q_note_names}}
 import type { ComponentChildren } from 'preact';
 import type { Catalog, Exercise } from '../catalog';
 import { shapeFor, type Shape } from '../music';
@@ -139,7 +139,6 @@ function Embed({ kind, arg, cat, lessonId }: { kind: string; arg: string; cat: C
         return raw.bpm === 'ladder' && cat.lessonById[lessonId] ? <LadderClick l={cat.lessonById[lessonId]} base={base} /> : <ClickButton preset={base} />;
       }
       if (name === 'tuner') return <p><a class="btn" href="#/tools/tuner">🎚 Open the tuner</a> <small class="muted">or use the Tuner button at the top of this lesson</small></p>;
-      if (name === 'delay') return <p><a class="btn" href="#/tools/metronome">⏱ Delay calculator (Tools)</a></p>;
       return null;
     }
     case 'quiz': return <QuizCard id={arg} lessonId={lessonId} cat={cat} />;
