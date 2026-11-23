@@ -26,6 +26,10 @@ window.__gtSimAuto=(kind,arg)=>{ const S=window.__gtLastPitchSetup;
       attack:e.tech==='swell'?0.35:0.004, pure:e.tech==='harmonic'})));
     window.__gtSimNotes(notes); } };"""
 L=json.load(open('public/catalog/lessons.json'))
+async def seedpage(pg, path):
+    import json
+    await pg.goto(f'http://127.0.0.1:{PORT}/?sim#/settings'); await pg.wait_for_function('!!window.__gtImport')
+    await pg.evaluate('d => window.__gtImport(d)', json.load(open(path))); await pg.reload(); await pg.wait_for_timeout(500)
 def seed(passed, kv=()):
     lp=[{'lesson_id':i,'state':'passed','first_pass_day':'2026-01-01','passed_day':'2026-01-02','review_index':5,'mastered':True,'updated_at':0} for i in passed]
     f=os.path.join(tempfile.mkdtemp(),'seed.json'); json.dump({'lesson_progress':lp,'kv':list(kv)},open(f,'w')); return f
@@ -38,8 +42,7 @@ def check(name, cond, extra=''):
     global ok; ok &= bool(cond); print('PASS' if cond else 'FAIL', name, extra if not cond else '')
 ATT="(async()=>{const r=indexedDB.open('guitar-trainer');await new Promise(x=>r.onsuccess=x);return await new Promise(x=>{const q=r.result.transaction('attempt').objectStore('attempt').getAll();q.onsuccess=()=>x(q.result.map(a=>({l:a.lesson_id,met:a.met_target,tgt:a.at_target_tempo,mode:a.grader_mode,type:a.criterion_type,ev:a.event,sess:'session_id' in a,m:JSON.parse(a.metrics_json)})))})})()"
 async def restore(pg, f):
-    await pg.goto(f'http://127.0.0.1:{PORT}/?sim#/settings'); await pg.wait_for_selector('text=Restore from file')
-    await pg.set_input_files('section.card:has-text("Backup") input[type=file]', f); await pg.wait_for_timeout(1500)
+    await seedpage(pg, f)
 async def lesson(pg, id):
     await pg.goto(f'http://127.0.0.1:{PORT}/?sim#/lesson/{id}'); await pg.wait_for_selector('section.card:has-text("Pass it")')
 async def result(pg, t=90000):

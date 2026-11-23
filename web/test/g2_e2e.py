@@ -24,6 +24,10 @@ SEED=os.path.join(tempfile.mkdtemp(),'seed.json')
 json.dump({'game_best':[{'key':'G_in_the_pocket|pk2|play','game_id':'G_in_the_pocket','level_id':'pk2','mode':'play','best_score':100,'best_stars':2,'ghost':[],'at':0}]},open(SEED,'w'))
 DB="(async(s)=>{const r=indexedDB.open('guitar-trainer');await new Promise(x=>r.onsuccess=x);return await new Promise(x=>{const q=r.result.transaction(s).objectStore(s).getAll();q.onsuccess=()=>x(q.result)})})"
 ok=True
+async def seedpage(pg, path):
+    import json
+    await pg.goto(f'{BASE}?sim#/settings'); await pg.wait_for_function('!!window.__gtImport')
+    await pg.evaluate('d => window.__gtImport(d)', json.load(open(path))); await pg.reload(); await pg.wait_for_timeout(500)
 def check(name, cond, extra=''):
     global ok; ok &= bool(cond); print('PASS' if cond else 'FAIL', name, '' if cond else extra)
 async def score(pg): return int(await pg.inner_text('.hud div b'))
@@ -51,8 +55,7 @@ async def run_width(b, W):
     ctx=await b.new_context(viewport={'width':W,'height':860}); pg=await ctx.new_page(); errs=[]
     pg.on('pageerror',lambda e: errs.append(str(e))); pg.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
     await pg.add_init_script(INIT)
-    await pg.goto(f'{BASE}#/settings'); await pg.wait_for_selector('text=Restore from file')
-    await pg.set_input_files('section.card:has-text("Backup") input[type=file]', SEED); await pg.wait_for_timeout(1500)
+    await seedpage(pg, SEED)
     # ---- Arcade home: the G2 games are playable; only the chord games are "coming later" ----
     await pg.goto(f'{BASE}#/arcade'); await pg.wait_for_selector('text=Octave Jump')
     tiles=await pg.inner_text('.tiles'); later=await pg.text_content('details.later')
