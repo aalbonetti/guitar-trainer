@@ -172,6 +172,8 @@ const SIM = typeof location !== 'undefined' && /[?&]sim\b/.test(location.search)
 const simQ = (k: string, d: number) => { const m = typeof location !== 'undefined' ? new RegExp(`[?&]${k}=(\\d+)`).exec(location.search) : null; return m ? +m[1] : d; };
 /** Test mode (?sim): simulated input, and the test-only globals games publish. */
 export const isSim = () => SIM;
+/** Test-only (`?sim`): lets the e2e suites seed a backup. The app itself has no restore/upload control. */
+if (SIM) (globalThis as any).__gtImport = async (d: Record<string, unknown>) => (await import('../db')).importAll(d);
 // ?sim&simdelay=800 delays opening the simulated input, like a slow getUserMedia (permission prompt).
 const SIM_DELAY = SIM ? simQ('simdelay', 0) : 0;
 const SIM_CHS = SIM ? Math.max(1, Math.min(8, simQ('simchs', 1))) : 1, SIM_CH = Math.min(SIM_CHS, Math.max(1, simQ('simch', 1))) - 1;
