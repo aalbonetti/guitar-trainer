@@ -10,7 +10,7 @@ import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
 import { progress, recordAttempt, saveStatus, streakInfo, firstPracticeDay } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
-import { exportAll, importAll, downloadBackup, shareBackup, canShareBackup } from '../db';
+import { exportAll, downloadBackup, shareBackup, canShareBackup } from '../db';
 import { TimingPanel, CalibrationCard, usePracticeTempo } from './Timing';
 import { PitchPanel } from './Pitch';
 import { ChordPanel } from './Chord';
@@ -350,7 +350,6 @@ function AudioCheckCard() {
 export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void }) {
   const [msg, setMsg] = useState('');
   const [inst, setInst] = useState(instrumentPref.get());
-  const [backup, setBackup] = useState<string | null>(null);
   const [bmsg, setBMsg] = useState('');
   const [keepOk, setKeepOk] = useState<boolean | null>(null);
   useEffect(() => { void (async () => { try { let ok = await navigator.storage?.persisted?.(); if (!ok) ok = await navigator.storage?.persist?.(); setKeepOk(!!ok); } catch { setKeepOk(null); } })(); }, []);
@@ -381,15 +380,8 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
         <div class="row wrap">
           {canShareBackup() ? <button class="primary" onClick={async () => { const r = await shareBackup(); setBMsg(r.how === 'shared' ? `Shared ${r.name}.` : r.how === 'downloaded' ? `Saved ${r.name} to Downloads.` : ''); }}>Share backup (Drive…)</button> : null}
           <button class={canShareBackup() ? '' : 'primary'} onClick={async () => { const n = await downloadBackup(); setBMsg(`Saved ${n} to Downloads.`); }}>Save backup file</button>
-          <label class="btn">Restore from file<input type="file" accept=".json,application/json" hidden onChange={async e => {
-            const f = (e.target as HTMLInputElement).files?.[0]; if (!f) return;
-            try { const data = JSON.parse(await f.text()); if (!confirm('Replace everything on this phone with this backup?')) return; await importAll(data); location.reload(); }
-            catch (err) { setBMsg('That backup could not be read: ' + (err as Error).message); } }} /></label>
-          <button class="small" onClick={async () => { const j = JSON.stringify(await exportAll()); try { await navigator.clipboard.writeText(j); setBMsg('Backup copied to the clipboard.'); } catch { setBackup(j); } }}>Copy as text</button>
-          <button class="small" onClick={() => setBackup(backup === null ? '' : null)}>Paste…</button>
+          <button class="small" onClick={async () => { const j = JSON.stringify(await exportAll()); try { await navigator.clipboard.writeText(j); setBMsg('Backup copied to the clipboard.'); } catch { setBMsg('Could not copy.'); } }}>Copy as text</button>
         </div>
-        {backup !== null ? <div><textarea class="backup" value={backup} onInput={e => setBackup((e.target as HTMLTextAreaElement).value)} placeholder="Paste a backup here" />
-          <button onClick={async () => { try { await importAll(JSON.parse(backup)); location.reload(); } catch (e) { setBMsg('That backup could not be read: ' + (e as Error).message); } }}>Restore from pasted backup</button></div> : null}
         {bmsg ? <p class="note">{bmsg}</p> : null}
       </section>
       <section class="card">
