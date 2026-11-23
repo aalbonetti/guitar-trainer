@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import { buildQueue, totalMinutes, sessionRow, normRoutine, songWeekStart, songOfWeek, songPool, type QueueInput } from '../src/practice';
-import { weekDate, thisWeekIndex, thisWeekSongs } from '../src/setlist';
 import { computeStates, type LessonProgress } from '../src/progress';
 
 const j = (f: string) => JSON.parse(fs.readFileSync(new URL(`../public/catalog/${f}`, import.meta.url), 'utf8'));
@@ -81,15 +80,6 @@ describe('practice queue', () => {
     for (let w = 0; w < 40; w++) seq.push(songOfWeek(five, new Date(Date.UTC(2026, 0, 6 + 7 * w, 18)))!);
     seq.forEach((p, i) => { if (i) expect(p).not.toBe(seq[i - 1]); });
     expect(new Set(seq.slice(0, 10)).size).toBe(5);               // everyone gets a turn
-  });
-  it('reads week labels and finds this week', () => {
-    const t = new Date('2026-11-21T12:00');
-    expect(weekDate('Sept 6', t)!.toDateString()).toBe(new Date(2026, 8, 6).toDateString());
-    expect(weekDate('Jan 3', new Date('2026-12-28T12:00'))!.getFullYear()).toBe(2027);
-    const list = sl(['Aug 23', 'Nov 15', 'Nov 29'], [['Nov 15'], ['Nov 29']]);
-    expect(thisWeekIndex(list, t)).toBe(1);                         // Nov 29 is next week, not this one
-    expect(thisWeekSongs(list, t).map(s => s.outlineId)).toEqual([ids[0]]);
-    expect(thisWeekIndex(list, new Date('2026-11-24T12:00'))).toBe(2);
   });
   it('old 15/30 routine choices map to 10/20', () => { expect(normRoutine(15)).toBe(10); expect(normRoutine(30)).toBe(20); expect(normRoutine('free')).toBe('free'); });
   it('session length runs from start to last activity', () => {

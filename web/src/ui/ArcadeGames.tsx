@@ -6,7 +6,8 @@ import type { Catalog, Game, GameLevel } from '../catalog';
 import { pick, positionsOf, pcAt, noteLabel, pretty, callNumberQ, capoQ, hearQ, delayQ, DELAY_NOTES, zoneMidis, zoneRange, midiAt, octaveQ, type Pos, type ChoiceQ, type DelayQ, type Rng, type OctaveQ } from '../games/core';
 import { midiName } from '../grading/pitch';
 import { playChords } from '../audio/engine';
-import { getSetList, thisWeekSongs } from '../setlist';
+import { getSetList } from '../setlist';
+import { songPool } from '../practice';
 import { Fretboard, zoneOf, posText, useEars, useHeard, Hearing, askNow, type Round } from './GameKit';
 import type { Heard } from '../games/judge';
 
@@ -166,9 +167,7 @@ export function OctaveJump({ l, round, r }: { l: GameLevel; round: Round; r: Rng
 
 // ---------- choice games: Call the Number, Capo Quick, Hear the Change ----------
 function songCalls(cat: Catalog, r: Rng): { prompts: { num: string; chord: string }[]; title: string; key: string; choices: string[] } {
-  const sl = getSetList();
-  const week = sl ? thisWeekSongs(sl).map(s => s.outlineId).filter((x): x is string => !!x && !!cat.outlineById[x]) : [];
-  const pool = week.length ? week : cat.outlines.map(o => o.id);
+  const pool = songPool({ cat, setlist: getSetList() }).ids;
   const o = cat.outlineById[pick(r, pool)];
   const prompts = o.sections.flatMap(s => s.chords_in_chart_key.map((c, i) => ({ num: s.numbers[i], chord: c })));
   return { prompts, title: o.title, key: o.chart_key, choices: [...new Set(prompts.map(p => p.chord))].slice(0, 9) };
