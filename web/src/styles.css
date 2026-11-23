@@ -29,14 +29,24 @@ ul.list li.sel a { color:var(--accent); }
 .shell { min-height:100vh; }
 .nav { position:fixed; z-index:10; left:0; right:0; bottom:0; display:flex; background:rgba(20,22,26,.97); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
 .nav .brand { display:none; }
-.nav a { flex:1; display:flex; flex-direction:column; align-items:center; padding:8px 0 6px; color:var(--muted); font-size:12px; }
-.nav a i { font-style:normal; font-size:20px; line-height:1.2; } .nav a.on { color:var(--accent); }
+.nav a { flex:1 1 0; min-width:0; min-height:56px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:6px 0; color:#c3c8d0; font-size:12.5px; }
+.nav a i { font-style:normal; font-size:24px; line-height:32px; width:56px; height:32px; text-align:center; border-radius:16px; transition:background .12s; }
+.nav a.on { color:var(--accent); font-weight:700; } .nav a.on i { background:rgba(232,163,61,.24); box-shadow:inset 0 0 0 1px rgba(232,163,61,.55); }
+.nav a:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.nav a.railonly { display:none; }
+/* header: brand + Progress/Settings buttons on every screen */
+.topbar { display:flex; align-items:center; justify-content:flex-end; gap:6px; margin:0 0 4px; }
+.topbar .brand { margin-right:auto; font-weight:700; font-size:14px; color:var(--muted); } .topbar .brand span { color:var(--accent); margin-left:2px; }
+.headbtn { display:inline-flex; align-items:center; justify-content:center; min-width:48px; min-height:48px; border-radius:24px; font-size:22px; color:var(--ink); background:var(--card); border:1px solid var(--line); }
+.headbtn.on { background:rgba(232,163,61,.24); border-color:var(--accent); }
+.headbtn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .main { padding:14px 14px calc(96px + env(safe-area-inset-bottom)); max-width:1300px; margin:0 auto; }
 .page .two { display:block; }
 @media (min-width:600px) {
-  .nav { top:0; right:auto; width:var(--navw); flex-direction:column; border-top:0; border-right:1px solid var(--line); padding:10px 0; }
+  .nav { top:0; right:auto; width:var(--navw); flex-direction:column; border-top:0; border-right:1px solid var(--line); padding:10px 0 calc(10px + env(safe-area-inset-bottom)); overflow-y:auto; }
   .nav .brand { display:block; text-align:center; font-weight:700; font-size:13px; padding:6px 4px 14px; } .nav .brand span { display:block; color:var(--accent); }
-  .nav a { flex:none; padding:12px 0; }
+  .nav a { flex:none; padding:8px 0; } .nav a.railonly { display:flex; }
+  .topbar .brand { visibility:hidden; } /* the rail shows the brand */
   .main { margin-left:var(--navw); padding:18px 22px 40px; }
   .page .two { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start; }
   .hide-narrow { display:block !important; }
@@ -143,7 +153,7 @@ details.selfmark { margin-top:12px; color:var(--muted); } details.selfmark summa
 .quicktune { margin:6px 0; } p.small { font-size:13px; }
 
 /* M5: practice loop, session bar, progress */
-.bottombars { position:fixed; z-index:11; left:12px; right:12px; bottom:calc(70px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; align-items:flex-end; gap:6px; pointer-events:none; }
+.bottombars { position:fixed; z-index:11; left:12px; right:12px; bottom:calc(76px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; align-items:flex-end; gap:6px; pointer-events:none; }
 @media (min-width:600px) { .bottombars { left:calc(var(--navw) + 16px); bottom:16px; } }
 .sessionbar { pointer-events:auto; display:flex; align-items:center; gap:6px; width:100%; max-width:560px; background:#262b33; border:1px solid var(--accent); border-radius:14px; padding:6px 6px 6px 12px; box-shadow:0 6px 20px rgba(0,0,0,.45); }
 .sessionbar .where { flex:1; min-width:0; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600; } .sessionbar .where small { color:var(--accent); margin-right:4px; }
@@ -156,7 +166,7 @@ ol.queue i { font-style:normal; width:26px; text-align:center; font-size:18px; }
 ol.queue li.done b { color:var(--muted); text-decoration:line-through; } ol.queue li.done i { color:var(--ok); } ol.queue li.cur a { background:var(--card2); border-radius:10px; }
 .practice .tabs { margin-bottom:4px; } button.big { min-height:52px; font-size:17px; padding:12px 20px; } a.btn.primary { background:var(--accent); border-color:var(--accent); color:#1a1300; font-weight:600; }
 .summary { margin-bottom:12px; }
-.nav a i { position:relative; } .navbadge { position:absolute; top:-4px; right:-12px; background:var(--bad); color:#fff; font-size:10px; font-style:normal; font-weight:700; border-radius:999px; min-width:16px; height:16px; line-height:16px; padding:0 4px; text-align:center; }
+.nav a i { position:relative; } .navbadge { position:absolute; top:-2px; right:6px; background:var(--bad); color:#fff; font-size:10px; font-style:normal; font-weight:700; border-radius:999px; min-width:16px; height:16px; line-height:16px; padding:0 4px; text-align:center; }
 .cal { display:grid; grid-template-columns:repeat(14,1fr); gap:4px; margin:8px 0; } .cal i { aspect-ratio:1; border-radius:4px; background:var(--card2); } .cal i.on { background:var(--ok); } .cal i.today { outline:2px solid var(--accent); }
 .weekbars { display:grid; grid-template-columns:repeat(8,1fr); gap:6px; height:120px; align-items:end; }
 .weekbars div { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; } .weekbars i { width:70%; background:var(--accent); border-radius:4px 4px 0 0; min-height:2px; }
@@ -177,7 +187,7 @@ textarea.paste { width:100%; min-height:220px; font:14px/1.4 ui-monospace,Menlo,
 @media (max-width:599px) { .chartpage .cline { font-size:17px; } }
 
 /* G1: Arcade */
-.nav a span { font-size:11px; }
+.nav a span { font-size:12.5px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .xpbar { height:10px; background:var(--card2); border-radius:6px; overflow:hidden; margin:8px 0; } .xpbar i { display:block; height:100%; background:linear-gradient(90deg,var(--accent),#f3c06b); }
 .tiles { display:grid; grid-template-columns:1fr; gap:0 12px; } @media (min-width:600px) { .tiles { grid-template-columns:1fr 1fr; } }
 .tile.dim { opacity:.6; } .gicon { display:inline-block; width:26px; text-align:center; }
@@ -282,7 +292,8 @@ details.card.later ul.list li > span { font-weight:400; }
 
 /* ---------- Arcade G2: shared frame layout, play mode, pause menu ---------- */
 .cal i.part { background:rgba(76,195,138,.35); } .cal i.frozen { background:#6aa9d8; }
-.streakline { margin:4px 0; }
+.streakline { margin:4px 0; } a.streaklink { display:block; color:inherit; border-radius:10px; min-height:48px; padding:6px 0; } a.streaklink:active { background:var(--card2); }
+a.tap-card.todaystat { padding:10px 14px; margin-bottom:12px; } a.tap-card.todaystat p { margin:0; display:flex; align-items:center; gap:8px; } a.tap-card.todaystat p span:first-child { flex:1; }
 .tile h2 small.modes { font-weight:400; font-size:11px; margin-left:4px; }
 .segmented { display:inline-flex; border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:4px 0 10px; }
 .segmented button { border:0; border-radius:0; background:var(--card2); min-width:96px; justify-content:center; }

@@ -46,7 +46,7 @@ export function Today({ cat }: { cat: Catalog }) {
   return (
     <div class="page">
       <h1>Today</h1>
-      <p class="muted">{passed} of {cat.lessons.length} lessons passed{streak ? ` · ${streak}-day streak` : ''} · <a href="#/arcade">level {levelFor(x.total).level}</a> · <a href="#/progress">progress</a></p>
+      <a class="card tap-card todaystat" href="#/progress" aria-label="See your progress"><p><span>{streak ? `🔥 ${streak}-day streak · ` : ''}{passed} of {cat.lessons.length} lessons passed · level {levelFor(x.total).level}</span><span class="chev" aria-hidden="true">›</span></p></a>
       <div class="two">
         <div><PracticeCard cat={cat} visibleTrack={vis} /></div>
         <div>
