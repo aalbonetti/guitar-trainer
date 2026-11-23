@@ -28,7 +28,7 @@ Replace Fmaj7 with F in **C – Am – F – G**, and the partial Bm with a full
 
 {{exercise:EX_barre_F_Bm}}
 
-> The app checks that each strum sounds like the chord (F, not your old Fmaj7), not each string. Check for dead strings yourself, one at a time.
+> Only the F and Bm strums are graded, and each chord needs 80% on its own. The app listens for the barre's low root (F on string 6, B on string 5), so your old Fmaj7 or the partial Bm doesn't count. It can't hear every string, though: check for dead strings yourself, one at a time.
 
 ### Goal
 80% of strums ring clean on F and Bm.

@@ -344,12 +344,22 @@ export async function bluetoothOutputLikely(): Promise<boolean> {
   const c = audioContext();
   return (c.outputLatency || 0) > 0.12;
 }
+// Every source the ?sim hooks schedule, so cancelling an attempt can silence what was queued for it.
+const simSources = new Set<AudioScheduledSourceNode>();
+const simTrack = (s: AudioScheduledSourceNode) => { simSources.add(s); s.onended = () => simSources.delete(s); return s; };
+/** Test-only (?sim): stop every simulated note/strum already scheduled. No-op with a real mic. */
+export function stopSimAudio() {
+  if (!SIM) return;
+  const now = ctx?.currentTime ?? 0;
+  simSources.forEach(s => { try { s.stop(now); } catch { /* not started or already stopped */ } });
+  simSources.clear(); simStrings.fill(null);
+}
 /** Test-only: play synthetic strums (context times) into the simulated input. */
 (globalThis as any).__gtSimStrums = (times: number[], gain = 0.8) => {
   if (!SIM) return false;
   const c = audioContext(); simBus = simBus || c.createGain();
   for (const t of times) [43, 47, 50, 55, 59, 67].forEach((m, ni) => {
-    const s = c.createBufferSource(); s.buffer = pluckBuffer(c, m, 0.6);
+    const s = simTrack(c.createBufferSource()) as AudioBufferSourceNode; s.buffer = pluckBuffer(c, m, 0.6);
     const g = c.createGain(); g.gain.value = gain;
     s.connect(g); g.connect(simBus!); s.start(Math.max(c.currentTime, t + ni * 0.004));
   });
@@ -363,7 +373,7 @@ export interface SimNote { midi: number; t: number; dur?: number; cents?: number
   if (!SIM) return false;
   const c = audioContext(); simBus = simBus || c.createGain();
   for (const n of notes) {
-    const s = c.createBufferSource(); s.buffer = simNoteBuffer(c, n);
+    const s = simTrack(c.createBufferSource()) as AudioBufferSourceNode; s.buffer = simNoteBuffer(c, n);
     s.connect(simBus); s.start(Math.max(c.currentTime, n.t));
   }
   return true;
@@ -409,7 +419,7 @@ const simStrings: (AudioBufferSourceNode | null)[] = [null, null, null, null, nu
     if (ch.up) order.reverse();
     order.forEach((i, k) => {
       const at = Math.max(c.currentTime, ch.t + k * spread);
-      const s = c.createBufferSource(); s.buffer = pluckBuffer(c, OPEN[i] + ch.frets[i] + (ch.capo || 0) + (Math.random() - 0.5) * 0.1, ch.dur ?? 1.6);
+      const s = simTrack(c.createBufferSource()) as AudioBufferSourceNode; s.buffer = pluckBuffer(c, OPEN[i] + ch.frets[i] + (ch.capo || 0) + (Math.random() - 0.5) * 0.1, ch.dur ?? 1.6);
       const g = c.createGain(); g.gain.value = (ch.gain ?? 0.8) * (0.6 + 0.8 * Math.random());
       s.connect(g); g.connect(simBus!);
       const prev = simStrings[i]; if (prev) { try { prev.stop(at + 0.005); } catch { /* already stopped */ } }

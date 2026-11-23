@@ -196,7 +196,8 @@
     ],
     "where": "320033",
     "root": "G",
-    "quality": "major"
+    "quality": "major",
+    "label": "G (4-finger)"
    },
    "Cadd9": {
     "name": "Cadd9",
@@ -1561,7 +1562,8 @@
     ],
     "where": "xx4432",
     "root": "B",
-    "quality": "minor"
+    "quality": "minor",
+    "label": "Bm (partial)"
    }
   }
  },
@@ -1577,6 +1579,10 @@
    [
     "C",
     "Fmaj7"
+   ],
+   [
+    "G|G_4f",
+    "C"
    ]
   ],
   "duration_s": 60,
@@ -1629,6 +1635,30 @@
     "where": "xx3210",
     "root": "F",
     "quality": "maj7"
+   },
+   "G|G_4f": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      2,
+      0,
+      0,
+      0,
+      3
+     ],
+     [
+      3,
+      2,
+      0,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "320003 or 320033",
+    "root": "G",
+    "quality": "major"
    }
   }
  },
@@ -2068,6 +2098,110 @@
     ],
     "shapes": "G",
     "label": "Key of Ab, capo 1, G shapes"
+   },
+   {
+    "key": "F",
+    "capo": 1,
+    "chords": [
+     "E",
+     "A",
+     "E",
+     "B7",
+     "E",
+     "A",
+     "E",
+     "B7"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5(7)",
+     "1",
+     "4",
+     "1",
+     "5(7)"
+    ],
+    "shapes": "E",
+    "label": "Key of F, capo 1, E shapes"
+   },
+   {
+    "key": "Ab",
+    "capo": 4,
+    "chords": [
+     "E",
+     "A",
+     "E",
+     "B7",
+     "E",
+     "A",
+     "E",
+     "B7"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5(7)",
+     "1",
+     "4",
+     "1",
+     "5(7)"
+    ],
+    "shapes": "E",
+    "label": "Key of Ab, capo 4, E shapes"
+   },
+   {
+    "key": "Bb",
+    "capo": 1,
+    "chords": [
+     "A",
+     "D",
+     "A",
+     "E",
+     "A",
+     "D",
+     "A",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5",
+     "1",
+     "4",
+     "1",
+     "5"
+    ],
+    "shapes": "A",
+    "label": "Key of Bb, capo 1, A shapes"
+   },
+   {
+    "key": "B",
+    "capo": 2,
+    "chords": [
+     "A",
+     "D",
+     "A",
+     "E",
+     "A",
+     "D",
+     "A",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5",
+     "1",
+     "4",
+     "1",
+     "5"
+    ],
+    "shapes": "A",
+    "label": "Key of B, capo 2, A shapes"
    }
   ],
   "strums_per_chord": 4,
@@ -2231,7 +2365,40 @@
     ],
     "where": "xx4432",
     "root": "B",
-    "quality": "minor"
+    "quality": "minor",
+    "label": "Bm (partial)"
+   },
+   "E": {
+    "name": "E",
+    "frets": [
+     [
+      0,
+      2,
+      2,
+      1,
+      0,
+      0
+     ]
+    ],
+    "where": "022100",
+    "root": "E",
+    "quality": "major"
+   },
+   "B7": {
+    "name": "B7",
+    "frets": [
+     [
+      -1,
+      2,
+      1,
+      2,
+      0,
+      2
+     ]
+    ],
+    "where": "x21202",
+    "root": "B",
+    "quality": "7"
    }
   }
  },
@@ -2446,7 +2613,7 @@
  },
  {
   "id": "EX_barre_F_Bm",
-  "name": "F and Bm barres in context: C\u2013Am\u2013F\u2013G, then D\u2013Bm\u2013G\u2013A",
+  "name": "F and Bm barres in context: C\u2013Am\u2013F\u2013G, then D\u2013Bm\u2013G\u2013A (each twice)",
   "type": "chord_progression",
   "meter": "4/4",
   "pace": "own",
@@ -2461,18 +2628,31 @@
      "Am",
      "F",
      "G",
+     "C",
+     "Am",
+     "F",
+     "G",
+     "D",
+     "Bm",
+     "G",
+     "A",
      "D",
      "Bm",
      "G",
      "A"
     ],
-    "label": "Key of C"
+    "label": "C\u2013Am\u2013F\u2013G and D\u2013Bm\u2013G\u2013A"
    }
   ],
   "strums_per_chord": 4,
-  "notes": "Fmaj7 is the stand-in you learned first; here it counts as the wrong chord.",
+  "notes": "Only the F and Bm strums are graded, and each needs the goal on its own. The app listens for the barre\u2019s low root, so Fmaj7 or the partial Bm doesn\u2019t count.",
   "decoys": [
-   "Fmaj7"
+   "Fmaj7",
+   "Bm_partial"
+  ],
+  "focus": [
+   "F",
+   "Bm"
   ],
   "voicings": {
    "C": {
@@ -2602,6 +2782,23 @@
     "where": "xx3210",
     "root": "F",
     "quality": "maj7"
+   },
+   "Bm_partial": {
+    "name": "Bm",
+    "frets": [
+     [
+      -1,
+      -1,
+      4,
+      4,
+      3,
+      2
+     ]
+    ],
+    "where": "xx4432",
+    "root": "B",
+    "quality": "minor",
+    "label": "Bm (partial)"
    }
   }
  },
@@ -2920,7 +3117,10 @@
      "2m",
      "5"
     ],
-    "label": "Key of B"
+    "label": "Key of B",
+    "names": {
+     "A_shape_minor@11": "G#m"
+    }
    },
    {
     "key": "C",
