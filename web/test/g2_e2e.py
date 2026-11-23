@@ -56,10 +56,10 @@ async def run_width(b, W):
     pg.on('pageerror',lambda e: errs.append(str(e))); pg.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
     await pg.add_init_script(INIT)
     await seedpage(pg, SEED)
-    # ---- Arcade home: the G2 games are playable; only the chord games are "coming later" ----
+    # ---- Arcade home: the G2 games are playable ----
     await pg.goto(f'{BASE}#/arcade'); await pg.wait_for_selector('text=Octave Jump')
-    tiles=await pg.inner_text('.tiles'); later=await pg.text_content('details.later')
-    check(f'{W}: Octave Jump, Box Runner, In the Pocket have tiles; Coming later is G3 only', all(x in tiles for x in ('Octave Jump','Box Runner','In the Pocket')) and 'Octave Jump' not in later and 'Song Run' in later, later)
+    tiles=await pg.inner_text('.tiles'); later=await pg.locator('details.later').count()
+    check(f'{W}: Octave Jump, Box Runner, In the Pocket have tiles (since G3 nothing is "coming later")', all(x in tiles for x in ('Octave Jump','Box Runner','In the Pocket')) and later==0, later)
     check(f'{W}: Arcade home shows the streak', 'streak' in (await pg.inner_text('.xpcard')).lower())
     # ---- Note Drop, play mode ----
     await start(pg, 'G_note_drop', 'nd1'); await pg.wait_for_timeout(1300)

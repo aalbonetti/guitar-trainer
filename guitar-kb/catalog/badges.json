@@ -1,0 +1,98 @@
+[
+ {
+  "id": "B_set_ready",
+  "name": "Set Ready",
+  "blurb": "A 3-star Song Run on every song in the church list.",
+  "rule": {
+   "kind": "song_run_all",
+   "game": "G_song_run",
+   "stars": 3
+  }
+ },
+ {
+  "id": "B_all_twelve",
+  "name": "All Twelve",
+  "blurb": "Call the Number with \u2605\u2605 in all 12 keys (85% of a key\u2019s calls right in a \u2605\u2605 round, at least 3 calls).",
+  "rule": {
+   "kind": "keys_all",
+   "game": "G_call_the_number",
+   "keys": [
+    "C",
+    "Db",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B"
+   ],
+   "accuracy": 0.85,
+   "min_calls": 3
+  }
+ },
+ {
+  "id": "B_whole_neck",
+  "name": "Whole Neck",
+  "blurb": "Note Drop \u2605\u2605\u2605 on the whole-neck level in play mode.",
+  "rule": {
+   "kind": "level_stars",
+   "game": "G_note_drop",
+   "level": "nd4",
+   "mode": "play",
+   "stars": 3
+  }
+ },
+ {
+  "id": "B_five_boxes",
+  "name": "Five Boxes",
+  "blurb": "Box Runner \u2605\u2605 in all 5 pentatonic positions.",
+  "rule": {
+   "kind": "positions_all",
+   "game": "G_box_runner",
+   "positions": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "stars": 2
+  }
+ },
+ {
+  "id": "B_in_the_pocket",
+  "name": "In the Pocket",
+  "blurb": "Gap Click: land within 20 ms after the 4-bar gap, 5 rounds in a row.",
+  "rule": {
+   "kind": "gap_landing",
+   "game": "G_in_the_pocket",
+   "level": "pk3",
+   "gap_bars": 4,
+   "within_ms": 20,
+   "in_a_row": 5
+  }
+ },
+ {
+  "id": "B_capo_brain",
+  "name": "Capo Brain",
+  "blurb": "Capo Quick: 30 right in a row.",
+  "rule": {
+   "kind": "streak_in_round",
+   "game": "G_capo_quick",
+   "streak": 30
+  }
+ },
+ {
+  "id": "B_faithful",
+  "name": "Faithful",
+  "blurb": "A 30-day streak.",
+  "rule": {
+   "kind": "streak_days",
+   "days": 30
+  }
+ }
+]

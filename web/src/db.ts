@@ -1,5 +1,5 @@
 // Minimal promise wrapper over IndexedDB. Tables follow guitar-kb/catalog/SCHEMA.md (on-device data).
-const NAME = 'guitar-trainer', VERSION = 5;
+const NAME = 'guitar-trainer', VERSION = 6;
 let dbp: Promise<IDBDatabase> | null = null;
 let blockedHook: (() => void) | null = null;
 /** Called when the database upgrade is blocked by another open copy of the app. */
@@ -18,6 +18,11 @@ function open(): Promise<IDBDatabase> {
         if (!d.objectStoreNames.contains('game_best')) d.createObjectStore('game_best', { keyPath: 'key' });
         if (!d.objectStoreNames.contains('xp_ledger')) d.createObjectStore('xp_ledger', { keyPath: 'id', autoIncrement: true });
         if (!d.objectStoreNames.contains('service_day')) d.createObjectStore('service_day', { keyPath: 'day' });
+      }
+      // G3: badges and the Daily Challenge. Only new stores are created, so every existing row is kept.
+      if (e.oldVersion < 6) {
+        if (!d.objectStoreNames.contains('badge')) d.createObjectStore('badge', { keyPath: 'badge_id' });
+        if (!d.objectStoreNames.contains('daily_challenge')) d.createObjectStore('daily_challenge', { keyPath: 'day' });
       }
       if (e.oldVersion >= 1) return;
       d.createObjectStore('lesson_progress', { keyPath: 'lesson_id' });
@@ -39,7 +44,7 @@ function open(): Promise<IDBDatabase> {
   return dbp;
 }
 const req = <T,>(r: IDBRequest<T>) => new Promise<T>((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-export const STORES = ['lesson_progress', 'attempt', 'practice_day', 'quiz_item_stats', 'kv', 'calibration', 'practice_session', 'imported_chart', 'game_run', 'game_best', 'xp_ledger', 'service_day'] as const;
+export const STORES = ['lesson_progress', 'attempt', 'practice_day', 'quiz_item_stats', 'kv', 'calibration', 'practice_session', 'imported_chart', 'game_run', 'game_best', 'xp_ledger', 'service_day', 'badge', 'daily_challenge'] as const;
 export async function getAll<T>(store: string): Promise<T[]> { const d = await open(); return req(d.transaction(store).objectStore(store).getAll()) as Promise<T[]>; }
 export async function get<T>(store: string, key: IDBValidKey): Promise<T | undefined> { const d = await open(); return req(d.transaction(store).objectStore(store).get(key)) as Promise<T | undefined>; }
 export async function put(store: string, value: unknown): Promise<void> { const d = await open(); await req(d.transaction(store, 'readwrite').objectStore(store).put(value)); }

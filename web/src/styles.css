@@ -337,3 +337,24 @@ details.shapes { margin:6px 0; } details.shapes summary { cursor:pointer; color:
 
 /* Respect "reduce motion": no transitions or animations; the needle and lights still move, just instantly. */
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration:.01ms !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; } }
+
+/* ---------- G3: chord games, Song Run, Daily Challenge, badges, heatmap ---------- */
+.choices.hint { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; } .choices.hint span { border:1px solid var(--line); border-radius:10px; padding:6px 10px; color:var(--muted); font-weight:600; }
+.choices.hint span.right { border-color:var(--ok); color:var(--ok); }
+button.override { display:flex; margin:4px auto; border-color:var(--ok); color:var(--ok); }
+.sprintchords { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; } .sprintchords span { padding:6px 12px; border-radius:10px; border:1px solid var(--line); font-size:20px; font-weight:600; }
+.sprintchords span.cur { background:var(--card2); } .sprintchords span.next { border-color:var(--accent); color:var(--accent); }
+.gboard .diagrams { justify-content:center; } .gboard .diagrams > div { border-radius:10px; padding:2px; } .gboard .diagrams > div.next { outline:2px solid var(--accent); }
+.songboxes { display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:6px; }
+.songboxes span { text-align:center; padding:10px 4px; border-radius:10px; border:1px solid var(--line); font-weight:600; font-size:18px; }
+.songboxes span.cur { border-color:var(--accent); color:var(--accent); } .songboxes span.ok { background:rgba(76,195,138,.25); } .songboxes span.mixed { background:rgba(232,163,61,.25); } .songboxes span.miss { background:rgba(239,100,97,.25); }
+.songsetup { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:flex-end; margin:8px 0; } .songsetup p { flex-basis:100%; }
+.tile.songrun details summary { cursor:pointer; padding:8px 0; }
+.dailybanner .dailydots { display:flex; gap:6px; margin-top:4px; } .dailydots i { width:12px; height:12px; border-radius:50%; background:var(--card2); border:1px solid var(--line); } .dailydots i.on { background:var(--ok); border-color:var(--ok); }
+ol.dailylist { padding-left:22px; } ol.dailylist li { padding:8px 0; border-top:1px solid var(--line); } ol.dailylist li a { display:flex; flex-direction:column; color:var(--ink); } ol.dailylist li.done b { color:var(--ok); }
+ul.badgelist { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr; gap:0 16px; } @media (min-width:600px) { ul.badgelist { grid-template-columns:1fr 1fr; } }
+ul.badgelist li { display:flex; flex-direction:column; padding:8px 0; border-top:1px solid var(--line); } ul.badgelist li:not(.got) b { color:var(--muted); }
+.heatmap { display:grid; gap:2px; align-items:center; margin:6px 0; } .heatmap i { aspect-ratio:1; border-radius:3px; background:var(--card2); min-width:0; }
+.heatmap small { font-size:10px; text-align:center; } .heatmap .sno { padding-right:4px; }
+.heatmap i.h1, .heatlegend i.h1 { background:var(--bad); } .heatmap i.h2, .heatlegend i.h2 { background:var(--accent); } .heatmap i.h3, .heatlegend i.h3 { background:rgba(76,195,138,.55); } .heatmap i.h4, .heatlegend i.h4 { background:var(--ok); }
+.heatlegend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin:0 2px 0 8px; vertical-align:middle; }
