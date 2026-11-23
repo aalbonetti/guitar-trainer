@@ -10,6 +10,10 @@ for x in lp:
     if x['lesson_id'] in ('T.03','F.07'): x['next_review_day']=D(-1)
 BK=os.path.join(tempfile.mkdtemp(),'seed.json'); json.dump({'lesson_progress':lp},open(BK,'w'))
 OPEN=[40,45,50,55,59,64]; SH=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']; FL=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B']
+async def seedpage(pg, path):
+    import json
+    await pg.goto(f'http://127.0.0.1:{PORT}/?sim#/settings'); await pg.wait_for_function('!!window.__gtImport')
+    await pg.evaluate('d => window.__gtImport(d)', json.load(open(path))); await pg.reload(); await pg.wait_for_timeout(500)
 def pc_of(label):  # "F♯/G♭" or "G"
     n=label.split('/')[0].replace('♯','#'); return SH.index(n)
 PCN={**{n:i for i,n in enumerate(SH)},**{n:i for i,n in enumerate(FL)}}
@@ -27,8 +31,7 @@ async def main():
         t=await pg.inner_text('.tiles'); later=await pg.text_content('details.later'); check(t.count('★★ on level')>=10 and 'Coming later' not in t and 'Coming later' in later and 'Song Run' in later and 'Taught in' in t, 'new player: first level of every game open, later levels need ★★, later games marked')
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_capo_quick/cq1'); await pg.wait_for_selector('text=▶ Start'); check(True, 'new player can open level 1')
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_capo_quick/cq2'); await pg.wait_for_selector('text=Get ★★ on the previous level'); check(True, 'level 2 waits for ★★ on level 1')
-        await pg.goto(f'http://127.0.0.1:{PORT}/#/settings'); await pg.wait_for_selector('text=Restore from file')
-        await pg.set_input_files('section.card:has-text("Backup") input[type=file]', BK); await pg.wait_for_timeout(1500)
+        await seedpage(pg, BK)
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade'); await pg.wait_for_selector('text=Note Drop'); await pg.wait_for_timeout(300)
         g1=['Note Drop','Fret Finder','Call the Number','Hear the Change','Capo Quick','Delay Math']
         t=' '.join([await pg.inner_text(f'section.tile:has-text("{n}")') for n in g1]); check('Taught in' not in t, 'F + T passed: no "taught in" tips on the G1 games')
