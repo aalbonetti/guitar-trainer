@@ -10,6 +10,10 @@ import { getSetList } from '../setlist';
 import { songPool } from '../practice';
 import { Fretboard, zoneOf, posText, useEars, useHeard, Hearing, askNow, type Round } from './GameKit';
 import type { Heard } from '../games/judge';
+import { noteSpot } from '../heat';
+
+/** Daily Challenge focus: the pitch classes of the hard spots come up about half the time. */
+const focusPc = (r: Rng, focus: Pos[], pcs: number[]): number | null => { const f = focus.map(pcAt).filter(pc => pcs.includes(pc)); return f.length && r() < 0.5 ? pick(r, f) : null; };
 
 /** Play mode is slower than tapping (find it on the neck, then the app hears it), so its speed-bonus windows are wider. */
 const WINDOWS = { note_drop: { tap: [900, 0], play: [1500, 0] }, fret_finder: { tap: [1200, 5000], play: [2000, 7000] }, octave_jump: { tap: [1200, 5000], play: [2000, 8000] } } as const;
@@ -19,36 +23,37 @@ const useTick = (on: boolean, ms: number) => { const [, set] = useState(0); useE
 // ---------- Note Drop ----------
 // Play mode: a note name falls; play that note somewhere in the highlighted zone. Any octave the zone holds is
 // right (it's a note-names game); an octave outside the zone, or another note, is a miss.
-export function NoteDrop({ l, round, r }: { l: GameLevel; round: Round; r: Rng }) {
+export function NoteDrop({ l, round, r, focus = [] }: { l: GameLevel; round: Round; r: Rng; focus?: Pos[] }) {
   const zone = zoneOf(l), play = round.mode === 'play';
   const pcs = useMemo(() => Array.from({ length: 12 }, (_, pc) => pc).filter(pc => positionsOf(pc, zone).length), []);
   const mk = (pc: number, id: number) => ({ pc, start: round.now(), since: play ? askNow() : 0, id });
-  const [q, setQ] = useState(() => mk(pick(r, pcs), 0));
+  const [q, setQ] = useState(() => mk(focusPc(r, focus, pcs) ?? pick(r, pcs), 0));
   const [marks, setMarks] = useState<{ p: Pos; cls: string }[]>([]);
   const [said, setSaid] = useState<string | null>(null);
   const [t, setT] = useState(0);
   const speed = (l.params.speed || 1) * Math.pow(1.15, Math.floor(round.correct / 10));
   const fallMs = 6000 / speed;
   const [fast] = WINDOWS.note_drop[round.mode];
-  const next = () => setQ(o => { let pc = pick(r, pcs); if (pc === o.pc) pc = pick(r, pcs); round.askedAt.current = round.now(); return mk(pc, o.id + 1); });
+  const next = () => setQ(o => { let pc = focusPc(r, focus, pcs) ?? pick(r, pcs); if (pc === o.pc) pc = pick(r, pcs); round.askedAt.current = round.now(); return mk(pc, o.id + 1); });
   const ear = useEars(play && !round.paused, zoneRange(zone));
   useEffect(() => { let raf = 0; const f = () => { setT(round.now()); raf = requestAnimationFrame(f); }; raf = requestAnimationFrame(f); return () => cancelAnimationFrame(raf); }, []);
   useEffect(() => {
     if (round.paused || t - q.start <= fallMs || round.lives <= 0) return;
     const where = positionsOf(q.pc, zone); setMarks(where.map(p => ({ p, cls: 'show' })));
+    where.forEach(p => noteSpot(p, false));
     round.answer(false, `${noteLabel(q.pc)} on ${fmtPlaces(where)}`); setSaid('Too slow'); next();
   }, [t]);
   const tap = (p: Pos) => {
     if (play || round.paused) return;
-    if (pcAt(p) === q.pc) { setMarks([{ p, cls: 'ok' }]); round.answer(true, undefined, fast, fallMs); }
-    else { setMarks([{ p, cls: 'bad' }, ...positionsOf(q.pc, zone).map(x => ({ p: x, cls: 'show' }))]); round.answer(false, `${noteLabel(q.pc)} (you tapped ${noteLabel(pcAt(p))} at ${posText(p)})`); }
+    if (pcAt(p) === q.pc) { setMarks([{ p, cls: 'ok' }]); noteSpot(p, true, round.now() - q.start); round.answer(true, undefined, fast, fallMs); }
+    else { setMarks([{ p, cls: 'bad' }, ...positionsOf(q.pc, zone).map(x => ({ p: x, cls: 'show' }))]); noteSpot(p, false); round.answer(false, `${noteLabel(q.pc)} (you tapped ${noteLabel(pcAt(p))} at ${posText(p)})`); }
     next();
   };
   const qRef = useRef(q); qRef.current = q;
   useHeard(play && !round.paused, ear.openedAt, () => ({ right: zoneMidis(qRef.current.pc, zone), since: qRef.current.since }), (h: Heard) => {
     const cur = qRef.current, where = positionsOf(cur.pc, zone);
-    if (h.kind === 'right') { setMarks(where.filter(p => midiAt(p) === h.midi).map(p => ({ p, cls: 'ok' }))); setSaid(`✓ ${h.heard}`); round.answer(true, undefined, fast, fallMs); }
-    else { setMarks(where.map(p => ({ p, cls: 'show' }))); setSaid(`✗ heard ${h.heard}${h.why === 'octave' ? ': an octave outside the zone' : ''}`); round.answer(false, `${noteLabel(cur.pc)} on ${fmtPlaces(where)}${h.why === 'octave' ? ' (octave off)' : ''}`); }
+    if (h.kind === 'right') { const at = where.filter(p => midiAt(p) === h.midi); setMarks(at.map(p => ({ p, cls: 'ok' }))); at.forEach(p => noteSpot(p, true, round.now() - cur.start)); setSaid(`✓ ${h.heard}`); round.answer(true, undefined, fast, fallMs); }
+    else { setMarks(where.map(p => ({ p, cls: 'show' }))); where.forEach(p => noteSpot(p, false)); setSaid(`✗ heard ${h.heard}${h.why === 'octave' ? ': an octave outside the zone' : ''}`); round.answer(false, `${noteLabel(cur.pc)} on ${fmtPlaces(where)}${h.why === 'octave' ? ' (octave off)' : ''}`); }
     next();
   });
   const frac = Math.min(1, (t - q.start) / fallMs);
@@ -67,10 +72,11 @@ export function NoteDrop({ l, round, r }: { l: GameLevel; round: Round; r: Rng }
 // ---------- Fret Finder ----------
 // Play mode: the app can hear the pitch but not the string, so it walks the strings (6 → 1) and you play every
 // place the note sits on the lit string. Exact octave: on one string, each place is a different octave.
-export function FretFinder({ l, round, r }: { l: GameLevel; round: Round; r: Rng }) {
+export function FretFinder({ l, round, r, focus = [] }: { l: GameLevel; round: Round; r: Rng; focus?: Pos[] }) {
   const zone = zoneOf(l), play = round.mode === 'play';
   const [fast, slow] = WINDOWS.fret_finder[round.mode];
-  const newNote = (prev?: number) => { let pc = Math.floor(r() * 12); while (pc === prev || !positionsOf(pc, zone).length) pc = Math.floor(r() * 12); return { pc, start: round.now(), since: play ? askNow() : 0, found: [] as Pos[] }; };
+  const zonePcs = Array.from({ length: 12 }, (_, pc) => pc).filter(pc => positionsOf(pc, zone).length);
+  const newNote = (prev?: number) => { let pc = focusPc(r, focus, zonePcs.filter(x => x !== prev)) ?? Math.floor(r() * 12); while (pc === prev || !positionsOf(pc, zone).length) pc = Math.floor(r() * 12); return { pc, start: round.now(), since: play ? askNow() : 0, found: [] as Pos[], lastAt: round.now() }; };
   const [q, setQ] = useState(() => newNote());
   const [bad, setBad] = useState<Pos | null>(null);
   const [said, setSaid] = useState<string | null>(null);
@@ -82,17 +88,18 @@ export function FretFinder({ l, round, r }: { l: GameLevel; round: Round; r: Rng
   useEffect(() => { const t = setInterval(() => {
     if (round.paused) return;
     const s = 20 - (round.now() - q.start) / 1000; setLeft(Math.max(0, Math.ceil(s)));
-    if (s <= 0) { const missing = targets.filter(t => !isFound(t)); round.addMisses(missing.length, `${noteLabel(q.pc)} at ${missing.map(posText).join(', ')}`); setQ(newNote(q.pc)); round.askedAt.current = round.now(); }
+    if (s <= 0) { const missing = targets.filter(t => !isFound(t)); missing.forEach(p => noteSpot(p, false)); round.addMisses(missing.length, `${noteLabel(q.pc)} at ${missing.map(posText).join(', ')}`); setQ(newNote(q.pc)); round.askedAt.current = round.now(); }
   }, 200); return () => clearInterval(t); }, [q, round.paused]);
   const found = (p: Pos) => {
+    noteSpot(p, true, round.now() - q.lastAt);
     round.answer(true, undefined, fast, slow);
     const f = [...q.found, p];
-    if (f.length === targets.length) setQ(newNote(q.pc)); else setQ({ ...q, found: f });
+    if (f.length === targets.length) setQ(newNote(q.pc)); else setQ({ ...q, found: f, lastAt: round.now() });
   };
   const tap = (p: Pos) => {
     if (play || round.paused || isFound(p)) return;
     if (pcAt(p) === q.pc) found(p);
-    else { setBad(p); setTimeout(() => setBad(null), 300); round.answer(false, `${noteLabel(q.pc)}: ${posText(p)} is ${noteLabel(pcAt(p))}`); }
+    else { setBad(p); setTimeout(() => setBad(null), 300); noteSpot(p, false); round.answer(false, `${noteLabel(q.pc)}: ${posText(p)} is ${noteLabel(pcAt(p))}`); }
   };
   const qRef = useRef(q); qRef.current = q;
   useHeard(play && !round.paused, ear.openedAt, () => {
@@ -166,7 +173,7 @@ export function OctaveJump({ l, round, r }: { l: GameLevel; round: Round; r: Rng
 }
 
 // ---------- choice games: Call the Number, Capo Quick, Hear the Change ----------
-function songCalls(cat: Catalog, r: Rng): { prompts: { num: string; chord: string }[]; title: string; key: string; choices: string[] } {
+export function songCalls(cat: Catalog, r: Rng): { prompts: { num: string; chord: string }[]; title: string; key: string; choices: string[] } {
   const pool = songPool({ cat, setlist: getSetList() }).ids;
   const o = cat.outlineById[pick(r, pool)];
   const prompts = o.sections.flatMap(s => s.chords_in_chart_key.map((c, i) => ({ num: s.numbers[i], chord: c })));
@@ -191,6 +198,7 @@ export function ChoiceGame({ cat, g, l, round, r }: { cat: Catalog; g: Game; l: 
   const choose = (c: string) => {
     if (picked || round.paused) return;
     const ok = c === q.answer; setPicked(c);
+    if (g.id === 'G_call_the_number' && q.key) { const t = (round.extra.current.keys ||= {}) as Record<string, [number, number]>; t[q.key] = [(t[q.key]?.[0] || 0) + (ok ? 1 : 0), (t[q.key]?.[1] || 0) + 1]; }
     round.answer(ok, ok ? undefined : q.miss, g.id === 'G_hear_the_change' ? 2200 : 1200, g.id === 'G_hear_the_change' ? 7000 : 5000);
     setTimeout(() => { setPicked(null); setQ(gen(q)); round.askedAt.current = round.now(); }, ok ? 220 : 900);
   };

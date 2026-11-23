@@ -70,7 +70,7 @@ export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
                 <option value={0.5}>½ bar</option><option value={1}>1 bar</option><option value={2}>2 bars</option></select></label>
             </>}
           </div>
-          {!pa.on ? <p class="muted small">Play-along clicks at {o.bpm || 'the metronome'} BPM after a one-bar count-in and lights up each chord. Song outlines don't store bar lengths, so pick how long each chord lasts.</p> : null}
+          {!pa.on ? <p class="muted small">Play-along clicks at {o.bpm || 'the metronome'} BPM after a one-bar count-in and lights up each chord. Song outlines don't store bar lengths, so pick how long each chord lasts. Ready for the boss level? <a href={`#/arcade/G_song_run/${o.id}`}>★ Song Run</a> grades every bar.</p> : null}
           {o.sections.map((s, si) => (
             <section class="section">
               <h3>{s.name}</h3>
