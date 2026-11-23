@@ -12,6 +12,11 @@ Across strings 3-2-1 at fret 12 you get G B E: a lovely Em(add) shimmer. At fret
 ### Swelled melody
 Play the melody notes from EL.07 with volume swells (ER.07) instead of picked attacks. Add a long reverb, maybe shimmer. The line floats.
 
+### The graded run
+{{exercise:EX_harmonics_swells}}
+
+At your own pace: the nine harmonics on strings 3-2-1 (fret 12, then 7, then 5), then three notes swelled in with the volume knob (D, E on string 2, G on string 1). Let each one ring clearly before the next.
+
 ### Practice
 1. Harmonics on frets 12, 7 and 5, every string. Get each one ringing clearly.
 2. Over a slow G – C loop, play harmonics on the chord tones.

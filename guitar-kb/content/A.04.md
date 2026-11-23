@@ -10,9 +10,13 @@ The key of C, and the chords you'll need when you capo up to play C-shape songs.
 - **G**: 3- or 4-finger, your choice.
 
 ### Changes to practice
-{{exercise:EX_changes_open}}
+Focus on **C ↔ Am** (one finger) and **C ↔ Fmaj7** (two fingers slide across together). These two are the graded pairs:
 
-Focus on **C ↔ Am** (one finger) and **C ↔ Fmaj7** (two fingers slide across together).
+{{exercise:EX_changes_cfamily}}
+
+More pairs to work on any time (not graded here):
+
+{{exercise:EX_changes_open}}
 
 ### Try a progression
 **C – Am – Fmaj7 – G** (1 – 6m – 4 – 5). Four downstrums each at 70 BPM.

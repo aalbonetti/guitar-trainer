@@ -279,6 +279,96 @@
     12,
     12
    ]
+  },
+  {
+   "id": "tri_321_D_root",
+   "root": "D",
+   "quality": "major",
+   "strings": [
+    3,
+    2,
+    1
+   ],
+   "frets": [
+    7,
+    7,
+    5
+   ]
+  },
+  {
+   "id": "tri_321_Em_root",
+   "root": "E",
+   "quality": "minor",
+   "strings": [
+    3,
+    2,
+    1
+   ],
+   "frets": [
+    9,
+    8,
+    7
+   ]
+  },
+  {
+   "id": "tri_321_C_inv1",
+   "root": "C",
+   "quality": "major",
+   "strings": [
+    3,
+    2,
+    1
+   ],
+   "frets": [
+    9,
+    8,
+    8
+   ]
+  },
+  {
+   "id": "tri_432_D_inv1",
+   "root": "D",
+   "quality": "major",
+   "strings": [
+    4,
+    3,
+    2
+   ],
+   "frets": [
+    4,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "tri_432_Em_inv1",
+   "root": "E",
+   "quality": "minor",
+   "strings": [
+    4,
+    3,
+    2
+   ],
+   "frets": [
+    5,
+    4,
+    5
+   ]
+  },
+  {
+   "id": "tri_432_C_inv2",
+   "root": "C",
+   "quality": "major",
+   "strings": [
+    4,
+    3,
+    2
+   ],
+   "frets": [
+    5,
+    5,
+    5
+   ]
   }
  ],
  "octaves": [
