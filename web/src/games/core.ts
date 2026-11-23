@@ -1,5 +1,6 @@
 // Arcade rules (07-games.md §3–§4) and question generators for the G1 tap games. Pure: unit-tested.
 import { SHARP, FLAT, pcOf, keyUsesFlats, noteName, OPEN_MIDI, keyName, KEY_NAMES } from '../music';
+import { matchOnsets } from '../dsp/dsp.js';
 
 // ---------- scoring ----------
 /** Speed bonus 2.0 (fast) → 1.0 (slow), linear between `fastMs` and `slowMs`. */
@@ -18,7 +19,10 @@ export function stars(finished: boolean, accuracy: number, score: number, target
 
 // ---------- XP + player level ----------
 export const XP = { lessonPass: 50, review: 20, daily: 30, pb: 10 } as const;
-export const xpForScore = (score: number) => Math.floor(score / 100);
+/** XP for a round: score ÷ 500, at most 30 (07-games §4, rebalanced in G2 so one round can't outweigh a lesson
+ *  pass (+50); a long click-timed round scores 20–45k). */
+export const XP_PER_ROUND_MAX = 30;
+export const xpForScore = (score: number) => Math.min(XP_PER_ROUND_MAX, Math.floor(score / 500));
 /** Level n needs 100 + 25·(n−1) XP to reach level n+1. */
 export function levelFor(totalXp: number): { level: number; into: number; need: number } {
   let level = 1, left = totalXp;
@@ -103,4 +107,114 @@ export interface DelayQ { bpm: number; note: string; ms: number }
 export function delayQ(r: Rng, range: [number, number], notes: string[]): DelayQ {
   const bpm = range[0] + Math.floor(r() * (range[1] - range[0] + 1)), note = pick(r, notes);
   return { bpm, note, ms: delayMs(bpm, note) };
+}
+
+// ================= G2: play mode, Octave Jump, Box Runner, In the Pocket =================
+export const midiAt = (p: Pos) => OPEN_MIDI[6 - p.string] + p.fret;
+/** Distinct sounding notes (MIDI) of a pitch class inside a zone, low to high. */
+export const zoneMidis = (pc: number, z: Zone) => [...new Set(positionsOf(pc, z).map(midiAt))].sort((a, b) => a - b);
+/** Every MIDI note a zone can sound (sizes the pitch tracker's range). */
+export function zoneRange(z: Zone): number[] { const out: number[] = []; for (const s of z.strings) out.push(midiAt({ string: s, fret: z.frets[0] }), midiAt({ string: s, fret: z.frets[1] })); return out; }
+
+// ---------- points with a given bonus ----------
+/** Points for a right answer with an explicit bonus (1.0–2.0) × combo. `base` is 100 per answer; click-timed
+ *  games use 100 per beat (an eighth note is worth 50, a sixteenth 25) so subdivision doesn't inflate scores. */
+export const pointsWith = (bonus: number, streak: number, base = 100) => Math.round(base * Math.max(1, Math.min(2, bonus)) * comboMult(streak));
+/** Click-timed games: bonus 2.0 within `fullMs` of the beat, falling to 1.0 at the window's edge. */
+export function timingBonus(errMs: number, fullMs: number, edgeMs: number): number {
+  return 2 - Math.max(0, Math.min(1, (Math.abs(errMs) - fullMs) / Math.max(1, edgeMs - fullMs)));
+}
+export interface Verdict { ok: boolean; bonus: number; miss?: string }
+/** Score answers in order. The live HUD and the final result use this same rule. */
+export function scoreRun(vs: Verdict[], base = 100): { score: number; correct: number; total: number; maxCombo: number; streak: number; misses: string[] } {
+  let score = 0, correct = 0, streak = 0, maxCombo = 1; const misses: string[] = [];
+  for (const v of vs) {
+    if (v.ok) { score += pointsWith(v.bonus, streak, base); correct++; streak++; maxCombo = Math.max(maxCombo, comboMult(streak)); }
+    else { streak = 0; if (v.miss) misses.push(v.miss); }
+  }
+  return { score, correct, total: vs.length, maxCombo, streak, misses };
+}
+
+// ---------- Octave Jump ----------
+/** Octave shapes from catalog shapes.json: low string → high string, frets up. */
+const OCTAVE_UP: Record<number, { string: number; frets: number }> = { 6: { string: 4, frets: 2 }, 5: { string: 3, frets: 2 }, 4: { string: 2, frets: 3 }, 3: { string: 1, frets: 3 } };
+export const octaveShape = (p: Pos): Pos => ({ string: OCTAVE_UP[p.string].string, fret: p.fret + OCTAVE_UP[p.string].frets });
+export interface OctaveQ { from: Pos; low: number; high: number; shape: Pos }
+/** A note on string 6 or 5 in the zone; the answer is the note an octave up (exact octave). */
+export function octaveQ(r: Rng, z: Zone, prev?: OctaveQ): OctaveQ {
+  for (let i = 0; ; i++) {
+    const from = { string: pick(r, z.strings), fret: z.frets[0] + Math.floor(r() * (z.frets[1] - z.frets[0] + 1)) };
+    if (i < 20 && prev && prev.from.string === from.string && prev.from.fret === from.fret) continue;
+    const low = midiAt(from);
+    return { from, low, high: low + 12, shape: octaveShape(from) };
+  }
+}
+
+// ---------- Box Runner ----------
+export interface BoxScale { id?: string; root: string; kind: string; position: number; frets: number[][] }
+/** The box moved to `key`: the lowest placement that keeps every note within frets 0–15
+ *  (mirrors the check in build_catalog.py). */
+export function boxFrets(sc: BoxScale, key: string): number[][] {
+  const base = ((pcOf(key) - pcOf(sc.root)) % 12 + 12) % 12;
+  const lo = Math.min(...sc.frets.flat()), hi = Math.max(...sc.frets.flat());
+  const s = [base - 12, base, base + 12].find(x => lo + x >= 0 && hi + x <= 15);
+  if (s === undefined) throw new Error(`${sc.id} doesn't fit in ${key}`);
+  return sc.frets.map(fl => fl.map(f => f + s));
+}
+/** The box's notes, low to high (string 6 first, frets ascending). */
+export const boxNotes = (frets: number[][]): Pos[] => frets.flatMap((fl, i) => [...fl].sort((a, b) => a - b).map(f => ({ string: 6 - i, fret: f })));
+/** The path through the box for a round. updown = up then back down; threes = 3-note groups up, then down.
+ *  The same note is never asked twice in a row (a junction that would repeat it is skipped). */
+export function boxPath(notes: Pos[], path: string, passes: number): Pos[] {
+  const groups: Pos[][] = [];
+  const down = [...notes].reverse();
+  for (let p = 0; p < passes; p++) {
+    if (path === 'threes') {
+      for (const run of [notes, down]) for (let i = 0; i + 2 < run.length; i++) groups.push(run.slice(i, i + 3));
+    } else if (path === 'up') groups.push(notes);
+    else if (path === 'down') groups.push(down);
+    else groups.push(notes, down);
+  }
+  const out: Pos[] = [];
+  const same = (a?: Pos, b?: Pos) => !!a && !!b && a.string === b.string && a.fret === b.fret;
+  for (const g of groups) {
+    if (path === 'threes') { if (!same(out[out.length - 1], g[0])) out.push(...g); }
+    else out.push(...(same(out[out.length - 1], g[0]) ? g.slice(1) : g));
+  }
+  return out;
+}
+/** Timing window for a note in Box Runner: 40% of the note spacing, 100–220 ms. */
+export const boxWindowS = (spacingS: number) => Math.min(0.22, Math.max(0.1, 0.4 * spacingS));
+
+// ---------- In the Pocket ----------
+export interface PocketParams { bars: number; gap_bars?: number[]; click_bars?: number; window_ms: number }
+/** Bar layout: which bars are silent (Gap Click). Bars are 0-based after the count-in; returns the gap index
+ *  per bar (-1 = click plays) and, for each gap, the bar where the click comes back. */
+export function pocketLayout(p: PocketParams): { bars: number; gapOf: number[]; returns: { gap: number; bars: number; bar: number }[] } {
+  if (!p.gap_bars?.length) return { bars: p.bars, gapOf: Array(p.bars).fill(-1), returns: [] };
+  const cb = p.click_bars || 2, gapOf: number[] = [], returns: { gap: number; bars: number; bar: number }[] = [];
+  p.gap_bars.forEach((g, i) => { for (let b = 0; b < cb; b++) gapOf.push(-1); for (let b = 0; b < g; b++) gapOf.push(i); returns.push({ gap: i, bars: g, bar: gapOf.length }); });
+  for (let b = 0; b < cb; b++) gapOf.push(-1);
+  return { bars: gapOf.length, gapOf, returns };
+}
+export interface PocketSlot { t: number; expected: boolean; bar: number }
+export interface PocketVerdict { slot: number; expected: boolean; ok: boolean; errMs: number | null; bonus: number; miss?: string; counted: boolean }
+/** Grade strums (context seconds) against the slots: an expected slot is right when a strum lands within
+ *  ±window_ms (after the calibrated offset); a strum in a rest is a miss; an empty rest isn't an answer.
+ *  `returnBars` labels the first strum after each gap. */
+export function pocketVerdicts(onsets: number[], slots: PocketSlot[], slotDur: number, offsetMs: number, windowMs: number, returnBars: Map<number, number> = new Map()): PocketVerdict[] {
+  const off = offsetMs / 1000;
+  const adj = onsets.map(o => o - off);
+  const m = matchOnsets(adj, slots.map(s => s.t), slotDur / 2).map(r => r.onset);
+  const seenBar = new Set<number>();
+  return slots.map((s, i) => {
+    const err = m[i] === null ? null : (m[i]! - s.t) * 1000;
+    if (!s.expected) return err === null ? { slot: i, expected: false, ok: true, errMs: null, bonus: 0, counted: false } : { slot: i, expected: false, ok: false, errMs: err, bonus: 0, miss: 'strums in the rests', counted: true };
+    const back = returnBars.has(s.bar) && !seenBar.has(s.bar) ? returnBars.get(s.bar)! : null; seenBar.add(s.bar);
+    if (err === null) return { slot: i, expected: true, ok: false, errMs: null, bonus: 0, miss: back !== null ? `after the ${back}-bar gap: no strum on the 1` : 'missed strums', counted: true };
+    const ok = Math.abs(err) <= windowMs;
+    const lab = `${Math.round(Math.abs(err))} ms ${err > 0 ? 'late' : 'early'}`;
+    return { slot: i, expected: true, ok, errMs: err, bonus: ok ? timingBonus(err, windowMs / 6, windowMs) : 0, counted: true,
+      miss: ok ? undefined : back !== null ? `after the ${back}-bar gap: ${lab}` : err > 0 ? `late strums (over ${windowMs} ms behind)` : `early strums (over ${windowMs} ms ahead)` };
+  });
 }

@@ -8,10 +8,13 @@ import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
 import { getSetList, importSetList, clearSetList, thisWeekSongs, thisWeekIndex } from '../setlist';
 import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
-import { progress, recordAttempt, saveStatus } from '../progressStore';
+import { progress, recordAttempt, saveStatus, streakInfo, firstPracticeDay } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
 import { exportAll, importAll, downloadBackup, shareBackup, canShareBackup } from '../db';
 import { TimingPanel, CalibrationCard, usePracticeTempo } from './Timing';
+import { PitchPanel } from './Pitch';
+import { ChordPanel } from './Chord';
+import { GRADERS, graderMode, setGraderMode, pitchGraderKey, chordGraderKey, isChordLesson, type GraderMode } from '../grading/modes';
 import { PracticeCard } from './Practice';
 import { xp } from '../xp';
 import { levelFor } from '../games/core';
@@ -36,14 +39,14 @@ export function Today({ cat }: { cat: Catalog }) {
   const { pr, states } = useStates(cat);
   const day = dayOf();
   const sl = getSetList();
-  const streak = (() => { let n = 0, d = day; const set = new Set(pr.days); if (!set.has(d)) d = addDaysLocal(d, -1); while (set.has(d)) { n++; d = addDaysLocal(d, -1); } return n; })();
+  const streak = streakInfo(day).current;
   const passed = Object.values(states).filter(s => s === 'passed').length;
   const vis = (id: string) => trackVisible(cat, id);
   const x = useStore(xp);
   return (
     <div class="page">
       <h1>Today</h1>
-      <p class="muted">{passed} of {cat.lessons.length} lessons passed{streak ? ` · ${streak}-day streak` : ''} · <a href="#/arcade">level {levelFor(x.total).level}</a> · <a href="#/progress">progress</a></p>
+      <a class="card tap-card todaystat" href="#/progress" aria-label="See your progress"><p><span>{streak ? `🔥 ${streak}-day streak · ` : ''}{passed} of {cat.lessons.length} lessons passed · level {levelFor(x.total).level}</span><span class="chev" aria-hidden="true">›</span></p></a>
       <div class="two">
         <div><PracticeCard cat={cat} visibleTrack={vis} /></div>
         <div>
@@ -71,10 +74,11 @@ function BackupNudge() {
   const [, bump] = useState(0);
   const [msg, setMsg] = useState('');
   const last = persisted<number | null>('gt_last_backup', null).get();
-  const has = pr.days.length > 0 || Object.keys(pr.lp).length > 0;
   const days = last ? Math.floor((Date.now() - last) / 86400000) : null;
+  // Never backed up: wait until there are 14 days of practice history worth protecting (not on day one).
+  const first = firstPracticeDay(), since = first ? Math.floor((Date.parse(dayOf() + 'T12:00:00') - Date.parse(first + 'T12:00:00')) / 86400000) : -1;
   if (msg) return <section class="card nudge"><p class="okText">{msg}</p></section>;
-  if (!has || (days !== null && days < 14) || Date.now() < snoozePref.get()) return null;
+  if (since < 0 || (days === null ? since < 14 : days < 14) || Date.now() < snoozePref.get()) return null;
   const share = canShareBackup();
   return (
     <section class="card nudge">
@@ -87,7 +91,6 @@ function BackupNudge() {
     </section>
   );
 }
-function addDaysLocal(day: string, n: number) { const [y, m, d] = day.split('-').map(Number); return dayOf(new Date(y, m - 1, d + n)); }
 
 // ---------- Path ----------
 const ICON: Record<State, string> = { locked: '🔒', available: '○', in_progress: '◐', passed: '●' };
@@ -170,7 +173,7 @@ export function LessonView({ cat, id }: { cat: Catalog; id: string }) {
           {triads.length ? <section class="card"><h2>Triads</h2><div class="chords">{triads.map(t => <ChordDiagram name={`${t!.root}${t!.quality === 'minor' ? 'm' : ''} (${t!.strings.join('-')})`} shape={triadShape(t!)} />)}</div></section> : null}
           {scales.length ? <section class="card"><h2>Scales</h2>{scales.map(s => <ScaleDiagram scale={s!} />)}</section> : null}
           {strums.length ? <section class="card"><h2>Rhythm</h2>{strums.map(s => <StrumGrid strum={s!} />)}</section> : null}
-          {exercises.length ? <section class="card"><h2>Exercises</h2><ul class="list">{exercises.map(e => <li><b>{e!.name}</b>{e!.tempo ? <small>start {e!.tempo.start} → target {e!.tempo.target} BPM</small> : null}{e!.pairs ? <small>{e!.pairs.map(p => p.join(' ↔ ')).join(' · ')}</small> : null}</li>)}</ul></section> : null}
+          {exercises.length ? <section class="card"><h2>Exercises</h2><ul class="list">{exercises.map(e => <li><b>{e!.name}</b>{e!.tempo ? <small>start {e!.tempo.start} → target {e!.tempo.target} BPM</small> : null}{e!.pairs ? <small>{e!.pairs.map(p => p.map(r => e!.voicings?.[r]?.name ?? r).join(' ↔ ')).join(' · ')}</small> : null}{e!.bpm ? <small>{e!.bpm} BPM</small> : null}</li>)}</ul></section> : null}
           {songs.length ? <section class="card"><h2>Songs that use this</h2><ul class="list">{songs.map(o => <li><a href={`#/song/${o.id}`}>{o.title}</a> <small class="muted">{o.artist}</small></li>)}</ul></section> : null}
         </aside>
       </div>
@@ -222,11 +225,35 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
         <p class="muted">Mark it yourself when you can play it at the goal. Self-marked passes are recorded as such.</p>
         <button disabled={doneToday} onClick={() => mark('self')}>{doneToday ? 'Marked today ✓' : 'I can do this'}</button></details> : null}
     </section>);
+  if (type === 'pitch' && graderMode(pitchGraderKey(l, cat)) !== 'self') return (
+    <section class="card">
+      <h2>Pass it {due ? <small class="badge b-due">review due</small> : null}</h2>
+      {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''}. Practice any time.</p> : null}
+      {doneToday && !(att.lessonId === l.id && att.phase === 'result') ? <p class="okText">Passed once today ✓ Pass it again on another day to complete the lesson.</p> : null}
+      <PitchPanel cat={cat} l={l} reviewDue={due} passed={p?.state === 'passed'} />
+      {msg ? <p class="note">{msg}</p> : null}
+      {p?.state !== 'passed' || due ? <details class="selfmark"><summary>Can't use the mic right now?</summary>
+        <p class="muted">Mark it yourself when you can play it. Self-marked passes are recorded as such.</p>
+        <button disabled={doneToday} onClick={() => mark('self')}>{doneToday ? 'Marked today ✓' : 'I can do this'}</button></details> : null}
+    </section>);
+  if (isChordLesson(l) && graderMode(chordGraderKey(l)) !== 'self') return (
+    <section class="card">
+      <h2>Pass it {due ? <small class="badge b-due">review due</small> : null}</h2>
+      {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''}. Practice any time.</p> : null}
+      {doneToday && !(att.lessonId === l.id && att.phase === 'result') ? <p class="okText">Passed once today ✓ Pass it again on another day to complete the lesson.</p> : null}
+      <ChordPanel cat={cat} l={l} reviewDue={due} passed={p?.state === 'passed'} />
+      {msg ? <p class="note">{msg}</p> : null}
+      {p?.state !== 'passed' || due ? <details class="selfmark"><summary>Can't use the mic right now?</summary>
+        <p class="muted">Mark it yourself when you can play it. Self-marked passes are recorded as such.</p>
+        <button disabled={doneToday} onClick={() => mark('self')}>{doneToday ? 'Marked today ✓' : 'I can do this'}</button></details> : null}
+    </section>);
   const graded = type !== 'self_check';
+  const selfByChoice = type === 'pitch' || isChordLesson(l);
   return (
     <section class="card">
       <h2>Pass it {due ? <small class="badge b-due">review due</small> : null}</h2>
-      {graded ? <p class="muted">Automatic grading for this lesson ({describePass(l.pass_criteria).split(':')[0].toLowerCase()}) arrives in a later update. Until then, mark it yourself when you can do it at the goal above, on two different days.</p>
+      {selfByChoice ? <p class="muted">{type === 'pitch' ? 'Pitch' : 'Chord'} grading is set to self-mark in <a href="#/settings">Settings</a>. Mark it yourself when you can do it, on two different days.</p>
+        : graded ? <p class="muted">Automatic grading for this lesson ({describePass(l.pass_criteria).split(':')[0].toLowerCase()}) arrives in a later update. Until then, mark it yourself when you can do it at the goal above, on two different days.</p>
         : <p class="muted">When it feels solid, mark it. Do that on two different days to pass.</p>}
       {p?.state === 'passed' && !due ? <p class="okText">Passed{p.mastered ? ' and mastered' : ''}.</p>
         : <button class="primary" disabled={doneToday} onClick={() => mark(graded ? 'self' : 'auto')}>{doneToday ? 'Marked today ✓ (come back another day)' : due ? 'Review: I can still do this' : 'I can do this'}</button>}
@@ -297,6 +324,21 @@ function DelayCalc() {
 }
 
 // ---------- Settings ----------
+/** §6 fallback flag per grader: auto, assisted (you confirm), or self-mark. */
+function GradingModes() {
+  const [, bump] = useState(0);
+  const label: Record<GraderMode, string> = { auto: 'Automatic', assisted: 'Assisted (I confirm)', self: 'Self-mark (no mic)' };
+  return (
+    <section class="card"><h2>Grading mode</h2>
+      <p class="muted">If a grader gets your playing wrong on this phone, switch it to assisted (it shows what it heard and you confirm) or self-mark. Timing grading is always automatic.</p>
+      {GRADERS.map(g => <label class="field">{g.name}
+        <select value={graderMode(g.key)} onChange={e => { setGraderMode(g.key, (e.target as HTMLSelectElement).value as GraderMode); bump(x => x + 1); }}>
+          {(['auto', 'assisted', 'self'] as GraderMode[]).map(m => <option value={m}>{label[m]}{m === g.def ? ' (default)' : ''}</option>)}
+        </select><small>{g.note}</small></label>)}
+    </section>
+  );
+}
+
 export const audioCheckPref = persisted<number | null>('gt_audio_check_done', null);
 /** The real-phone audio check (M0 page) hasn't been done yet: graders are only proven on synthetic audio. */
 function AudioCheckCard() {
@@ -305,7 +347,7 @@ function AudioCheckCard() {
     <section class={`card ${done ? '' : 'attn'}`}>
       <h2>Phone audio check {done ? <small class="okText">done {new Date(done).toLocaleDateString()} ✓</small> : <small class="badge b-due">to do</small>}</h2>
       {!done ? <>
-        <p>The tuner and timing grader have only been tested on synthetic audio. A 15-minute check with your guitar confirms they work on this phone before more grading is built on them.</p>
+        <p>The tuner, timing, pitch and chord graders have only been tested on synthetic audio. A 15-minute check with your guitar confirms they work on this phone before more grading is built on them.</p>
         <ol class="small">
           <li>Quiet room, guitar in hand, phone on a stand about an arm's length away.</li>
           <li>Open the check page and run each test, first folded, then unfolded.</li>
@@ -347,6 +389,7 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
       <section class="card"><h2>Audio</h2><InputPicker /></section>
       <AudioCheckCard />
       <section class="card"><h2>Timing calibration</h2><CalibrationCard /></section>
+      <GradingModes />
       <section class="card">
         <h2>Church set list</h2>
         <p class="muted">Import the set-list CSV (Name, new, total, then one column per week). It's stored only on this phone and never uploaded.</p>

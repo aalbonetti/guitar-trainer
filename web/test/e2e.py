@@ -15,7 +15,7 @@ async def main():
             await pg.screenshot(path=f'test/{name}_today.png')
             await pg.goto(base+'#/lesson/A.02'); await pg.wait_for_selector('text=Chords')
             await pg.click('text=Metronome'); await pg.click('.sheet >> text=Start'); await pg.wait_for_timeout(1500)
-            beat=await pg.evaluate("document.querySelectorAll('.metro .beats i.on').length")
+            beat=await pg.evaluate("document.querySelectorAll('.metro .beats .on').length")
             await pg.screenshot(path=f'test/{name}_lesson.png', full_page=True)
             await pg.goto(base+'#/song/MS_goodness_of_god'); await pg.wait_for_selector('.song .title')
             await pg.select_option('.song select >> nth=1', '1')

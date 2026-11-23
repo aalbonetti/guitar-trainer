@@ -106,7 +106,8 @@ function magSpectrum(frame) {
 
 // 12-bin chroma from a frame (8192 samples recommended at 48 kHz).
 // Uses spectral PEAKS with interpolated frequency, not raw bins: leakage and the noise floor
-// otherwise flatten the chroma. Peaks off the semitone grid by > 35 cents are ignored, and the
+// otherwise flatten the chroma. Peaks off the semitone grid by > 25 cents are ignored (the 7th
+// harmonic, 31 cents flat, would otherwise add a 7th to every chord: G heard as G7), and the
 // click band (above `hi`) is never counted.
 function chroma(frame, sr, opts = {}) {
   const lo = opts.lo || 75, hi = opts.hi || 1500, relDb = opts.relDb || 40;
@@ -127,7 +128,7 @@ function chroma(frame, sr, opts = {}) {
     const off = den !== 0 ? 0.5 * (a - g) / den : 0;
     const f = (k + off) * binHz;
     const midi = freqToMidi(f), r = Math.round(midi);
-    if (Math.abs(midi - r) > 0.35) continue;
+    if (Math.abs(midi - r) > 0.25) continue;
     ch[((r % 12) + 12) % 12] += Math.sqrt(m / mx); // compress so loud bass strings don't dominate
   }
   return normalize(ch);
