@@ -8,6 +8,11 @@
   "orientation": "any",
   "background_color": "#14161a",
   "theme_color": "#14161a",
+  "shortcuts": [
+    { "name": "Tuner", "url": "./#/tools/tuner", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Metronome", "url": "./#/tools/metronome", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Today's practice", "url": "./#/today", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+  ],
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
