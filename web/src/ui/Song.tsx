@@ -7,7 +7,6 @@ import { ChordDiagram } from './Diagrams';
 import { ToolBar } from './Tools';
 import { persisted, useStore } from '../store';
 import { progress } from '../progressStore';
-import { charts, chartFor } from '../charts';
 import { noteSongOpened } from '../practice';
 import { knownChords, bestCapo, fitLine, type Fit } from '../songfit';
 import { metro, startMetronome, stopMetronome } from '../audio/engine';
@@ -28,7 +27,6 @@ export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
   const pr = useStore(progress);
   const [, bump] = useState(0);
   useEffect(() => { noteSongOpened(o.id); }, [o.id]);
-  useStore(charts); const myChart = chartFor(o.id);
   const [nash, setNash] = useState(false);
   const st = songSettings(cat, o, pr.lp);
   const { key, capo } = st;
@@ -79,8 +77,6 @@ export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
               <div class="chordline">{(nash ? s.numbers : s.chords_in_chart_key.map(show)).map((c, ci) => <span class={pa.cur && pa.cur.si === si && pa.cur.ci === ci ? 'now' : ''} data-now={pa.cur && pa.cur.si === si && pa.cur.ci === ci ? '1' : undefined}>{c}</span>)}</div>
             </section>
           ))}
-          {myChart ? <p><a class="btn primary" href={`#/chart/${myChart.id}`}>Open your full chart</a></p>
-            : o.chords_verified !== 'full' ? <p class="muted">Main sections only. <a href="#/import">Import your SongSelect chart</a> for the full song with words.</p> : <p class="muted small"><a href="#/import">Import your chart</a> to see the words with the chords.</p>}
           {o.notes ? <p class="note">{o.notes}</p> : null}
         </div>
         <aside class="songside">
