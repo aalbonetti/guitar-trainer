@@ -5,7 +5,7 @@ import { describePass, lessonTempo } from '../catalog';
 import type { Shape } from '../music';
 import { ChordDiagram, ScaleDiagram, StrumGrid } from './Diagrams';
 import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
-import { getSetList, importSetList, clearSetList, thisWeekSongs, thisWeekIndex } from '../setlist';
+import { getSetList, importSetList, clearSetList } from '../setlist';
 import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
 import { progress, recordAttempt, saveStatus, streakInfo, firstPracticeDay } from '../progressStore';
@@ -265,28 +265,22 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
 // ---------- Songs ----------
 export function Songs({ cat, selected, initialTab }: { cat: Catalog; selected?: string; initialTab?: string }) {
   const [q, setQ] = useState('');
-  const [tab, setTab] = useState<'week' | 'all' | 'mine'>(initialTab === 'mine' ? 'mine' : getSetList() ? 'week' : 'all');
+  const [tab, setTab] = useState<'all' | 'mine'>(initialTab === 'mine' ? 'mine' : 'all');
   const ch = useStore(charts);
   useEffect(() => { if (!ch.ready) void loadCharts(); }, []);
-  const sl = getSetList();
-  const week = sl ? thisWeekSongs(sl) : [];
-  const list = tab === 'week'
-    ? week.map(s => ({ id: s.outlineId, title: s.name, sub: sl!.weeks[thisWeekIndex(sl!)] }))
-    : cat.outlines.filter(o => !q || (o.title + ' ' + o.artist + ' ' + (o.ccli || '')).toLowerCase().includes(q.toLowerCase())).map(o => ({ id: o.id, title: o.title, sub: `${o.chart_key}${o.bpm ? ' · ' + o.bpm : ''}` }));
+  const list = cat.outlines.filter(o => !q || (o.title + ' ' + o.artist + ' ' + (o.ccli || '')).toLowerCase().includes(q.toLowerCase())).map(o => ({ id: o.id, title: o.title, sub: `${o.chart_key}${o.bpm ? ' · ' + o.bpm : ''}` }));
   return (
     <div class={`page songs ${selected ? 'has-sel' : ''}`}>
       <div class="songlist">
         <h1>Songs</h1>
         <div class="tabs">
-          <button class={tab === 'week' ? 'sel' : ''} onClick={() => setTab('week')}>This week</button>
           <button class={tab === 'all' ? 'sel' : ''} onClick={() => setTab('all')}>All ({cat.outlines.length})</button>
           <button class={tab === 'mine' ? 'sel' : ''} onClick={() => setTab('mine')}>My charts{ch.list.length ? ` (${ch.list.length})` : ''}</button>
         </div>
         {tab === 'mine' ? <MyCharts /> : null}
         {tab === 'all' ? <input type="search" placeholder="Search title, artist, CCLI" value={q} onInput={e => setQ((e.target as HTMLInputElement).value)} /> : null}
-        {tab === 'week' && !sl ? <p class="muted">Import your set-list CSV in <a href="#/settings">Settings</a>.</p> : null}
         <ul class="list" hidden={tab === 'mine'}>
-          {list.map(s => <li class={s.id === selected ? 'sel' : ''}>{s.id ? <a href={`#/song/${s.id}`}>{s.title}<small>{s.sub}</small></a> : <span class="muted">{s.title} <small>no outline yet</small></span>}</li>)}
+          {list.map(s => <li class={s.id === selected ? 'sel' : ''}><a href={`#/song/${s.id}`}>{s.title}<small>{s.sub}</small></a></li>)}
         </ul>
       </div>
       <div class="songdetail">{selected && cat.outlineById[selected] ? <SongView cat={cat} o={cat.outlineById[selected]} /> : <p class="muted hint">Pick a song.</p>}</div>
