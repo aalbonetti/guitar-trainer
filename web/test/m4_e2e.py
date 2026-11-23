@@ -14,6 +14,10 @@ L=json.load(open('public/catalog/lessons.json'))
 lp=[{'lesson_id':l['id'],'state':'passed','first_pass_day':'2026-01-01','passed_day':'2026-01-02','review_index':5,'mastered':True,'updated_at':0} for l in L if l['track']=='F' or l['id'] in ('A.01','A.02','A.03','A.04','A.05')]
 BK=os.path.join(tempfile.mkdtemp(),'seed.json')
 json.dump({'lesson_progress':lp,'kv':[{'key':'ladder:A.05','v':{'bpm':80,'clean':0,'sloppy':0}},{'key':'ladder:A.06','v':{'bpm':90,'clean':0,'sloppy':0}}]},open(BK,'w'))
+async def seedpage(pg, path):
+    import json
+    await pg.goto(f'http://127.0.0.1:{PORT}/?sim#/settings'); await pg.wait_for_function('!!window.__gtImport')
+    await pg.evaluate('d => window.__gtImport(d)', json.load(open(path))); await pg.reload(); await pg.wait_for_timeout(500)
 async def wait_result(pg, sel='.result, .error', t=60000):
     await pg.wait_for_selector(sel, timeout=t)
 async def main():
@@ -24,8 +28,7 @@ async def main():
         pg.on('pageerror',lambda e: errs.append(str(e)))
         await pg.add_init_script(INIT)
         pg.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
-        await pg.goto(f'http://127.0.0.1:{PORT}/?sim#/settings'); await pg.wait_for_selector('text=Restore from file')
-        await pg.set_input_files('section.card:has-text("Backup") input[type=file]', BK); await pg.wait_for_timeout(1500)
+        await seedpage(pg, BK)
         await pg.goto(f'http://127.0.0.1:{PORT}/?sim#/lesson/A.05'); await pg.wait_for_selector('text=Pass it')
         await pg.click('button:has-text("Start at 80 BPM")')
         await pg.wait_for_selector('text=First, a 30-second calibration', timeout=10000)
