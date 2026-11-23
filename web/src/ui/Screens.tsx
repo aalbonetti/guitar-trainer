@@ -276,7 +276,6 @@ export function Tools({ which, cat }: { which?: string; cat: Catalog }) {
           <section class={`card ${w === 'metronome' ? 'hide-narrow' : ''}`}><h2>Tuner</h2><TunerPanel /></section>
           <section class={`card ${w !== 'metronome' ? 'hide-narrow' : ''}`}><h2>Metronome</h2><MetronomePanel /></section>
         </div>
-        <section class="card"><h2>Dotted-eighth delay</h2><DelayCalc /></section>
       </> : null}
       {w === 'chords' ? <section class="card"><h2>Chord library</h2><ChordLibrary /></section> : null}
       {w === 'scales' ? <section class="card"><h2>Scale viewer</h2><ScaleViewer cat={cat} /></section> : null}
@@ -284,13 +283,6 @@ export function Tools({ which, cat }: { which?: string; cat: Catalog }) {
     </div>
   );
 }
-function DelayCalc() {
-  const [bpm, setBpm] = useState(72);
-  const ms = (60000 / bpm) * 0.75;
-  return <div class="row wrap"><label class="field inline">BPM <input type="number" min="40" max="220" value={bpm} onInput={e => setBpm(+(e.target as HTMLInputElement).value || 72)} /></label>
-    <p>Dotted 8th: <b>{ms.toFixed(0)} ms</b> · quarter: {(60000 / bpm).toFixed(0)} ms · 8th: {(30000 / bpm).toFixed(0)} ms</p></div>;
-}
-
 // ---------- Settings ----------
 /** §6 fallback flag per grader: auto, assisted (you confirm), or self-mark. */
 function GradingModes() {
