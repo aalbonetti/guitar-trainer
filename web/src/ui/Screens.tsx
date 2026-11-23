@@ -54,6 +54,7 @@ export function Today({ cat }: { cat: Catalog }) {
               <button class="primary" onClick={() => go('#/tools/metronome')}>⏱ Metronome</button>
             </div>
           </section>
+          <StorageNote />
           {(() => { const pool = songPool({ cat, setlist: sl }); const id = songOfWeek(pool.ids, new Date()); const o = id ? cat.outlineById[id] : null;
             return o ? <a class="card tap-card" href={`#/song/${o.id}`} aria-label={`Song of the week: ${o.title}`}><h2>Song of the week <span class="chev" aria-hidden="true">›</span></h2><p><span class="big-link">{o.title}</span> <small class="muted">{o.artist}</small></p>
               <p class="small fit">{(() => { const st = songSettings(cat, o, pr.lp); return st.suggested || st.capo === st.fit.capo ? fitLine(st.fit) : `Capo ${st.capo}${st.key !== o.chart_key ? `, key of ${st.key}` : ''} (your choice).`; })()}</p>
@@ -63,6 +64,14 @@ export function Today({ cat }: { cat: Catalog }) {
     </div>
   );
 }
+/** Today: if Chrome won't promise to keep this site's data, say so (there is no backup, so it matters). */
+function StorageNote() {
+  const [bad, setBad] = useState(false);
+  useEffect(() => { void (async () => { try { if (!navigator.storage?.persisted) return; let ok = await navigator.storage.persisted(); if (!ok) ok = await navigator.storage.persist?.() ?? true; setBad(!ok); } catch { /* unknown: stay quiet */ } })(); }, []);
+  if (!bad) return null;
+  return <section class="card nudge"><h2>⚠ Storage isn’t protected</h2><p class="muted small">Chrome hasn’t marked this app’s data as permanent, so it could be cleared if the phone runs low on space. Adding the app to your home screen and using it regularly usually fixes that.</p></section>;
+}
+
 // ---------- Path ----------
 const ICON: Record<State, string> = { locked: '🔒', available: '○', in_progress: '◐', passed: '●' };
 function useStates(cat: Catalog) { const pr = useStore(progress); return { pr, states: computeStates(cat.lessons, cat.tracks, pr.lp) }; }
