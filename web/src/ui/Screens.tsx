@@ -8,9 +8,8 @@ import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
 import { getSetList, clearSetList } from '../setlist';
 import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
-import { progress, recordAttempt, saveStatus, streakInfo, firstPracticeDay } from '../progressStore';
+import { progress, recordAttempt, saveStatus, streakInfo } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
-import { exportAll, downloadBackup, shareBackup, canShareBackup } from '../db';
 import { TimingPanel, CalibrationCard, usePracticeTempo } from './Timing';
 import { PitchPanel } from './Pitch';
 import { ChordPanel } from './Chord';
@@ -55,7 +54,6 @@ export function Today({ cat }: { cat: Catalog }) {
               <button class="primary" onClick={() => go('#/tools/metronome')}>⏱ Metronome</button>
             </div>
           </section>
-          <BackupNudge />
           {(() => { const pool = songPool({ cat, setlist: sl }); const id = songOfWeek(pool.ids, new Date()); const o = id ? cat.outlineById[id] : null;
             return o ? <a class="card tap-card" href={`#/song/${o.id}`} aria-label={`Song of the week: ${o.title}`}><h2>Song of the week <span class="chev" aria-hidden="true">›</span></h2><p><span class="big-link">{o.title}</span> <small class="muted">{o.artist}</small></p>
               <p class="small fit">{(() => { const st = songSettings(cat, o, pr.lp); return st.suggested || st.capo === st.fit.capo ? fitLine(st.fit) : `Capo ${st.capo}${st.key !== o.chart_key ? `, key of ${st.key}` : ''} (your choice).`; })()}</p>
@@ -65,31 +63,6 @@ export function Today({ cat }: { cat: Catalog }) {
     </div>
   );
 }
-/** Reminder on Today when there's progress worth protecting and no backup in 14 days. "Later" hides it for a week. */
-const snoozePref = persisted<number>('gt_backup_snooze', 0);
-function BackupNudge() {
-  const pr = useStore(progress);
-  const [, bump] = useState(0);
-  const [msg, setMsg] = useState('');
-  const last = persisted<number | null>('gt_last_backup', null).get();
-  const days = last ? Math.floor((Date.now() - last) / 86400000) : null;
-  // Never backed up: wait until there are 14 days of practice history worth protecting (not on day one).
-  const first = firstPracticeDay(), since = first ? Math.floor((Date.parse(dayOf() + 'T12:00:00') - Date.parse(first + 'T12:00:00')) / 86400000) : -1;
-  if (msg) return <section class="card nudge"><p class="okText">{msg}</p></section>;
-  if (since < 0 || (days === null ? since < 14 : days < 14) || Date.now() < snoozePref.get()) return null;
-  const share = canShareBackup();
-  return (
-    <section class="card nudge">
-      <h2>💾 Back up your progress</h2>
-      <p class="muted small">{days === null ? 'You haven’t saved a backup yet.' : `Last backup ${days} days ago.`} If Chrome data is ever cleared, a backup brings everything back.</p>
-      <div class="row wrap">
-        <button class="primary" onClick={async () => { if (share) { const r = await shareBackup(); if (r.how !== 'cancelled') setMsg(r.how === 'shared' ? 'Backup shared ✓' : `Saved ${r.name} to Downloads ✓`); } else { const n = await downloadBackup(); setMsg(`Saved ${n} to Downloads ✓`); } }}>{share ? 'Share to Drive…' : 'Save backup file'}</button>
-        <button class="small" onClick={() => { snoozePref.set(Date.now() + 7 * 86400000); bump(x => x + 1); }}>Later</button>
-      </div>
-    </section>
-  );
-}
-
 // ---------- Path ----------
 const ICON: Record<State, string> = { locked: '🔒', available: '○', in_progress: '◐', passed: '●' };
 function useStates(cat: Catalog) { const pr = useStore(progress); return { pr, states: computeStates(cat.lessons, cat.tracks, pr.lp) }; }
@@ -350,10 +323,8 @@ function AudioCheckCard() {
 export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void }) {
   const [msg, setMsg] = useState('');
   const [inst, setInst] = useState(instrumentPref.get());
-  const [bmsg, setBMsg] = useState('');
   const [keepOk, setKeepOk] = useState<boolean | null>(null);
   useEffect(() => { void (async () => { try { let ok = await navigator.storage?.persisted?.(); if (!ok) ok = await navigator.storage?.persist?.(); setKeepOk(!!ok); } catch { setKeepOk(null); } })(); }, []);
-  const lastBackup = persisted<number | null>('gt_last_backup', null).get();
   const sl = getSetList();
   return (
     <div class="page">
@@ -373,16 +344,8 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
         {msg ? <p class="note">{msg}</p> : null}
       </section> : null}
       <section class="card">
-        <h2>Saving & backup</h2>
+        <h2>Saving</h2>
         <p>Progress saves on this phone after every quiz, attempt and game. {keepOk === true ? <span class="okText">Chrome has marked it as permanent storage ✓</span> : keepOk === false ? <span class="muted">Chrome may clear it if the phone runs low on space; installing the app to the home screen helps.</span> : null}</p>
-        <p class="muted">A backup file protects it if Chrome data is ever cleared. It holds progress, calibration, tempo ladders and settings. Share it to Google Drive (or email it to yourself) every couple of weeks.</p>
-        <p class="muted small">{lastBackup ? `Last backup: ${new Date(lastBackup).toLocaleDateString()}` : 'No backup saved yet.'}</p>
-        <div class="row wrap">
-          {canShareBackup() ? <button class="primary" onClick={async () => { const r = await shareBackup(); setBMsg(r.how === 'shared' ? `Shared ${r.name}.` : r.how === 'downloaded' ? `Saved ${r.name} to Downloads.` : ''); }}>Share backup (Drive…)</button> : null}
-          <button class={canShareBackup() ? '' : 'primary'} onClick={async () => { const n = await downloadBackup(); setBMsg(`Saved ${n} to Downloads.`); }}>Save backup file</button>
-          <button class="small" onClick={async () => { const j = JSON.stringify(await exportAll()); try { await navigator.clipboard.writeText(j); setBMsg('Backup copied to the clipboard.'); } catch { setBMsg('Could not copy.'); } }}>Copy as text</button>
-        </div>
-        {bmsg ? <p class="note">{bmsg}</p> : null}
       </section>
       <section class="card">
         <h2>About</h2>
