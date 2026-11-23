@@ -50,7 +50,7 @@ guitar-trainer/                 (GitHub repo, public)
 | **Lesson** | Renders the lesson markdown with embedded chord diagrams, tab, strum grids and tool launchers. Shows the pass target and "Attempt" button. **Tuner and metronome always available** (§3b) |
 | **Attempt runner** | Count-in → play → live feedback → result card (score vs target, tempo used, retry/next). One layout per grader type |
 | **Tools** | Tuner · Metronome (meter, subdivision, accents, tap tempo) · Dotted-eighth delay calculator · Capo/transpose calculator · Chord library (curated + full chords-db) · Scale viewer |
-| **Songs** | Tabs: *This month* (from `setlist.json` play dates) · *All outlines* · *My charts* (imports). Search by title/CCLI |
+| **Songs** | Tabs: *All outlines* · *My charts* (imports). No "This week/This month" tab (removed). Search by title/CCLI |
 | **Song view** | Sections with chords in a chosen key **or** Nashville numbers; key and capo remembered per song, defaulting to the capo spot that uses the chords you've learned; play-along (current chord lit on the click); click at chart BPM (tap tempo when BPM is null); linked lessons from `practice_for`; SongSelect link-out; "drill this song's changes" builds a chord-change exercise from its progressions |
 | **Import** | File picker for `.cho/.chordpro/.pro/.txt`, or paste text. Preview → match to outline by CCLI, then title → save |
 | **Arcade** | The game section: short skill games, XP, streak, Daily Challenge and badges. Full design in `07-games.md` |
@@ -187,7 +187,7 @@ If chord verification misses its bar, ship with `assisted` mode for those grader
 - Tuner, metronome, delay calculator, capo/transpose calculator, chord library
 - Graders: `quiz`, `self_check`, `timing`, `pitch` (tuner + note matching)
 - Progress rules (§5) with a due-today badge
-- Songs: outlines, *This month*, Song view (key / Nashville / capo / click)
+- Songs: outlines, Song view (key / Nashville / capo / click)
 - ChordPro import and the chart tools
 - Backup/restore
 - Arcade in tap mode, plus play mode for single-note games (`07-games.md` G1–G2)
@@ -205,7 +205,7 @@ If chord verification misses its bar, ship with `assisted` mode for those grader
 | M3 | Path + Lesson rendering (markdown + tokens) + lesson tool bar with tuner and metronome (§3b) + IndexedDB + progress rules | Can work F.01–F.04 end to end (quiz/self_check); tuner and metronome open from every lesson, with the metronome pre-set from the lesson |
 | M4 | Timing grader + calibration + tempo ladder | F.05, F.06, A.05–A.07, ER.02 gradable |
 | M5 | Today queue + reviews + due badge + backup export/import | Daily-use loop works |
-| M6 | Songs + Song view + ChordPro import | Can practice this month's set |
+| M6 | Songs + Song view + ChordPro import | Can practice any song from the outlines or an imported chart |
 | M7 | Pitch grader for note matching | F.02, EL.04–EL.07, EL.11 gradable |
 | M8 | Chord graders (v1.1) | A.01–A.04, A.08, A.11–A.12, ER.04–ER.06, ER.09, ER.11 gradable |
 
