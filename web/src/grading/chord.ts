@@ -18,7 +18,7 @@ import DSP, { chroma, chordTemplate, normalize, freqToMidi, OnsetDetector } from
 
 const magSpectrum = (DSP as unknown as { magSpectrum: (f: Float32Array) => Float64Array }).magSpectrum;
 /** M0's chroma (dsp.js `chroma`: spectral peaks 75–1500 Hz within 40 dB of the strongest, on the semitone grid,
- *  sqrt-compressed) computed from a magnitude spectrum, so ringing can be taken out first. */
+ *  sqrt-compressed, peaks within ±25 cents of a semitone) computed from a magnitude spectrum, so ringing can be taken out first. */
 export function chromaFromMag(mag: ArrayLike<number>, sr: number, n: number, lo = 75, hi = 1500, relDb = 40): number[] {
   const binHz = sr / n, k0 = Math.max(2, Math.ceil(lo / binHz)), k1 = Math.min(mag.length - 2, Math.floor(hi / binHz));
   let mx = 0; for (let k = k0; k <= k1; k++) if (mag[k] > mx) mx = mag[k];
@@ -30,7 +30,7 @@ export function chromaFromMag(mag: ArrayLike<number>, sr: number, n: number, lo 
     if (m < floor || m < mag[k - 1] || m < mag[k + 1]) continue;
     const a = Math.log(mag[k - 1] + 1e-12), b = Math.log(m + 1e-12), g = Math.log(mag[k + 1] + 1e-12), den = a - 2 * b + g;
     const midi = freqToMidi((k + (den !== 0 ? 0.5 * (a - g) / den : 0)) * binHz), rr = Math.round(midi);
-    if (Math.abs(midi - rr) > 0.35) continue;
+    if (Math.abs(midi - rr) > 0.25) continue;
     ch[((rr % 12) + 12) % 12] += Math.sqrt(m / mx);
   }
   return normalize(ch);
@@ -57,6 +57,8 @@ export function chordTarget(id: string, name: string, fretsList: number[][], cap
   const sounding = fretsList.map(f => soundingFrets(f, capo));
   return { id, name, templates: sounding.map(f => chordTemplate(f)), pcs: pcsOf(sounding[0]), frets: sounding, ...(decoy ? { decoy } : {}) };
 }
+/** `big` has every pitch class of `small` and at least one more. */
+export const contains = (big: number[], small: number[]) => big.length > small.length && small.every(p => big.includes(p));
 const samePcs = (a: number[], b: number[]) => a.length === b.length && a.every((x, i) => x === b[i]);
 /** Targets for one variant of a chord_progression (unique chords in order) and the decoys to verify against:
  *  the exercise's decoys, plus, with a capo, the same shapes without it (unless one sounds like a real chord). */
@@ -98,7 +100,13 @@ export function verifyChord(ch: number[] | null, expected: ChordTarget, others: 
   if (!ch || !ch.some(x => x > 0)) return { ok: false, expected: expected.id, heard: null, score: 0, best: 0, margin: 0, why: 'silent' };
   const exp = scoreChord(ch, expected);
   let bestOther = -1, bestId: string | null = null;
-  for (const o of others) { if (o.id === expected.id) continue; const s = scoreChord(ch, o) - (o.decoy ? decoyMargin : 0); if (s > bestOther) { bestOther = s; bestId = o.id; } }
+  for (const o of others) {
+    if (o.id === expected.id) continue;
+    // a decoy, or a chord holding every note of the expected one plus more (G7 ⊃ G, Cadd9 ⊃ C, Em7 ⊃ Em), must win
+    // by a margin: the expected chord's own overtones can supply the extra note
+    const s = scoreChord(ch, o) - (o.decoy || contains(o.pcs, expected.pcs) ? decoyMargin : 0);
+    if (s > bestOther) { bestOther = s; bestId = o.id; }
+  }
   const top = Math.max(exp, bestOther), margin = exp - Math.max(0, bestOther);
   const heard = top < minScore ? null : exp >= bestOther ? expected.id : bestId;
   const ok = heard === expected.id;
