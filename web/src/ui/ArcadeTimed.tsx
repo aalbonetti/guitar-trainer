@@ -23,6 +23,7 @@ const PHASE_TEXT: Record<Phase, string> = { opening: 'Opening the mic…', count
 export function BoxRunner({ cat, l, round, r }: { cat: Catalog; l: GameLevel; round: Round; r: Rng }) {
   const p = l.params;
   const S = useMemo(() => boxSetup(cat, p, r), []);
+  useEffect(() => { round.extra.current = { pos: S.pos, key: S.key, scale: p.scale }; }, []); // Five Boxes badge
   const ear = useStore(ears);
   const [phase, setPhase] = useState<Phase>('opening');
   const [idx, setIdx] = useState(0), [beat, setBeat] = useState(-1);
@@ -134,6 +135,7 @@ export function InThePocket({ cat, l, round }: { cat: Catalog; l: GameLevel; rou
                 if (v.counted) round.answerWith(v.ok, v.bonus, v.miss);
                 if (v.errMs !== null && v.expected) { last = v.errMs; recent.push(v.errMs); if (recent.length > 8) recent.shift(); }
                 const sl = slots[settled];
+                if (S.returnBars.has(sl.bar) && settled % S.feel.grid === 0) { const lands = (round.extra.current.landings ||= {}) as Record<string, number | null>; lands[String(S.returnBars.get(sl.bar))] = v.errMs === null ? null : Math.round(v.errMs); } // In the Pocket badge
                 if (S.returnBars.has(sl.bar) && settled % S.feel.grid === 0) landing = v.errMs === null ? `Back from the ${S.returnBars.get(sl.bar)}-bar gap: no strum on the 1` : `Back from the ${S.returnBars.get(sl.bar)}-bar gap: ${Math.round(Math.abs(v.errMs))} ms ${v.errMs > 0 ? 'late' : 'early'}${v.ok ? ' ✓' : ''}`;
                 settled++;
               }

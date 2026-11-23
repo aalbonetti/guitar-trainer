@@ -38,7 +38,7 @@ function click(t: number, kind: 0 | 1 | 2, vol: number): OscillatorNode {
   const v = vol * (kind === 2 ? 0.45 : 1);
   g.gain.setValueAtTime(0, t);
   g.gain.setValueCurveAtTime(new Float32Array([0, 0.146, 0.5, 0.854, 1].map(x => x * v)), t, 0.002);
-  g.gain.setTargetAtTime(0, t + 0.002, 0.006);
+  g.gain.setTargetAtTime(0, t + 0.0021, 0.006);
   o.connect(g); g.connect(c.destination);
   if (SIM && simBus) { const d = c.createDelay(0.5); d.delayTime.value = 0.09; const b = c.createGain(); b.gain.value = 0.25; g.connect(d); d.connect(b); b.connect(simBus); }
   o.start(t); o.stop(t + 0.06);
@@ -356,6 +356,8 @@ export function stopSimAudio() {
   simSources.forEach(s => { try { s.stop(now); } catch { /* not started or already stopped */ } });
   simSources.clear(); simStrings.fill(null);
 }
+/** Test-only: silence everything the sim has scheduled (between games in e2e tests). */
+(globalThis as any).__gtSimStop = () => stopSimAudio();
 /** Test-only: play synthetic strums (context times) into the simulated input. */
 (globalThis as any).__gtSimStrums = (times: number[], gain = 0.8) => {
   if (!SIM) return false;
@@ -422,7 +424,7 @@ const simStrings: (AudioBufferSourceNode | null)[] = [null, null, null, null, nu
     order.forEach((i, k) => {
       const at = Math.max(c.currentTime, ch.t + k * spread);
       const s = simTrack(c.createBufferSource()) as AudioBufferSourceNode; s.buffer = pluckBuffer(c, OPEN[i] + ch.frets[i] + (ch.capo || 0) + (Math.random() - 0.5) * 0.1, ch.dur ?? 1.6);
-      const g = c.createGain(); g.gain.value = (ch.gain ?? 0.8) * (0.6 + 0.8 * Math.random());
+      const g = c.createGain(), gv = (ch.gain ?? 0.8) * (0.6 + 0.8 * Math.random()), dur = ch.dur ?? 1.6; g.gain.setValueAtTime(gv, at); g.gain.setValueAtTime(gv, at + Math.max(0, dur - 0.25)); g.gain.linearRampToValueAtTime(0, at + dur); // fade out: an abrupt buffer end reads as a new onset
       s.connect(g); g.connect(simBus!);
       const prev = simStrings[i]; if (prev) { try { prev.stop(at + 0.005); } catch { /* already stopped */ } }
       s.start(at); simStrings[i] = s;

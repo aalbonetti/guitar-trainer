@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { GameLevel } from '../catalog';
 import { comboMult, points, pointsWith, type Pos, type Zone } from '../games/core';
-import { openEars, closeEars, ears, heardSince, now as ctxNowS, publishExpect } from '../games/listen';
+import { openEars, closeEars, ears, heardSince, strumsSince, now as ctxNowS, publishExpect, publishChordExpect } from '../games/listen';
+import { verifyChord, type ChordTarget, type ChordVerdict } from '../grading/chord';
 import { judgeAnswer, type AnswerCheck, type Heard } from '../games/judge';
 import { useStore } from '../store';
 import { isSim } from '../audio/engine';
@@ -25,12 +26,20 @@ export interface Round {
   askedAt: { current: number };
   /** Click-timed games end the round themselves (finished = played to the end). */
   finish: (finished: boolean) => void;
+  /** Longest run of right answers so far. */
+  bestStreak: number;
+  /** Game-specific detail saved with the run (keys called, box position, Gap Click landings). */
+  extra: { current: Record<string, any> };
+  /** Assisted mode (chord games): the last answer was marked wrong but you played it right: count it. */
+  overrideLast: () => boolean;
+  /** Can the last answer be overridden (it was a miss and nothing came after it)? */
+  canOverride: boolean;
 }
 /** Test-only: shorter rounds for headless tests (`__gtGameShortS`). */
 export const shortRound = (s?: number) => { const x = isSim() ? (globalThis as any).__gtGameShortS as number | undefined : undefined; return s && x ? Math.min(s, x) : s; };
 
 export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean, onEnd: (finished: boolean) => void, finishedRule: (correct: number, timeUp: boolean) => boolean) {
-  const [st, setSt] = useState({ score: 0, streak: 0, maxCombo: 1, correct: 0, total: 0, lives: l.lives || 0, misses: [] as string[] });
+  const [st, setSt] = useState({ score: 0, streak: 0, maxCombo: 1, correct: 0, total: 0, lives: l.lives || 0, misses: [] as string[], bestStreak: 0 });
   const [flash, setFlash] = useState<'ok' | 'bad' | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const roundS = shortRound(l.round_s);
@@ -43,6 +52,10 @@ export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean
   // The round's numbers live in a ref and change synchronously, so several answers in one tick (notes settling in
   // a click-timed game) each see the combo the one before left; the state copy is just for rendering.
   const stRef = useRef(st);
+  const extra = useRef<Record<string, any>>({});
+  // the state before the last answer and how that answer would have scored if right (assisted override)
+  const undo = useRef<{ before: typeof st; pts: (streak: number) => number } | null>(null);
+  const [canOverride, setCanOverride] = useState(false);
   const pausedRef = useRef(paused); pausedRef.current = paused;
   const end = (finished: boolean) => { if (ended.current) return; ended.current = true; onEnd(finished); };
   useEffect(() => {
@@ -58,8 +71,9 @@ export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean
   const apply = (ok: boolean, pts: (streak: number) => number, miss?: string) => {
     if (ended.current) return;
     const s = stRef.current, streak = ok ? s.streak + 1 : 0;
-    const n = { ...s, total: s.total + 1, correct: s.correct + (ok ? 1 : 0), streak, maxCombo: Math.max(s.maxCombo, comboMult(streak)),
+    const n = { ...s, total: s.total + 1, correct: s.correct + (ok ? 1 : 0), streak, maxCombo: Math.max(s.maxCombo, comboMult(streak)), bestStreak: Math.max(s.bestStreak, streak),
       score: s.score + (ok ? pts(s.streak) : 0), lives: ok || !l.lives ? s.lives : s.lives - 1, misses: ok || !miss ? s.misses : [...s.misses, miss] };
+    undo.current = ok ? null : { before: s, pts }; setCanOverride(!ok);
     stRef.current = n; setSt(n);
     if (l.lives && n.lives <= 0) setTimeout(() => end(finishedRule(n.correct, false)), 350);
     setFlash(ok ? 'ok' : 'bad'); clearTimeout(flashT.current); flashT.current = window.setTimeout(() => setFlash(null), 250);
@@ -67,9 +81,17 @@ export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean
   };
   const answer: Round['answer'] = (ok, miss, fastMs, slowMs) => { const ms = now() - askedAt.current; apply(ok, k => points(ms, k, fastMs, slowMs), miss); };
   const answerWith: Round['answerWith'] = (ok, bonus, miss) => apply(ok, k => pointsWith(bonus, k, base), miss);
-  const addMisses = (n: number, miss: string) => { if (n <= 0 || ended.current) return; const x = { ...stRef.current, total: stRef.current.total + n, streak: 0, misses: [...stRef.current.misses, ...Array(n).fill(miss)] }; stRef.current = x; setSt(x); };
-  const round: Round = { ...st, flash, elapsed, paused, mode, answer, answerWith, addMisses, now, askedAt, finish: end };
-  return { round, ghost, durationS: () => now() / 1000, stRef, roundS };
+  const overrideLast = () => {
+    const u = undo.current; if (!u || ended.current) return false;
+    undo.current = null; setCanOverride(false);
+    const s = u.before, streak = s.streak + 1;
+    const n = { ...s, total: s.total + 1, correct: s.correct + 1, streak, maxCombo: Math.max(s.maxCombo, comboMult(streak)), bestStreak: Math.max(s.bestStreak, streak), score: s.score + u.pts(s.streak), lives: s.lives };
+    stRef.current = n; setSt(n); setFlash('ok');
+    return true;
+  };
+  const addMisses = (n: number, miss: string) => { if (n <= 0 || ended.current) return; undo.current = null; setCanOverride(false); const x = { ...stRef.current, total: stRef.current.total + n, streak: 0, misses: [...stRef.current.misses, ...Array(n).fill(miss)] }; stRef.current = x; setSt(x); };
+  const round: Round = { ...st, flash, elapsed, paused, mode, answer, answerWith, addMisses, now, askedAt, finish: end, extra, overrideLast, canOverride };
+  return { round, ghost, durationS: () => now() / 1000, stRef, roundS, extra };
 }
 
 // ---------- fretboard ----------
@@ -140,3 +162,63 @@ export function Hearing({ e }: { e: { on: boolean; opening: boolean; hearing: st
 }
 /** Ask the question at context time "now" (play mode ignores notes that started earlier). */
 export const askNow = () => ctxNowS();
+
+// ---------- chord play mode (G3) ----------
+/** Open the mic for strums while `active` (play mode and not paused); closed on pause, quit and the end. */
+export function useChordEars(active: boolean) {
+  const e = useStore(ears);
+  const openedAt = useRef(0);
+  useEffect(() => {
+    if (!active) return;
+    let live = true;
+    void openEars([], { chords: true }).then(ok => { if (ok && live) openedAt.current = ctxNowS(); });
+    return () => { live = false; closeEars(); };
+  }, [active]);
+  return { ...e, openedAt };
+}
+/** After a decided strum, wrong-sounding strums are ignored for this long (the last chord still rings). */
+export const CHORD_SETTLE_S = 0.6;
+/** …and a strum of the previous answer's chord within this long isn't a wrong answer to the new question. */
+export const CHORD_REPEAT_S = 2;
+export interface ChordCheck { since: number; expected: ChordTarget; others: ChordTarget[]; sim?: { right: number[]; wrong: number[][]; capo?: number } }
+export type StrumHeard = ChordVerdict & { t: number };
+/** Verify each new strum against the question's expected chord. Like single notes, a strum is a wrong answer only
+ *  when it clearly sounds like another chord the game offers; a muted scrape or an unclear strum is ignored. */
+export function useStrumHeard(active: boolean, openedAt: { current: number }, check: () => ChordCheck | null, onHeard: (h: StrumHeard) => void) {
+  const seen = useRef(new Set<number>()), lastSince = useRef(-1), lastDecided = useRef(-1e9), prevTarget = useRef<ChordTarget | null>(null);
+  const cb = useRef(onHeard); cb.current = onHeard;
+  const ck = useRef(check); ck.current = check;
+  useEffect(() => {
+    if (!active) { publishChordExpect(null); return; }
+    const t = setInterval(() => {
+      const c = ck.current();
+      publishChordExpect(c?.sim ?? null);
+      if (!c || !openedAt.current) return;
+      if (c.since !== lastSince.current) { lastSince.current = c.since; seen.current = new Set(); }
+      for (const s of strumsSince(Math.max(c.since, openedAt.current))) {
+        if (seen.current.has(s.t)) continue;
+        seen.current.add(s.t);
+        const v = verifyChord(s.chroma, c.expected, c.others, undefined, undefined, s.low ?? null);
+        if (isSim()) { const log = ((globalThis as any).__gtStrumLog ||= []) as unknown[]; log.push({ t: +s.t.toFixed(3), exp: c.expected.id, heard: v.heard, ok: v.ok, score: +v.score.toFixed(3) }); if (log.length > 50) log.shift(); }
+        // Just after a decision, the last chord is still ringing and a second onset inside it (or a slow strum's
+        // tail) can show up: within SETTLE_S only a right answer counts, nothing there is a wrong one.
+        if (!v.ok && s.t - lastDecided.current < CHORD_SETTLE_S) continue;
+        // the chord just heard (right or wrong) again soon after (still ringing, or strummed once more) isn't a new answer
+        if (!v.ok && prevTarget.current && s.t - lastDecided.current < CHORD_REPEAT_S && verifyChord(s.chroma, prevTarget.current, c.others, undefined, undefined, s.low ?? null).ok) continue;
+        if (v.ok || v.heard !== null) { lastDecided.current = s.t; prevTarget.current = v.ok ? c.expected : c.others.find(o => o.id === v.heard) ?? null; cb.current({ ...v, t: s.t }); return; } // one decision per poll: the question changes after it
+      }
+    }, 80);
+    return () => { clearInterval(t); publishChordExpect(null); };
+  }, [active]);
+}
+/** "Heard: Em ✓" read-out for chord play mode. */
+export function HeardChord({ e, last }: { e: { on: boolean; opening: boolean; error: string | null }; last: string | null }) {
+  if (e.error) return <p class="error small">Microphone: {e.error}</p>;
+  if (!e.on) return <p class="readline muted">{e.opening ? 'Opening the mic…' : 'Mic off'}</p>;
+  return <p class="readline">{last ? <b>{last}</b> : <span class="muted">Listening for a strum…</span>}</p>;
+}
+/** Assisted mode: the app marked the last strum wrong; one tap counts it as right (07-games.md §1, proposed). */
+export function OverrideButton({ round, assisted }: { round: Round; assisted: boolean }) {
+  if (!assisted || !round.canOverride) return null;
+  return <button class="small override" onClick={() => round.overrideLast()}>✓ I played it right</button>;
+}

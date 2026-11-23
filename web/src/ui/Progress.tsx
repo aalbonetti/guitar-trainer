@@ -8,6 +8,8 @@ import { computeStates, dayOf, addDays } from '../progress';
 import { sessionsSince, type SessionRow } from '../practice';
 import * as db from '../db';
 import type { TimingCriteria } from '../grading/timing';
+import { loadHeat, hardSpots, band, type HeatCell } from '../heat';
+import { noteLabel, pcAt } from '../games/core';
 
 interface AttemptRow { lesson_id: string; criterion_type: string; grader_mode: string; score: number; met_target: boolean; at_target_tempo: boolean; metrics_json: string; event: string; day: string; at: number }
 const mondayOf = (day: string) => { const [y, m, d] = day.split('-').map(Number); const t = new Date(y, m - 1, d); return addDays(day, -((t.getDay() + 6) % 7)); };
@@ -67,6 +69,7 @@ export function Progress({ cat }: { cat: Catalog }) {
             <ul class="list">{timingLessons.map(l => { const goal = (l.pass_criteria as unknown as TimingCriteria).bpm, cur = ladders[l.id] ?? Math.round(goal * 0.65);
               return <li><a href={`#/lesson/${l.id}`}><b class="lid">{l.id}</b> {l.title}<small>{cur} → {goal} BPM</small><div class="ladder"><i style={{ width: `${Math.min(100, (cur / goal) * 100)}%` }} /></div></a></li>; })}</ul>
           </section> : null}
+          <Heatmap />
           <section class="card">
             <h2>Recent attempts</h2>
             {attempts.length ? <ul class="list">{attempts.slice(0, 15).map(a => { const m = safe(a.metrics_json);
@@ -80,3 +83,32 @@ export function Progress({ cat }: { cat: Catalog }) {
   );
 }
 function safe(s: string): Record<string, any> { try { return JSON.parse(s || '{}'); } catch { return {}; } }
+
+/** Fretboard heatmap (07-games.md §4): accuracy and speed per string and fret from Note Drop and Fret Finder. */
+function Heatmap() {
+  const [cells, setCells] = useState<Record<string, HeatCell> | null>(null);
+  useEffect(() => { void loadHeat().then(setCells); }, []);
+  if (!cells) return null;
+  const list = Object.values(cells);
+  const times = list.map(c => c.avgMs).filter((x): x is number => x !== null).sort((a, b) => a - b);
+  const med = times.length ? times[Math.floor(times.length / 2)] : 0;
+  const maxF = Math.max(12, ...list.map(c => c.fret));
+  const hard = hardSpots(cells);
+  const lab = (c: HeatCell) => `${noteLabel(pcAt(c))} · string ${c.string}, fret ${c.fret}: ${c.correct}/${c.seen} right${c.avgMs !== null ? `, ${(c.avgMs / 1000).toFixed(1)} s` : ''}`;
+  return (
+    <section class="card heatcard">
+      <h2>Fretboard heatmap</h2>
+      {!list.length ? <p class="muted">Play Note Drop or Fret Finder (tap or play) and your accuracy at each string and fret shows up here.</p> : <>
+        <div class="heatmap" role="table" aria-label="Accuracy by string and fret" style={{ gridTemplateColumns: `auto repeat(${maxF + 1}, 1fr)` }}>
+          <span />{Array.from({ length: maxF + 1 }, (_, f) => <small class="fno">{[0, 3, 5, 7, 9, 12, 15].includes(f) ? f : ''}</small>)}
+          {[1, 2, 3, 4, 5, 6].map(st => <>
+            <small class="sno">{st}</small>
+            {Array.from({ length: maxF + 1 }, (_, f) => { const c = cells[`s${st}f${f}`]; return <i class={`h${band(c, med)}`} title={c ? lab(c) : `string ${st}, fret ${f}: no answers yet`} aria-label={c ? lab(c) : undefined} />; })}
+          </>)}
+        </div>
+        <p class="muted small heatlegend"><i class="h1" /> under 60% <i class="h2" /> under 85% <i class="h3" /> 85%+ <i class="h4" /> 85%+ and quicker than your usual · string 1 on top</p>
+        {hard.length ? <><h3>Hard spots</h3><ul class="misses">{hard.map(c => <li>{lab(c)}</li>)}</ul><p class="muted small">These come up more often in the Daily Challenge.</p></> : null}
+      </>}
+    </section>
+  );
+}
