@@ -5,7 +5,7 @@ import { describePass, lessonTempo } from '../catalog';
 import type { Shape } from '../music';
 import { ChordDiagram, ScaleDiagram, StrumGrid } from './Diagrams';
 import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
-import { getSetList, importSetList, clearSetList } from '../setlist';
+import { getSetList, clearSetList } from '../setlist';
 import { persisted, useStore } from '../store';
 import { LessonContent } from './Content';
 import { progress, recordAttempt, saveStatus, streakInfo, firstPracticeDay } from '../progressStore';
@@ -18,11 +18,9 @@ import { GRADERS, graderMode, setGraderMode, pitchGraderKey, chordGraderKey, isC
 import { PracticeCard } from './Practice';
 import { xp } from '../xp';
 import { levelFor } from '../games/core';
-import { MyCharts } from './Charts';
 import { SongView, songSettings } from './Song';
 import { ChordLibrary, ScaleViewer, CapoCalc } from './ToolsExtra';
 import { fitLine } from '../songfit';
-import { charts, loadCharts } from '../charts';
 import { songPool, songOfWeek } from '../practice';
 import { attempt } from '../grading/runner';
 
@@ -263,23 +261,15 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
 }
 
 // ---------- Songs ----------
-export function Songs({ cat, selected, initialTab }: { cat: Catalog; selected?: string; initialTab?: string }) {
+export function Songs({ cat, selected }: { cat: Catalog; selected?: string; initialTab?: string }) {
   const [q, setQ] = useState('');
-  const [tab, setTab] = useState<'all' | 'mine'>(initialTab === 'mine' ? 'mine' : 'all');
-  const ch = useStore(charts);
-  useEffect(() => { if (!ch.ready) void loadCharts(); }, []);
   const list = cat.outlines.filter(o => !q || (o.title + ' ' + o.artist + ' ' + (o.ccli || '')).toLowerCase().includes(q.toLowerCase())).map(o => ({ id: o.id, title: o.title, sub: `${o.chart_key}${o.bpm ? ' · ' + o.bpm : ''}` }));
   return (
     <div class={`page songs ${selected ? 'has-sel' : ''}`}>
       <div class="songlist">
-        <h1>Songs</h1>
-        <div class="tabs">
-          <button class={tab === 'all' ? 'sel' : ''} onClick={() => setTab('all')}>All ({cat.outlines.length})</button>
-          <button class={tab === 'mine' ? 'sel' : ''} onClick={() => setTab('mine')}>My charts{ch.list.length ? ` (${ch.list.length})` : ''}</button>
-        </div>
-        {tab === 'mine' ? <MyCharts /> : null}
-        {tab === 'all' ? <input type="search" placeholder="Search title, artist, CCLI" value={q} onInput={e => setQ((e.target as HTMLInputElement).value)} /> : null}
-        <ul class="list" hidden={tab === 'mine'}>
+        <h1>Songs <small class="muted">({cat.outlines.length})</small></h1>
+        <input type="search" placeholder="Search title, artist, CCLI" value={q} onInput={e => setQ((e.target as HTMLInputElement).value)} />
+        <ul class="list">
           {list.map(s => <li class={s.id === selected ? 'sel' : ''}><a href={`#/song/${s.id}`}>{s.title}<small>{s.sub}</small></a></li>)}
         </ul>
       </div>
@@ -366,12 +356,6 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
   useEffect(() => { void (async () => { try { let ok = await navigator.storage?.persisted?.(); if (!ok) ok = await navigator.storage?.persist?.(); setKeepOk(!!ok); } catch { setKeepOk(null); } })(); }, []);
   const lastBackup = persisted<number | null>('gt_last_backup', null).get();
   const sl = getSetList();
-  const onFile = async (e: Event) => {
-    const f = (e.target as HTMLInputElement).files?.[0];
-    if (!f) return;
-    try { const l = importSetList(await f.text(), cat.outlines); setMsg(`Imported ${l.songs.length} songs (${l.songs.filter(s => s.outlineId).length} with outlines), weeks ${l.weeks[0]} – ${l.weeks[l.weeks.length - 1]}.`); onChange(); }
-    catch (err) { setMsg((err as Error).message); }
-  };
   return (
     <div class="page">
       <h1>Settings</h1>
@@ -384,17 +368,15 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
       <AudioCheckCard />
       <section class="card"><h2>Timing calibration</h2><CalibrationCard /></section>
       <GradingModes />
-      <section class="card">
+      {sl ? <section class="card">
         <h2>Church set list</h2>
-        <p class="muted">Import the set-list CSV (Name, new, total, then one column per week). It's stored only on this phone and never uploaded.</p>
-        <label class="btn">📄 Choose set-list CSV<input type="file" accept=".csv,text/csv" hidden onChange={onFile} /></label>
-        {sl ? <p>Current: {sl.songs.length} songs, imported {new Date(sl.importedAt).toLocaleDateString()}. <button class="small" onClick={() => { clearSetList(); setMsg('Set list removed.'); onChange(); }}>Remove</button></p> : null}
+        <p>{sl.songs.length} songs saved on this phone from an earlier import; they pick the song of the week. <button class="small" onClick={() => { clearSetList(); setMsg('Set list removed.'); onChange(); }}>Remove</button></p>
         {msg ? <p class="note">{msg}</p> : null}
-      </section>
+      </section> : null}
       <section class="card">
         <h2>Saving & backup</h2>
         <p>Progress saves on this phone after every quiz, attempt and game. {keepOk === true ? <span class="okText">Chrome has marked it as permanent storage ✓</span> : keepOk === false ? <span class="muted">Chrome may clear it if the phone runs low on space; installing the app to the home screen helps.</span> : null}</p>
-        <p class="muted">A backup file protects it if Chrome data is ever cleared. It holds progress, calibration, tempo ladders, settings and your set list. Share it to Google Drive (or email it to yourself) every couple of weeks.</p>
+        <p class="muted">A backup file protects it if Chrome data is ever cleared. It holds progress, calibration, tempo ladders and settings. Share it to Google Drive (or email it to yourself) every couple of weeks.</p>
         <p class="muted small">{lastBackup ? `Last backup: ${new Date(lastBackup).toLocaleDateString()}` : 'No backup saved yet.'}</p>
         <div class="row wrap">
           {canShareBackup() ? <button class="primary" onClick={async () => { const r = await shareBackup(); setBMsg(r.how === 'shared' ? `Shared ${r.name}.` : r.how === 'downloaded' ? `Saved ${r.name} to Downloads.` : ''); }}>Share backup (Drive…)</button> : null}
