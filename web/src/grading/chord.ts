@@ -14,7 +14,7 @@
 // API for games (G3: Call the Number, Triad Hunt, Change Sprint): `chordTarget` builds a target from frets,
 // `StrumAnalyzer` turns capture blocks into strums with chroma, `verifyChord` checks one strum against the
 // expected target and the alternatives the game offers.
-import DSP, { chroma, chordTemplate, normalize, freqToMidi, OnsetDetector } from '../dsp/dsp.js';
+import DSP, { chordTemplate, normalize, freqToMidi, midiToFreq, OnsetDetector } from '../dsp/dsp.js';
 
 const magSpectrum = (DSP as unknown as { magSpectrum: (f: Float32Array) => Float64Array }).magSpectrum;
 /** M0's chroma (dsp.js `chroma`: spectral peaks 75–1500 Hz within 40 dB of the strongest, on the semitone grid,
@@ -37,13 +37,15 @@ export function chromaFromMag(mag: ArrayLike<number>, sr: number, n: number, lo 
 }
 
 // ---------- catalog shapes ----------
-export interface Voicing { name: string; frets: number[][]; where: string; root: string; quality: string }
+export interface Voicing { name: string; frets: number[][]; where: string; root: string; quality: string; /** fuller name when the catalog has one: 'Bm (partial)' */ label?: string }
 export interface ChordChangesEx { id: string; name: string; type: 'chord_changes'; pairs: string[][]; duration_s: number; target_per_min: number; voicings: Record<string, Voicing> }
-export interface ChordVariant { key: string; capo: number; chords: string[]; numbers?: string[]; shapes?: string; label: string }
+export interface ChordVariant { key: string; capo: number; chords: string[]; numbers?: string[]; shapes?: string; label: string; /** names spelled for this key (G#m in B) */ names?: Record<string, string> }
 export interface ChordProgEx {
   id: string; name: string; type: 'chord_progression'; meter: string; pace: 'timed' | 'own'; bpm?: number; tempo?: { start: number; target: number; step: number };
   beats_per_chord?: number; strums_per_chord?: number; pick: 'only' | 'random' | 'choose'; show: 'chords' | 'numbers'; variants: ChordVariant[]; decoys?: string[];
   voicings: Record<string, Voicing>; notes?: string;
+  /** only these chords' strums are graded, and each must reach the ratio on its own (A.12: F and Bm) */
+  focus?: string[];
 }
 
 // ---------- templates ----------
@@ -52,10 +54,11 @@ const OPEN = [40, 45, 50, 55, 59, 64];
 export const soundingFrets = (frets: number[], capo = 0): number[] => frets.map(f => (f < 0 ? -1 : f + capo));
 export const pcsOf = (frets: number[]): number[] => [...new Set(frets.flatMap((f, i) => (f < 0 ? [] : [(OPEN[i] + f) % 12])))].sort((a, b) => a - b);
 /** A chord to verify against: one template per accepted fingering, at sounding pitch. */
-export interface ChordTarget { id: string; name: string; templates: number[][]; pcs: number[]; frets: number[][]; decoy?: string }
+export interface ChordTarget { id: string; name: string; templates: number[][]; pcs: number[]; frets: number[][]; decoy?: string; /** lowest sounding MIDI note */ bass: number }
 export function chordTarget(id: string, name: string, fretsList: number[][], capo = 0, decoy?: string): ChordTarget {
   const sounding = fretsList.map(f => soundingFrets(f, capo));
-  return { id, name, templates: sounding.map(f => chordTemplate(f)), pcs: pcsOf(sounding[0]), frets: sounding, ...(decoy ? { decoy } : {}) };
+  const bass = Math.min(...sounding.map(f => Math.min(...f.flatMap((x, i) => (x < 0 ? [] : [OPEN[i] + x])))));
+  return { id, name, templates: sounding.map(f => chordTemplate(f)), pcs: pcsOf(sounding[0]), frets: sounding, bass, ...(decoy ? { decoy } : {}) };
 }
 /** `big` has every pitch class of `small` and at least one more. */
 export const contains = (big: number[], small: number[]) => big.length > small.length && small.every(p => big.includes(p));
@@ -93,12 +96,28 @@ export const MIN_MARGIN = 0.015;
 const dot = (a: number[], b: number[]) => { let s = 0; for (let i = 0; i < 12; i++) s += a[i] * b[i]; return s; };
 /** Best cosine over a target's fingerings. */
 export const scoreChord = (ch: number[], t: ChordTarget): number => Math.max(...t.templates.map(tp => dot(ch, tp)));
-export interface ChordVerdict { ok: boolean; expected: string; heard: string | null; score: number; best: number; margin: number; why?: 'other' | 'unclear' | 'silent' }
+export interface ChordVerdict { ok: boolean; expected: string; heard: string | null; score: number; best: number; margin: number; why?: 'other' | 'unclear' | 'silent' | 'bass' }
+/** Low-root check. Chroma can't tell a barre F from Fmaj7 or a full Bm from the partial one (the same or almost the
+ *  same pitch classes); the bass can: the barre's root on string 6/5 (F2, B2) is a fifth or more below anything in
+ *  the twin. When a candidate is such a twin (same notes, or all of them plus more) with its lowest note ≥ BASS_GAP
+ *  semitones higher, the expected chord's lowest note must show in the strum's spectrum (≥ BASS_DB re the loudest
+ *  peak), or the strum counts as the twin. */
+export const BASS_GAP = 5, BASS_DB = -40;
+/** Strength (dB re the frame's loudest peak, 60–1500 Hz) of the peak at a MIDI note, from a strum's low profile. */
+export const LOW_MIN = 36, LOW_MAX = 64;
+export const lowDb = (low: number[] | null | undefined, midi: number): number => (low && midi >= LOW_MIN && midi <= LOW_MAX ? low[midi - LOW_MIN] : 0);
 /** Does this strum's chroma match the expected chord better than every alternative (and well enough)?
  *  `heard` is the best-scoring chord when it clears MIN_SCORE, else null. */
-export function verifyChord(ch: number[] | null, expected: ChordTarget, others: ChordTarget[], minScore = MIN_SCORE, decoyMargin = DECOY_MARGIN): ChordVerdict {
+export function verifyChord(ch: number[] | null, expected: ChordTarget, others: ChordTarget[], minScore = MIN_SCORE, decoyMargin = DECOY_MARGIN, low: number[] | null = null): ChordVerdict {
   if (!ch || !ch.some(x => x > 0)) return { ok: false, expected: expected.id, heard: null, score: 0, best: 0, margin: 0, why: 'silent' };
   const exp = scoreChord(ch, expected);
+  if (low && exp >= minScore && lowDb(low, expected.bass) < BASS_DB) {
+    const twins = others.filter(o => o.id !== expected.id && o.bass - expected.bass >= BASS_GAP && (samePcs(o.pcs, expected.pcs) || contains(o.pcs, expected.pcs)));
+    if (twins.length) {
+      const tw = twins.map(o => ({ o, s: scoreChord(ch, o) })).sort((a, b) => b.s - a.s)[0];
+      return { ok: false, expected: expected.id, heard: tw.o.id, score: exp, best: Math.max(exp, tw.s), margin: exp - tw.s, why: 'bass' };
+    }
+  }
   let bestOther = -1, bestId: string | null = null;
   for (const o of others) {
     if (o.id === expected.id) continue;
@@ -114,7 +133,8 @@ export function verifyChord(ch: number[] | null, expected: ChordTarget, others: 
 }
 
 // ---------- streaming strum analysis ----------
-export interface Strum { t: number; chroma: number[] | null; level: number; frames: number }
+/** `low[m - LOW_MIN]`: how strongly MIDI note m (C2–E4) shows as a peak, dB re the loudest peak (mean over the window). */
+export interface Strum { t: number; chroma: number[] | null; level: number; frames: number; low?: number[] | null }
 /** Ringing compensation: how much of the pre-onset spectrum is assumed still ringing, and the share of energy that
  *  must be new for the compensated chroma to be used. */
 export const RING_KEEP = 0.9, FRESH_MIN = 0.3;
@@ -177,17 +197,23 @@ export class StrumAnalyzer {
    *  upstrum on the same chord), or the same chord was strummed again, M0's plain chroma is used. */
   private analyze(on: number, a: number, b: number): Strum {
     const sr = this.sr, N = this.o.fftN, step = Math.round(this.o.stepS * sr);
-    const acc = new Array(12).fill(0); let frames = 0, e = 0, n = 0;
-    const frame = new Float32Array(N);
+    const acc = new Array(12).fill(0), lowAcc = new Array(LOW_MAX - LOW_MIN + 1).fill(0); let frames = 0, e = 0, n = 0;
+    const frame = new Float32Array(N), binHz = sr / N;
     const pre = this.read(Math.round(on - 0.005 * sr) - N, frame) ? magSpectrum(frame) : null;
     const preCh = pre ? chromaFromMag(pre, sr, N) : null;
     for (let s = Math.round(a); s + N <= Math.round(b) + 1 && s + N <= this.end; s += step) {
       if (!this.read(s, frame)) continue;
       if (frames === 0) { for (let i = 0; i < N; i++) e += frame[i] * frame[i]; n = N; }
       let ch: number[] | null = null;
-      const plain = chroma(frame, sr);
+      const post = magSpectrum(frame), plain = chromaFromMag(post, sr, N); // = dsp.js chroma(frame)
+      let mx = 0; for (let k = Math.ceil(60 / binHz); k <= Math.floor(1500 / binHz); k++) if (post[k] > mx) mx = post[k];
+      for (let m = LOW_MIN; m <= LOW_MAX; m++) {
+        const f = midiToFreq(m), k0 = Math.floor(f * 2 ** (-0.4 / 12) / binHz), k1 = Math.ceil(f * 2 ** (0.4 / 12) / binHz);
+        let pk = 0; for (let k = k0; k <= k1; k++) if (post[k] > pk) pk = post[k];
+        lowAcc[m - LOW_MIN] += mx > 0 ? pk / mx : 0;
+      }
       if (pre && preCh && dot(preCh, plain) < SAME_CHORD_COS) {
-        const post = magSpectrum(frame), fresh = new Float64Array(post.length);
+        const fresh = new Float64Array(post.length);
         let ep = 0, ef = 0;
         for (let k = 0; k < post.length; k++) { const d = post[k] - RING_KEEP * pre[k]; fresh[k] = d > 0 ? d : 0; ep += post[k] * post[k]; ef += fresh[k] * fresh[k]; }
         if (ef >= FRESH_MIN * ep) ch = chromaFromMag(fresh, sr, N);
@@ -195,7 +221,7 @@ export class StrumAnalyzer {
       (ch ?? plain).forEach((v, i) => { acc[i] += v; });
       frames++;
     }
-    return { t: on / sr, chroma: frames ? normalize(acc) : null, level: n ? Math.sqrt(e / n) : 0, frames };
+    return { t: on / sr, chroma: frames ? normalize(acc) : null, level: n ? Math.sqrt(e / n) : 0, frames, low: frames ? lowAcc.map(x => 20 * Math.log10(x / frames + 1e-9)) : null };
   }
 }
 
@@ -204,7 +230,7 @@ export interface ChordBox { i: number; ref: string; label: string; number?: stri
 export interface ChordPlan { bpm: number; beat: number; beatsPerBar: number; countIn: number[]; clicks: { t: number; kind: 0 | 1 | 2 }[]; boxes: ChordBox[]; start: number; end: number }
 /** Box label as the player should see it: the chord name, or only the number on a number chart. */
 export function boxLabel(ex: Pick<ChordProgEx, 'voicings' | 'show'>, v: ChordVariant, i: number): string {
-  return ex.show === 'numbers' && v.numbers ? v.numbers[i] : ex.voicings[v.chords[i]].name;
+  return ex.show === 'numbers' && v.numbers ? v.numbers[i] : v.names?.[v.chords[i]] ?? ex.voicings[v.chords[i]].name;
 }
 /** Timed: one bar of count-in clicks, then a click on every beat; each chord lasts `beats_per_chord`. */
 export function buildChordPlan(ex: Pick<ChordProgEx, 'voicings' | 'show' | 'beats_per_chord'>, v: ChordVariant, bpm: number, beatsPerBar: number, t0: number): ChordPlan {
@@ -219,21 +245,29 @@ export function buildChordPlan(ex: Pick<ChordProgEx, 'voicings' | 'show' | 'beat
 
 export interface StrumResult { t: number; box: number; expected: string; heard: string | null; ok: boolean; score: number; margin: number; skipped?: 'change' }
 export interface BoxResult { ref: string; label: string; strums: number; ok: number }
+export interface FocusResult { ref: string; correct: number; graded: number; ratio: number; met: boolean }
 export interface ChordGrade {
-  strums: StrumResult[]; boxes: BoxResult[]; graded: number; correct: number;
-  /** timed: chord boxes with no strum at all (one miss each) · own pace: strums never played (misses) */
+  strums: StrumResult[]; boxes: BoxResult[];
+  /** what `correct`/`graded` count: chord boxes (timed: a bar is right when most of its strums are) or strums (own pace) */
+  unit: 'bars' | 'strums'; graded: number; correct: number;
+  /** timed: chord boxes with no strum at all · own pace: strums never played (misses) */
   missedBoxes: number; owed: number; ratio: number; target: number;
+  /** exercises with `focus`: each focus chord on its own (all must reach the target) */
+  focus: FocusResult[];
   met: boolean; clean: boolean; sloppy: boolean; great: boolean;
-  /** expected chord id → heard chord id (or 'unclear') → strums */
+  /** expected chord id → heard chord id (or 'unclear' / 'none') → strums */
   confusion: Record<string, Record<string, number>>;
 }
 /** How close to a chord change a strum may land before it's left ungraded (a strum on the old chord just before
  *  the bar line, or the change itself): the last half beat of a box when the next chord differs. A strum up to
  *  80 ms early (after the latency offset) counts for the coming chord. */
 export const CHANGE_GUARD_BEATS = 0.5, EARLY_S = 0.08;
-/** Grade strums against a click plan. `offsetS` = calibrated input latency, subtracted from onset times. A chord
- *  box with no graded strum at all counts as one miss, so skipping chords can't raise the ratio. */
-export function gradeTimedChords(strums: Strum[], plan: ChordPlan, tg: { targets: Record<string, ChordTarget>; decoys: ChordTarget[] }, o: { offsetS: number; ratio: number; minScore?: number }): ChordGrade {
+type Tg = { targets: Record<string, ChordTarget>; decoys: ChordTarget[] };
+/** Grade strums against a click plan, bar by bar: a chord box is right when more than half of its strums sound
+ *  like its chord, so strumming more doesn't dilute a bar you didn't get (spec: ratio of strums → here ratio of
+ *  chord boxes, which can't be gamed by strum count). A box with no strum is wrong. `offsetS` = calibrated input
+ *  latency, subtracted from onset times. */
+export function gradeTimedChords(strums: Strum[], plan: ChordPlan, tg: Tg, o: { offsetS: number; ratio: number; minScore?: number; focus?: string[] }): ChordGrade {
   const all = [...Object.values(tg.targets), ...tg.decoys];
   const guard = CHANGE_GUARD_BEATS * plan.beat;
   const res: StrumResult[] = [];
@@ -242,20 +276,20 @@ export function gradeTimedChords(strums: Strum[], plan: ChordPlan, tg: { targets
     const bi = plan.boxes.findIndex(b => tt >= b.t0 - EARLY_S && tt < b.t1 - EARLY_S);
     if (bi < 0) continue;
     const b = plan.boxes[bi], next = plan.boxes[bi + 1];
-    const v = verifyChord(s.chroma, tg.targets[b.ref], all, o.minScore);
+    const v = verifyChord(s.chroma, tg.targets[b.ref], all, o.minScore, DECOY_MARGIN, s.low ?? null);
     const r: StrumResult = { t: s.t, box: bi, expected: b.ref, heard: v.heard, ok: v.ok, score: v.score, margin: v.margin };
     if (next && next.ref !== b.ref && tt >= b.t1 - guard - EARLY_S && !v.ok) r.skipped = 'change';
     res.push(r);
   }
-  return summarize(res, plan.boxes.map(b => ({ ref: b.ref, label: b.label })), o.ratio, 0);
+  return summarize(res, plan.boxes.map(b => ({ ref: b.ref, label: b.label })), o.ratio, 'bars', 0, o.focus);
 }
 /** Own pace: strums were assigned to boxes in order (`strums_per_chord` each) as they came in. Strums the player
  *  never got to (finished early or ran out of time) count as misses. */
-export function gradeOwnChords(res: StrumResult[], boxes: { ref: string; label: string }[], perBox: number, ratio: number): ChordGrade {
-  const played = res.length, owed = Math.max(0, boxes.length * perBox - played);
-  return summarize(res, boxes, ratio, owed);
+export function gradeOwnChords(res: StrumResult[], boxes: { ref: string; label: string }[], perBox: number, ratio: number, focus?: string[]): ChordGrade {
+  const owedBy = boxes.map((_, i) => Math.max(0, perBox - res.filter(r => r.box === i).length));
+  return summarize(res, boxes, ratio, 'strums', owedBy, focus);
 }
-function summarize(res: StrumResult[], boxes: { ref: string; label: string }[], target: number, owed: number): ChordGrade {
+function summarize(res: StrumResult[], boxes: { ref: string; label: string }[], target: number, unit: 'bars' | 'strums', owedBy: number[] | 0, focus?: string[]): ChordGrade {
   const br: BoxResult[] = boxes.map(b => ({ ref: b.ref, label: b.label, strums: 0, ok: 0 }));
   const confusion: ChordGrade['confusion'] = {};
   for (const r of res) {
@@ -264,13 +298,21 @@ function summarize(res: StrumResult[], boxes: { ref: string; label: string }[], 
     const h = r.heard ?? 'unclear';
     (confusion[r.expected] ||= {})[h] = (confusion[r.expected][h] || 0) + 1;
   }
-  const missedBoxes = owed ? 0 : br.filter(b => b.strums === 0).length;
-  for (const b of br) if (!owed && b.strums === 0) (confusion[b.ref] ||= {}).none = (confusion[b.ref].none || 0) + 1;
-  const correct = res.filter(r => !r.skipped && r.ok).length;
-  const graded = res.filter(r => !r.skipped).length + missedBoxes + owed;
+  const owed = (i: number) => (owedBy ? owedBy[i] : 0);
+  if (!owedBy) for (const b of br) if (b.strums === 0) (confusion[b.ref] ||= {}).none = (confusion[b.ref].none || 0) + 1;
+  const boxOk = (b: BoxResult) => b.strums > 0 && b.ok * 2 > b.strums;
+  /** correct / graded over the boxes whose chord is in `refs` */
+  const tally = (idx: number[]) => unit === 'bars'
+    ? { correct: idx.filter(i => boxOk(br[i])).length, graded: idx.length }
+    : { correct: idx.reduce((a, i) => a + br[i].ok, 0), graded: idx.reduce((a, i) => a + br[i].strums + owed(i), 0) };
+  const counted = br.map((b, i) => i).filter(i => !focus?.length || focus.includes(br[i].ref));
+  const { correct, graded } = tally(counted);
   const ratio = graded ? correct / graded : 0;
-  const met = correct > 0 && ratio >= target - 1e-9;
-  return { strums: res, boxes: br, graded, correct, missedBoxes, owed, ratio, target, met, clean: met,
+  const fr: FocusResult[] = (focus || []).map(f => { const t = tally(br.map((b, i) => i).filter(i => br[i].ref === f)); const rr = t.graded ? t.correct / t.graded : 0; return { ref: f, ...t, ratio: rr, met: rr >= target - 1e-9 }; });
+  const met = correct > 0 && ratio >= target - 1e-9 && fr.every(x => x.met);
+  const missedBoxes = owedBy ? 0 : br.filter(b => b.strums === 0).length;
+  const owedTotal = owedBy ? counted.reduce((a, i) => a + owed(i), 0) : 0;
+  return { strums: res, boxes: br, unit, graded, correct, missedBoxes, owed: owedTotal, ratio, target, focus: fr, met, clean: met,
     sloppy: ratio < Math.max(0.5, target - 0.2), great: met && ratio >= 0.97, confusion };
 }
 
@@ -341,6 +383,10 @@ export function chordCoach(g: ChordGrade, names: Record<string, string>): string
   // share of wrong strums that match a shape without the capo, not just the most common confusion
   const total = wrong.reduce((a, w) => a + w[2], 0), noCapo = wrong.filter(w => w[1].startsWith('nocapo:')).reduce((a, w) => a + w[2], 0);
   if (noCapo >= total / 3 || h.startsWith('nocapo:')) return 'Some chords sounded as if the capo wasn’t on (or was on the wrong fret). Check the capo, then play the same shapes.';
+  const unmet = g.focus.filter(f => !f.met);
+  const twin = wrong.find(w => w[1].startsWith('decoy:') && g.focus.some(f => f.ref === w[0]));
+  if (twin) return `Some ${n(twin[0])} strums sounded like ${n(twin[1])}: for the barre, keep the index flat across ${/^B/.test(n(twin[0])) ? 'strings 5 to 1 so the low root on string 5' : 'all six strings so the low root on string 6'} rings.`;
+  if (unmet.length) return `${unmet.map(f => n(f.ref)).join(' and ')} need${unmet.length === 1 ? 's' : ''} ${Math.round(g.target * 100)}% on ${unmet.length === 1 ? 'its' : 'their'} own. Check each string of the barre, one at a time.`;
   if (h === 'none') return `No strums were heard on ${n(e)}. Keep strumming through the changes, even if the chord isn't ready yet.`;
   if (h === 'unclear') return `Some ${n(e)} strums didn't sound like any of the chords. Check that every string in the shape rings (a muted or buzzing string blurs the chord).`;
   return g.met ? `Nearly all right. A few ${n(e)} strums sounded more like ${n(h)}.` : `Several ${n(e)} strums sounded like ${n(h)}. Check the fingers that differ between them, and let the chord ring before changing.`;

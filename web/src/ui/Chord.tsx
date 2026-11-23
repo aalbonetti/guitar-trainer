@@ -86,8 +86,8 @@ export function ChordPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Les
   const desc = setup.kind === 'changes'
     ? `${setup.pairs.length === 1 ? 'One minute' : `${setup.pairs.length} minutes, one per pair`}: switch back and forth as fast as you can while every strum rings as the chord. Goal: ${setup.target} changes a minute${setup.pairs.length > 1 ? ' on every pair' : ''}.`
     : setup.ex.pace === 'timed'
-      ? `${setup.ex.variants[0].chords.length} chords to a click, ${goalOnly || !setup.ladder || (tempo ?? 0) >= goalBpm! ? `at ${goalBpm} BPM` : `at ${tempo} BPM, working up to ${goalBpm}`}. Strum any pattern; one bar of count-in. Goal: ${pct(setup.ratio)} of strums sound like the right chord.`
-      : `${setup.ex.variants[0].chords.length} chords at your own pace, ${setup.ex.strums_per_chord} strums each. Goal: ${pct(setup.ratio)} of strums sound like the right chord.`;
+      ? `${setup.ex.variants[0].chords.length} chords to a click, ${goalOnly || !setup.ladder || (tempo ?? 0) >= goalBpm! ? `at ${goalBpm} BPM` : `at ${tempo} BPM, working up to ${goalBpm}`}. Strum any pattern; one bar of count-in. Goal: ${pct(setup.ratio)} of the bars right (a bar is right when most of its strums sound like its chord).`
+      : `${setup.ex.variants[0].chords.length} chords at your own pace, ${setup.ex.strums_per_chord} strums each. Goal: ${pct(setup.ratio)} of ${setup.ex.focus?.length ? `the ${setup.ex.focus.map(f => setup.ex.voicings[f].name).join(' and ')} strums, each chord on its own` : 'strums'} sound like the right chord.`;
   return (
     <div>
       {r ? <ChordResult r={r} setup={setup} pending={!!a.pending} atGoal={atGoal} /> : mine && a.phase === 'error' ? <p class="error">{a.message}</p> : null}
@@ -156,9 +156,10 @@ function ChordResult({ r, setup, pending, atGoal }: { r: ChordOutcome; setup: Ch
       <h3>{head}</h3>
       {r.label ? <p class="muted">{r.label}</p> : null}
       <div class="stats">
-        <div><b>{g.correct}/{g.graded}</b><span>strums right (goal {pct(g.target)})</span></div>
-        <div><b>{pct(g.ratio)}</b><span>right chord</span></div>
-        {g.missedBoxes || g.owed ? <div><b>{g.missedBoxes || g.owed}</b><span>{g.owed ? 'strums not played' : 'chords with no strum'}</span></div> : <div><b>{g.boxes.filter(b => b.strums && b.ok === b.strums).length}/{g.boxes.length}</b><span>chords all right</span></div>}
+        <div><b>{g.correct}/{g.graded}</b><span>{g.unit === 'bars' ? 'bars right' : g.focus.length ? `${g.focus.map(f => names[f.ref]).join(' + ')} strums right` : 'strums right'} (goal {pct(g.target)})</span></div>
+        {g.focus.length ? g.focus.map(f => <div class={f.met ? '' : 'missed'}><b>{pct(f.ratio)}</b><span>{names[f.ref]}: {f.correct}/{f.graded} {f.met ? '✓' : `(needs ${pct(g.target)})`}</span></div>)
+          : <div><b>{pct(g.ratio)}</b><span>{g.unit === 'bars' ? 'a bar is right when most of its strums are' : 'right chord'}</span></div>}
+        {g.focus.length ? null : g.missedBoxes || g.owed ? <div><b>{g.missedBoxes || g.owed}</b><span>{g.owed ? 'strums not played' : 'chords with no strum'}</span></div> : <div><b>{g.boxes.filter(b => b.strums && b.ok === b.strums).length}/{g.boxes.length}</b><span>chords all right</span></div>}
       </div>
       <ol class="notechips chordchips">{g.boxes.map((b, i) => {
         const wrong = g.strums.filter(s => s.box === i && !s.skipped && !s.ok).map(s => heardName(s.heard ?? 'unclear', names));
