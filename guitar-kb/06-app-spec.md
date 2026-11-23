@@ -49,7 +49,7 @@ guitar-trainer/                 (GitHub repo, public)
 | **Path** | Track map (F → A / ER / EL, T alongside). Lesson nodes show locked / available / in progress / passed / review due |
 | **Lesson** | Renders the lesson markdown with embedded chord diagrams, tab, strum grids and tool launchers. Shows the pass target and "Attempt" button. **Tuner and metronome always available** (§3b) |
 | **Attempt runner** | Count-in → play → live feedback → result card (score vs target, tempo used, retry/next). One layout per grader type |
-| **Tools** | Tuner · Metronome (meter, subdivision, accents, tap tempo) · Dotted-eighth delay calculator · Capo/transpose calculator · Chord library (curated + full chords-db) · Scale viewer |
+| **Tools** | Tuner · Metronome (meter, subdivision, accents, tap tempo) · Capo/transpose calculator · Chord library (curated + full chords-db) · Scale viewer |
 | **Songs** | Tabs: *All outlines* · *My charts* (imports). No "This week/This month" tab (removed). Search by title/CCLI |
 | **Song view** | Sections with chords in a chosen key **or** Nashville numbers; key and capo remembered per song, defaulting to the capo spot that uses the chords you've learned; play-along (current chord lit on the click); click at chart BPM (tap tempo when BPM is null); linked lessons from `practice_for`; SongSelect link-out; "drill this song's changes" builds a chord-change exercise from its progressions |
 | **Import** | File picker for `.cho/.chordpro/.pro/.txt`, or paste text. Preview → match to outline by CCLI, then title → save |
@@ -149,7 +149,7 @@ Plain markdown plus embed tokens that the renderer swaps for live components:
 | `{{rhythm:S3_worship}}` | Strum grid with a play button |
 | `{{exercise:EX_spider}}` | Tab view with tempo control and "Attempt" button |
 | `{{song:MS_goodness_of_god}}` | Song card linking to Song view |
-| `{{tool:tuner}}` / `{{tool:metronome:bpm=80}}` / `{{tool:delay}}` | Inline tool launcher |
+| `{{tool:tuner}}` / `{{tool:metronome:bpm=80}}` | Inline tool launcher |
 | `{{quiz:Q_note_names}}` | Inline quiz |
 
 The catalog build script will check that every token references an existing ID, just as it already checks lesson assets.
@@ -184,7 +184,7 @@ If chord verification misses its bar, ship with `assisted` mode for those grader
 **In v1:**
 - Catalog loader + chords-db merge
 - Path, Lesson, Today, Progress, Settings
-- Tuner, metronome, delay calculator, capo/transpose calculator, chord library
+- Tuner, metronome, capo/transpose calculator, chord library
 - Graders: `quiz`, `self_check`, `timing`, `pitch` (tuner + note matching)
 - Progress rules (§5) with a due-today badge
 - Songs: outlines, Song view (key / Nashville / capo / click)
