@@ -6,8 +6,6 @@ The go-to electric part for pre-choruses and early bridges: **eighth notes on th
 - Feedback around 30% (2–4 repeats), mix just under your dry sound.
 - On a Kemper or most delay pedals, set the tap division to "dotted eighth" and tap the song's tempo.
 
-{{tool:delay}}
-
 ### Play it
 {{exercise:EX_root_pulse_G}}
 
