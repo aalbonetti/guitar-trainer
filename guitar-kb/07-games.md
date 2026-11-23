@@ -39,7 +39,7 @@ Every game's **first level is open from the start**; each next level opens with 
 | `G_in_the_pocket` | **In the Pocket** | Strum or chug to the click; a meter shows how far ahead of or behind the beat you are. **Gap Click** level: the click drops out for 1, 2 and then 4 bars, and you have to land on beat when it returns | Timing · A.05 (16ths level: ER.10) |
 | `G_delay_math` | **Delay Math** | A BPM is shown: tap the dotted-eighth delay time in ms (within ±10 ms), or tap the delay "ghost" note in time | Delay time · T.07 |
 | `G_change_sprint` | **Change Sprint** | 60 seconds of chord changes from a pair or family. Race your own ghost (best run so far) | Chord changes · A.01 |
-| `G_song_run` | **Song Run** | **The boss level for each song.** A set-list song's sections scroll at chart BPM in your chosen key and capo, and you play each chord on its bar. Scored per bar. A 3-star Song Run on every song in *This month* earns **Set Ready** | Song practice · unlocks per song when its `practice_for` lessons are available |
+| `G_song_run` | **Song Run** | **The boss level for each song.** A set-list song's sections scroll at chart BPM in your chosen key and capo, and you play each chord on its bar. Scored per bar. A 3-star Song Run on every song in the church list earns **Set Ready** | Song practice · unlocks per song when its `practice_for` lessons are available |
 
 **Levels inside each game** come from parameters, not new code: fretboard zone (strings 6–5, frets 0–5 → whole neck), speed, key set (G/D/C/E/A → all 12), number vocabulary, and tap vs play.
 
@@ -71,7 +71,7 @@ Every game's **first level is open from the start**; each next level opens with 
 ## 5. Badges (examples)
 | Badge | Earned by |
 |---|---|
-| **Set Ready** | 3-star Song Run on every song in *This month* |
+| **Set Ready** | 3-star Song Run on every song in the church list |
 | **All Twelve** | Call the Number with ★★ in all 12 keys |
 | **Whole Neck** | Note Drop ★★★ on the full-neck zone in play mode |
 | **Five Boxes** | Box Runner ★★ in all 5 pentatonic positions |
