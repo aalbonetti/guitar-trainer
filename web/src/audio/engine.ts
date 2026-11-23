@@ -356,6 +356,8 @@ export function stopSimAudio() {
   simSources.forEach(s => { try { s.stop(now); } catch { /* not started or already stopped */ } });
   simSources.clear(); simStrings.fill(null);
 }
+/** Test-only: silence everything the sim has scheduled (between games in e2e tests). */
+(globalThis as any).__gtSimStop = () => stopSimAudio();
 /** Test-only: play synthetic strums (context times) into the simulated input. */
 (globalThis as any).__gtSimStrums = (times: number[], gain = 0.8) => {
   if (!SIM) return false;

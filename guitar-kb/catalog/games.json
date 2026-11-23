@@ -559,7 +559,7 @@
  {
   "id": "G_triad_hunt",
   "name": "Triad Hunt",
-  "blurb": "Find the triad on a string set, any inversion.",
+  "blurb": "A chord, a string set and a fret window: find the triad there, any inversion.",
   "unlock_lesson": "ER.04",
   "review_for": [],
   "modes": [
@@ -567,7 +567,109 @@
    "play"
   ],
   "milestone": "G3",
-  "levels": []
+  "levels": [
+   {
+    "id": "th1",
+    "name": "Strings 3-2-1, major: G C D A E",
+    "params": {
+     "string_sets": [
+      "321"
+     ],
+     "keys": [
+      "G",
+      "D",
+      "C",
+      "E",
+      "A"
+     ],
+     "qualities": [
+      "major"
+     ],
+     "window": 5
+    },
+    "target_score": 1500,
+    "round_s": 60
+   },
+   {
+    "id": "th2",
+    "name": "Strings 3-2-1, major and minor",
+    "params": {
+     "string_sets": [
+      "321"
+     ],
+     "keys": [
+      "G",
+      "D",
+      "C",
+      "E",
+      "A"
+     ],
+     "qualities": [
+      "major",
+      "minor"
+     ],
+     "window": 5
+    },
+    "target_score": 1500,
+    "round_s": 60
+   },
+   {
+    "id": "th3",
+    "name": "Strings 4-3-2, major and minor",
+    "params": {
+     "string_sets": [
+      "432"
+     ],
+     "keys": [
+      "G",
+      "D",
+      "C",
+      "E",
+      "A"
+     ],
+     "qualities": [
+      "major",
+      "minor"
+     ],
+     "window": 5
+    },
+    "target_score": 1400,
+    "round_s": 60,
+    "unlock_lesson": "ER.05"
+   },
+   {
+    "id": "th4",
+    "name": "Both string sets, all 12 roots",
+    "params": {
+     "string_sets": [
+      "321",
+      "432"
+     ],
+     "keys": [
+      "C",
+      "Db",
+      "D",
+      "Eb",
+      "E",
+      "F",
+      "F#",
+      "G",
+      "Ab",
+      "A",
+      "Bb",
+      "B"
+     ],
+     "qualities": [
+      "major",
+      "minor"
+     ],
+     "window": 5
+    },
+    "target_score": 1200,
+    "round_s": 60,
+    "unlock_lesson": "ER.05"
+   }
+  ]
  },
  {
   "id": "G_octave_jump",
@@ -748,6 +850,26 @@
     },
     "target_score": 15500,
     "unlock_lesson": "EL.02"
+   },
+   {
+    "id": "br6",
+    "name": "Minor boxes 3 and 4 in A, eighths, 80 BPM",
+    "params": {
+     "scale": "minor_pentatonic",
+     "positions": [
+      3,
+      4
+     ],
+     "keys": [
+      "A"
+     ],
+     "path": "updown",
+     "bpm": 80,
+     "sub": 2,
+     "passes": 4
+    },
+    "target_score": 15500,
+    "unlock_lesson": "EL.02"
    }
   ]
  },
@@ -831,25 +953,1739 @@
  {
   "id": "G_change_sprint",
   "name": "Change Sprint",
-  "blurb": "60 seconds of chord changes. Race your best run.",
+  "blurb": "60 seconds of chord changes around a pair or a family. Race your best run.",
   "unlock_lesson": "A.01",
   "review_for": [],
   "modes": [
    "play"
   ],
   "milestone": "G3",
-  "levels": []
+  "levels": [
+   {
+    "id": "cs1",
+    "name": "Em \u2194 G",
+    "params": {
+     "cycle": [
+      "Em",
+      "G|G_4f"
+     ],
+     "target_per_min": 30,
+     "voicings": {
+      "Em": {
+       "name": "Em",
+       "frets": [
+        [
+         0,
+         2,
+         2,
+         0,
+         0,
+         0
+        ]
+       ],
+       "where": "022000",
+       "root": "E",
+       "quality": "minor"
+      },
+      "G|G_4f": {
+       "name": "G",
+       "frets": [
+        [
+         3,
+         2,
+         0,
+         0,
+         0,
+         3
+        ],
+        [
+         3,
+         2,
+         0,
+         0,
+         3,
+         3
+        ]
+       ],
+       "where": "320003 or 320033",
+       "root": "G",
+       "quality": "major"
+      }
+     }
+    },
+    "target_score": 8150,
+    "round_s": 60,
+    "unlock_lesson": "A.01"
+   },
+   {
+    "id": "cs2",
+    "name": "C \u2194 Am",
+    "params": {
+     "cycle": [
+      "C",
+      "Am"
+     ],
+     "target_per_min": 25,
+     "voicings": {
+      "C": {
+       "name": "C",
+       "frets": [
+        [
+         -1,
+         3,
+         2,
+         0,
+         1,
+         0
+        ]
+       ],
+       "where": "x32010",
+       "root": "C",
+       "quality": "major"
+      },
+      "Am": {
+       "name": "Am",
+       "frets": [
+        [
+         -1,
+         0,
+         2,
+         2,
+         1,
+         0
+        ]
+       ],
+       "where": "x02210",
+       "root": "A",
+       "quality": "minor"
+      }
+     }
+    },
+    "target_score": 5950,
+    "round_s": 60,
+    "unlock_lesson": "A.04"
+   },
+   {
+    "id": "cs3",
+    "name": "D \u2194 A",
+    "params": {
+     "cycle": [
+      "D",
+      "A"
+     ],
+     "target_per_min": 25,
+     "voicings": {
+      "D": {
+       "name": "D",
+       "frets": [
+        [
+         -1,
+         -1,
+         0,
+         2,
+         3,
+         2
+        ]
+       ],
+       "where": "xx0232",
+       "root": "D",
+       "quality": "major"
+      },
+      "A": {
+       "name": "A",
+       "frets": [
+        [
+         -1,
+         0,
+         2,
+         2,
+         2,
+         0
+        ]
+       ],
+       "where": "x02220",
+       "root": "A",
+       "quality": "major"
+      }
+     }
+    },
+    "target_score": 5950,
+    "round_s": 60,
+    "unlock_lesson": "A.03"
+   },
+   {
+    "id": "cs4",
+    "name": "G \u2194 C",
+    "params": {
+     "cycle": [
+      "G|G_4f",
+      "C"
+     ],
+     "target_per_min": 25,
+     "voicings": {
+      "G|G_4f": {
+       "name": "G",
+       "frets": [
+        [
+         3,
+         2,
+         0,
+         0,
+         0,
+         3
+        ],
+        [
+         3,
+         2,
+         0,
+         0,
+         3,
+         3
+        ]
+       ],
+       "where": "320003 or 320033",
+       "root": "G",
+       "quality": "major"
+      },
+      "C": {
+       "name": "C",
+       "frets": [
+        [
+         -1,
+         3,
+         2,
+         0,
+         1,
+         0
+        ]
+       ],
+       "where": "x32010",
+       "root": "C",
+       "quality": "major"
+      }
+     }
+    },
+    "target_score": 5950,
+    "round_s": 60,
+    "unlock_lesson": "A.04"
+   },
+   {
+    "id": "cs5",
+    "name": "G family: G \u2192 Dsus4 \u2192 Em7 \u2192 Cadd9",
+    "params": {
+     "cycle": [
+      "G_4f",
+      "Dsus4",
+      "Em7",
+      "Cadd9"
+     ],
+     "target_per_min": 30,
+     "voicings": {
+      "G_4f": {
+       "name": "G",
+       "frets": [
+        [
+         3,
+         2,
+         0,
+         0,
+         3,
+         3
+        ]
+       ],
+       "where": "320033",
+       "root": "G",
+       "quality": "major",
+       "label": "G (4-finger)"
+      },
+      "Dsus4": {
+       "name": "Dsus4",
+       "frets": [
+        [
+         -1,
+         -1,
+         0,
+         2,
+         3,
+         3
+        ]
+       ],
+       "where": "xx0233",
+       "root": "D",
+       "quality": "sus4"
+      },
+      "Em7": {
+       "name": "Em7",
+       "frets": [
+        [
+         0,
+         2,
+         2,
+         0,
+         3,
+         3
+        ]
+       ],
+       "where": "022033",
+       "root": "E",
+       "quality": "m7"
+      },
+      "Cadd9": {
+       "name": "Cadd9",
+       "frets": [
+        [
+         -1,
+         3,
+         2,
+         0,
+         3,
+         3
+        ]
+       ],
+       "where": "x32033",
+       "root": "C",
+       "quality": "add9"
+      }
+     }
+    },
+    "target_score": 8150,
+    "round_s": 60,
+    "unlock_lesson": "A.02"
+   },
+   {
+    "id": "cs6",
+    "name": "Triads 3-2-1: G \u2192 D \u2192 Em \u2192 C",
+    "params": {
+     "cycle": [
+      "tri_321_G_inv2",
+      "tri_321_D_root",
+      "tri_321_Em_root",
+      "tri_321_C_inv1"
+     ],
+     "target_per_min": 20,
+     "voicings": {
+      "tri_321_G_inv2": {
+       "name": "G",
+       "frets": [
+        [
+         -1,
+         -1,
+         -1,
+         7,
+         8,
+         7
+        ]
+       ],
+       "where": "xxx787",
+       "root": "G",
+       "quality": "major"
+      },
+      "tri_321_D_root": {
+       "name": "D",
+       "frets": [
+        [
+         -1,
+         -1,
+         -1,
+         7,
+         7,
+         5
+        ]
+       ],
+       "where": "xxx775",
+       "root": "D",
+       "quality": "major"
+      },
+      "tri_321_Em_root": {
+       "name": "Em",
+       "frets": [
+        [
+         -1,
+         -1,
+         -1,
+         9,
+         8,
+         7
+        ]
+       ],
+       "where": "xxx987",
+       "root": "E",
+       "quality": "minor"
+      },
+      "tri_321_C_inv1": {
+       "name": "C",
+       "frets": [
+        [
+         -1,
+         -1,
+         -1,
+         9,
+         8,
+         8
+        ]
+       ],
+       "where": "xxx988",
+       "root": "C",
+       "quality": "major"
+      }
+     }
+    },
+    "target_score": 4500,
+    "round_s": 60,
+    "unlock_lesson": "ER.04"
+   }
+  ]
  },
  {
   "id": "G_song_run",
   "name": "Song Run",
-  "blurb": "The boss level: play a set-list song bar by bar at its tempo.",
+  "blurb": "The boss level: a song\u2019s chords scroll at its tempo in your key and capo. Scored per bar.",
   "unlock_lesson": "A.05",
   "review_for": [],
   "modes": [
    "play"
   ],
   "milestone": "G3",
-  "levels": []
+  "levels": [
+   {
+    "id": "MS_goodness_of_god",
+    "name": "Goodness of God",
+    "params": {
+     "outline": "MS_goodness_of_god",
+     "bpm": 63,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1"
+     ],
+     "targets": {
+      "0.5": 11500,
+      "1": 11500
+     }
+    },
+    "target_score": 11500
+   },
+   {
+    "id": "MS_build_my_life",
+    "name": "Build My Life",
+    "params": {
+     "outline": "MS_build_my_life",
+     "bpm": 70,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 2550,
+      "1": 2550,
+      "2": 5900
+     }
+    },
+    "target_score": 2550
+   },
+   {
+    "id": "MS_what_a_beautiful_name",
+    "name": "What a Beautiful Name",
+    "params": {
+     "outline": "MS_what_a_beautiful_name",
+     "bpm": 68,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1"
+     ],
+     "targets": {
+      "0.5": 6550,
+      "1": 6550
+     }
+    },
+    "target_score": 6550
+   },
+   {
+    "id": "MS_10000_reasons",
+    "name": "10,000 Reasons (Bless the Lord)",
+    "params": {
+     "outline": "MS_10000_reasons",
+     "bpm": 72.5,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1"
+     ],
+     "targets": {
+      "0.5": 10550,
+      "1": 10550
+     }
+    },
+    "target_score": 10550
+   },
+   {
+    "id": "MS_holy_forever",
+    "name": "Holy Forever",
+    "params": {
+     "outline": "MS_holy_forever",
+     "bpm": 72,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1"
+     ],
+     "targets": {
+      "0.5": 7800,
+      "1": 7800
+     }
+    },
+    "target_score": 7800
+   },
+   {
+    "id": "MS_gratitude",
+    "name": "Gratitude",
+    "params": {
+     "outline": "MS_gratitude",
+     "bpm": 78,
+     "bpm_known": true,
+     "meter": "6/8",
+     "meter_known": true,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 9100,
+      "1": 9100,
+      "2": 18400
+     }
+    },
+    "target_score": 9100
+   },
+   {
+    "id": "MS_cornerstone",
+    "name": "Cornerstone",
+    "params": {
+     "outline": "MS_cornerstone",
+     "bpm": 71.5,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5750,
+      "1": 5750,
+      "2": 11500
+     }
+    },
+    "target_score": 5750
+   },
+   {
+    "id": "MS_living_hope",
+    "name": "Living Hope",
+    "params": {
+     "outline": "MS_living_hope",
+     "bpm": 72,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1"
+     ],
+     "targets": {
+      "0.5": 7800,
+      "1": 7800
+     }
+    },
+    "target_score": 7800
+   },
+   {
+    "id": "MS_way_maker",
+    "name": "Way Maker",
+    "params": {
+     "outline": "MS_way_maker",
+     "bpm": 68,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 3,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 2550,
+      "1": 2550,
+      "2": 5900
+     }
+    },
+    "target_score": 2550
+   },
+   {
+    "id": "MS_king_of_kings",
+    "name": "King of Kings",
+    "params": {
+     "outline": "MS_king_of_kings",
+     "bpm": 68,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5250,
+      "1": 5250,
+      "2": 10550
+     }
+    },
+    "target_score": 5250
+   },
+   {
+    "id": "MS_firm_foundation",
+    "name": "Firm Foundation (He Won't)",
+    "params": {
+     "outline": "MS_firm_foundation",
+     "bpm": 75,
+     "bpm_known": true,
+     "meter": "6/8",
+     "meter_known": true,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 9100,
+      "1": 9100,
+      "2": 18400
+     }
+    },
+    "target_score": 9100
+   },
+   {
+    "id": "MS_raise_a_hallelujah",
+    "name": "Raise a Hallelujah",
+    "params": {
+     "outline": "MS_raise_a_hallelujah",
+     "bpm": 82,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3200,
+      "1": 3200,
+      "2": 6550
+     }
+    },
+    "target_score": 3200
+   },
+   {
+    "id": "MS_great_are_you_lord",
+    "name": "Great Are You Lord",
+    "params": {
+     "outline": "MS_great_are_you_lord",
+     "bpm": 72,
+     "bpm_known": true,
+     "meter": "6/8",
+     "meter_known": true,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5250,
+      "1": 5250,
+      "2": 10550
+     }
+    },
+    "target_score": 5250
+   },
+   {
+    "id": "MS_who_you_say_i_am",
+    "name": "Who You Say I Am",
+    "params": {
+     "outline": "MS_who_you_say_i_am",
+     "bpm": 86,
+     "bpm_known": true,
+     "meter": "6/8",
+     "meter_known": true,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 10850,
+      "1": 10850,
+      "2": 21750
+     }
+    },
+    "target_score": 10850
+   },
+   {
+    "id": "MS_in_christ_alone",
+    "name": "In Christ Alone",
+    "params": {
+     "outline": "MS_in_christ_alone",
+     "bpm": 68,
+     "bpm_known": true,
+     "meter": "3/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 2550,
+      "1": 2550,
+      "2": 5900
+     }
+    },
+    "target_score": 2550
+   },
+   {
+    "id": "MS_love_of_god",
+    "name": "Love of God",
+    "params": {
+     "outline": "MS_love_of_god",
+     "bpm": 74,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1"
+     ],
+     "targets": {
+      "0.5": 7200,
+      "1": 7200
+     }
+    },
+    "target_score": 7200
+   },
+   {
+    "id": "MS_o_come_to_the_altar",
+    "name": "O Come to the Altar",
+    "params": {
+     "outline": "MS_o_come_to_the_altar",
+     "bpm": 70,
+     "bpm_known": true,
+     "meter": "6/8",
+     "meter_known": true,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5600,
+      "1": 5600,
+      "2": 11200
+     }
+    },
+    "target_score": 5600
+   },
+   {
+    "id": "MS_reckless_love",
+    "name": "Reckless Love",
+    "params": {
+     "outline": "MS_reckless_love",
+     "bpm": 83,
+     "bpm_known": true,
+     "meter": "6/8",
+     "meter_known": true,
+     "passes": 4,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3800,
+      "1": 3800,
+      "2": 7800
+     }
+    },
+    "target_score": 3800
+   },
+   {
+    "id": "MS_blessed_be_your_name",
+    "name": "Blessed Be Your Name",
+    "params": {
+     "outline": "MS_blessed_be_your_name",
+     "bpm": 116,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5900,
+      "1": 5900,
+      "2": 11800
+     }
+    },
+    "target_score": 5900
+   },
+   {
+    "id": "MS_glorious_day",
+    "name": "Glorious Day",
+    "params": {
+     "outline": "MS_glorious_day",
+     "bpm": 110,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3200,
+      "1": 3200,
+      "2": 6550
+     }
+    },
+    "target_score": 3200
+   },
+   {
+    "id": "MS_holy_is_the_lord",
+    "name": "Holy Is the Lord",
+    "params": {
+     "outline": "MS_holy_is_the_lord",
+     "bpm": 84,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 4800,
+      "1": 4800,
+      "2": 9100
+     }
+    },
+    "target_score": 4800
+   },
+   {
+    "id": "MS_i_will_follow",
+    "name": "I Will Follow",
+    "params": {
+     "outline": "MS_i_will_follow",
+     "bpm": 96,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 2850,
+      "1": 2850,
+      "2": 6200
+     }
+    },
+    "target_score": 2850
+   },
+   {
+    "id": "MS_hymn_of_heaven",
+    "name": "Hymn of Heaven",
+    "params": {
+     "outline": "MS_hymn_of_heaven",
+     "bpm": 71,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1"
+     ],
+     "targets": {
+      "0.5": 7500,
+      "1": 7500
+     }
+    },
+    "target_score": 7500
+   },
+   {
+    "id": "MS_at_the_cross_love_ran_red",
+    "name": "At the Cross (Love Ran Red)",
+    "params": {
+     "outline": "MS_at_the_cross_love_ran_red",
+     "bpm": 73,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5900,
+      "1": 5900,
+      "2": 11800
+     }
+    },
+    "target_score": 5900
+   },
+   {
+    "id": "MS_amazing_grace_my_chains",
+    "name": "Amazing Grace (My Chains Are Gone)",
+    "params": {
+     "outline": "MS_amazing_grace_my_chains",
+     "bpm": 63,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5400,
+      "1": 5400,
+      "2": 10850
+     }
+    },
+    "target_score": 5400
+   },
+   {
+    "id": "MS_everlasting_god",
+    "name": "Everlasting God",
+    "params": {
+     "outline": "MS_everlasting_god",
+     "bpm": 100,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5250,
+      "1": 5250,
+      "2": 10050
+     }
+    },
+    "target_score": 5250
+   },
+   {
+    "id": "MS_come_as_you_are",
+    "name": "Come As You Are",
+    "params": {
+     "outline": "MS_come_as_you_are",
+     "bpm": 67.5,
+     "bpm_known": true,
+     "meter": "6/8",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 7800,
+      "1": 7800,
+      "2": 16450
+     }
+    },
+    "target_score": 7800
+   },
+   {
+    "id": "MS_all_the_people_said_amen",
+    "name": "All the People Said Amen",
+    "params": {
+     "outline": "MS_all_the_people_said_amen",
+     "bpm": 95,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 6400,
+      "1": 6400,
+      "2": 13750
+     }
+    },
+    "target_score": 6400
+   },
+   {
+    "id": "MS_this_is_amazing_grace",
+    "name": "This Is Amazing Grace",
+    "params": {
+     "outline": "MS_this_is_amazing_grace",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3200,
+      "1": 3200,
+      "2": 6550
+     }
+    },
+    "target_score": 3200
+   },
+   {
+    "id": "MS_o_church_arise",
+    "name": "O Church Arise",
+    "params": {
+     "outline": "MS_o_church_arise",
+     "bpm": 99,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 4800,
+      "1": 4800,
+      "2": 9100
+     }
+    },
+    "target_score": 4800
+   },
+   {
+    "id": "MS_o_praise_the_name",
+    "name": "O Praise the Name (Anastasis)",
+    "params": {
+     "outline": "MS_o_praise_the_name",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5900,
+      "1": 5900,
+      "2": 11800
+     }
+    },
+    "target_score": 5900
+   },
+   {
+    "id": "MS_hosanna_praise_is_rising",
+    "name": "Hosanna (Praise Is Rising)",
+    "params": {
+     "outline": "MS_hosanna_praise_is_rising",
+     "bpm": 114,
+     "bpm_known": true,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5250,
+      "1": 5250,
+      "2": 10050
+     }
+    },
+    "target_score": 5250
+   },
+   {
+    "id": "MS_made_for_more",
+    "name": "Made for More",
+    "params": {
+     "outline": "MS_made_for_more",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 6200,
+      "1": 6200,
+      "2": 13100
+     }
+    },
+    "target_score": 6200
+   },
+   {
+    "id": "MS_hear_our_praises",
+    "name": "Hear Our Praises",
+    "params": {
+     "outline": "MS_hear_our_praises",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3200,
+      "1": 3200,
+      "2": 6550
+     }
+    },
+    "target_score": 3200
+   },
+   {
+    "id": "MS_here_i_am_lord",
+    "name": "Here I Am, Lord",
+    "params": {
+     "outline": "MS_here_i_am_lord",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 2550,
+      "1": 2550,
+      "2": 5900
+     }
+    },
+    "target_score": 2550
+   },
+   {
+    "id": "MS_graves_into_gardens",
+    "name": "Graves Into Gardens",
+    "params": {
+     "outline": "MS_graves_into_gardens",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "6/8",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 4800,
+      "1": 4800,
+      "2": 9100
+     }
+    },
+    "target_score": 4800
+   },
+   {
+    "id": "MS_here_i_am_to_worship",
+    "name": "Here I Am to Worship",
+    "params": {
+     "outline": "MS_here_i_am_to_worship",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 2850,
+      "1": 2850,
+      "2": 6200
+     }
+    },
+    "target_score": 2850
+   },
+   {
+    "id": "MS_how_great_is_our_god",
+    "name": "How Great Is Our God",
+    "params": {
+     "outline": "MS_how_great_is_our_god",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 2850,
+      "1": 2850,
+      "2": 6200
+     }
+    },
+    "target_score": 2850
+   },
+   {
+    "id": "MS_mighty_to_save",
+    "name": "Mighty to Save",
+    "params": {
+     "outline": "MS_mighty_to_save",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5600,
+      "1": 5600,
+      "2": 11200
+     }
+    },
+    "target_score": 5600
+   },
+   {
+    "id": "MS_lead_me_to_the_cross",
+    "name": "Lead Me to the Cross",
+    "params": {
+     "outline": "MS_lead_me_to_the_cross",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 6050,
+      "1": 6050,
+      "2": 12450
+     }
+    },
+    "target_score": 6050
+   },
+   {
+    "id": "MS_run_to_the_father",
+    "name": "Run to the Father",
+    "params": {
+     "outline": "MS_run_to_the_father",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "6/8",
+     "meter_known": true,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 6200,
+      "1": 6200,
+      "2": 13100
+     }
+    },
+    "target_score": 6200
+   },
+   {
+    "id": "MS_above_all",
+    "name": "Above All",
+    "params": {
+     "outline": "MS_above_all",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1"
+     ],
+     "targets": {
+      "0.5": 9100,
+      "1": 9100
+     }
+    },
+    "target_score": 9100
+   },
+   {
+    "id": "MS_how_deep_the_fathers_love",
+    "name": "How Deep the Father's Love for Us",
+    "params": {
+     "outline": "MS_how_deep_the_fathers_love",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "3/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3200,
+      "1": 3200,
+      "2": 6550
+     }
+    },
+    "target_score": 3200
+   },
+   {
+    "id": "MS_ancient_words",
+    "name": "Ancient Words",
+    "params": {
+     "outline": "MS_ancient_words",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5600,
+      "1": 5600,
+      "2": 11200
+     }
+    },
+    "target_score": 5600
+   },
+   {
+    "id": "MS_lay_me_down",
+    "name": "Lay Me Down",
+    "params": {
+     "outline": "MS_lay_me_down",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 2550,
+      "1": 2550,
+      "2": 5900
+     }
+    },
+    "target_score": 2550
+   },
+   {
+    "id": "MS_your_grace_is_enough",
+    "name": "Your Grace Is Enough",
+    "params": {
+     "outline": "MS_your_grace_is_enough",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5250,
+      "1": 5250,
+      "2": 10050
+     }
+    },
+    "target_score": 5250
+   },
+   {
+    "id": "MS_the_wonderful_cross",
+    "name": "The Wonderful Cross",
+    "params": {
+     "outline": "MS_the_wonderful_cross",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 1600,
+      "1": 1600,
+      "2": 4800
+     }
+    },
+    "target_score": 1600
+   },
+   {
+    "id": "MS_thank_you_jesus_for_the_blood",
+    "name": "Thank You Jesus for the Blood",
+    "params": {
+     "outline": "MS_thank_you_jesus_for_the_blood",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1"
+     ],
+     "targets": {
+      "0.5": 7500,
+      "1": 7500
+     }
+    },
+    "target_score": 7500
+   },
+   {
+    "id": "MS_open_the_eyes_of_my_heart",
+    "name": "Open the Eyes of My Heart",
+    "params": {
+     "outline": "MS_open_the_eyes_of_my_heart",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3800,
+      "1": 3800,
+      "2": 7800
+     }
+    },
+    "target_score": 3800
+   },
+   {
+    "id": "MS_chain_breaker",
+    "name": "Chain Breaker",
+    "params": {
+     "outline": "MS_chain_breaker",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3800,
+      "1": 3800,
+      "2": 7800
+     }
+    },
+    "target_score": 3800
+   },
+   {
+    "id": "MS_change_my_heart_oh_god",
+    "name": "Change My Heart Oh God",
+    "params": {
+     "outline": "MS_change_my_heart_oh_god",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 4800,
+      "1": 4800,
+      "2": 9100
+     }
+    },
+    "target_score": 4800
+   },
+   {
+    "id": "MS_come_now_is_the_time",
+    "name": "Come Now Is the Time to Worship",
+    "params": {
+     "outline": "MS_come_now_is_the_time",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": true,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3200,
+      "1": 3200,
+      "2": 6550
+     }
+    },
+    "target_score": 3200
+   },
+   {
+    "id": "MS_come_thou_fount_come_thou_king",
+    "name": "Come Thou Fount, Come Thou King",
+    "params": {
+     "outline": "MS_come_thou_fount_come_thou_king",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3800,
+      "1": 3800,
+      "2": 7800
+     }
+    },
+    "target_score": 3800
+   },
+   {
+    "id": "MS_shine_jesus_shine",
+    "name": "Shine, Jesus, Shine",
+    "params": {
+     "outline": "MS_shine_jesus_shine",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5400,
+      "1": 5400,
+      "2": 10850
+     }
+    },
+    "target_score": 5400
+   },
+   {
+    "id": "MS_the_potters_hand",
+    "name": "The Potter's Hand",
+    "params": {
+     "outline": "MS_the_potters_hand",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 1900,
+      "1": 1900,
+      "2": 5250
+     }
+    },
+    "target_score": 1900
+   },
+   {
+    "id": "MS_christ_above_me",
+    "name": "Christ Above Me",
+    "params": {
+     "outline": "MS_christ_above_me",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5400,
+      "1": 5400,
+      "2": 10850
+     }
+    },
+    "target_score": 5400
+   },
+   {
+    "id": "MS_for_all_youve_done",
+    "name": "For All You've Done",
+    "params": {
+     "outline": "MS_for_all_youve_done",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 5250,
+      "1": 5250,
+      "2": 10050
+     }
+    },
+    "target_score": 5250
+   },
+   {
+    "id": "MS_more_like_jesus",
+    "name": "More Like Jesus",
+    "params": {
+     "outline": "MS_more_like_jesus",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 2,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3200,
+      "1": 3200,
+      "2": 6550
+     }
+    },
+    "target_score": 3200
+   },
+   {
+    "id": "MS_sing_wherever_i_go",
+    "name": "Sing Wherever I Go",
+    "params": {
+     "outline": "MS_sing_wherever_i_go",
+     "bpm": 72,
+     "bpm_known": false,
+     "meter": "4/4",
+     "meter_known": false,
+     "passes": 1,
+     "bars_per_chord": [
+      "0.5",
+      "1",
+      "2"
+     ],
+     "targets": {
+      "0.5": 3200,
+      "1": 3200,
+      "2": 6550
+     }
+    },
+    "target_score": 3200
+   }
+  ]
  }
 ]
