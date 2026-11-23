@@ -14,6 +14,10 @@ setlist={'weeks':['w1','w2','w3','w4'],'importedAt':'x','songs':[{'name':song['t
 backup={'_app':'guitar-trainer','lesson_progress':lp,'attempt':[],'practice_day':[{'day':D(-2)},{'day':D(-1)}],'quiz_item_stats':[],'kv':[],'calibration':[],'practice_session':[{'id':'old','started_at':0,'ended_at':0,'day':D(-1),'routine':'15','total_s':960,'items':4,'items_done':4,'attempts':2,'passes':1}],
   '_local':{'gt_setlist_v1':json.dumps(setlist),'gt_instruments':json.dumps('acoustic')}}
 bf=os.path.join(tempfile.mkdtemp(),'b.json'); json.dump(backup,open(bf,'w'))
+async def seedpage(pg, path):
+    import json
+    await pg.goto(f'http://127.0.0.1:{PORT}/?sim#/settings'); await pg.wait_for_function('!!window.__gtImport')
+    await pg.evaluate('d => window.__gtImport(d)', json.load(open(path))); await pg.reload(); await pg.wait_for_timeout(500)
 async def main():
     ok=True
     def check(c,m):
@@ -23,9 +27,7 @@ async def main():
         ctx=await b.new_context(viewport={'width':412,'height':880},accept_downloads=True); pg=await ctx.new_page(); errs=[]
         await ctx.add_init_script("window.__buzz = 0; navigator.vibrate = () => { window.__buzz++; return true; };")
         pg.on('pageerror',lambda e: errs.append(str(e))); pg.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
-        await pg.goto(f'http://127.0.0.1:{PORT}/#/settings'); await pg.wait_for_selector('text=Backup')
-        await pg.set_input_files('section.card:has-text("Backup") input[type=file]', bf)
-        await pg.wait_for_timeout(1500); await pg.goto(f'http://127.0.0.1:{PORT}/#/today'); await pg.wait_for_selector("text=Today's practice")
+        await seedpage(pg, bf); await pg.goto(f'http://127.0.0.1:{PORT}/#/today'); await pg.wait_for_selector("text=Today's practice")
         badge=await pg.locator('.navbadge').first.inner_text(); check(badge=='1', f'due badge shows 1 (got {badge})')
         # cover screen: 5 evenly wide tabs, each >= 48 px tall; Progress and Settings live in the header
         await pg.set_viewport_size({'width':380,'height':800}); await pg.wait_for_timeout(200)
