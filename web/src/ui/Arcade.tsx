@@ -1,148 +1,165 @@
-// Arcade (07-games.md): home, shared game frame (score, combo, ghost, timer/lives, results) and the six G1 tap games.
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+// Arcade (07-games.md): home, the shared game frame (score, combo, ghost, timer/lives, mode, pause menu with the
+// tuner and metronome sheets, results) and the game registry. The games are in ArcadeGames.tsx (untimed, tap or
+// play) and ArcadeTimed.tsx (click-timed, play).
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import type { Catalog, Game, GameLevel } from '../catalog';
 import { useStore } from '../store';
-import { progress } from '../progressStore';
+import { progress, streakInfo } from '../progressStore';
 import { xp } from '../xp';
-import { bests, bestKey, loadBests, unlocked, finishRun, markService, type RunOutcome } from '../arcade';
-import { levelFor, comboMult, points, rng, pick, shuffle, positionsOf, pcAt, noteLabel, pretty, callNumberQ, capoQ, hearQ, delayQ, DELAY_NOTES, type Pos, type Zone, type ChoiceQ, type DelayQ, type Rng } from '../games/core';
-import { playChords } from '../audio/engine';
+import { bests, bestKey, bestStars, loadBests, unlocked, finishRun, markService, modeFor, setModeFor, type RunOutcome, type RunResult, type Mode } from '../arcade';
+import { levelFor, comboMult, rng } from '../games/core';
 import { dayOf, computeStates } from '../progress';
-import { getSetList, thisWeekSongs } from '../setlist';
+import { metro, tuner, stopMetronome, stopTuner, bluetoothOutputLikely, acquireCapture, releaseCapture, capture, routeLabel } from '../audio/engine';
+import { getCalibration, routeName, posture, attempt } from '../grading/runner';
+import { patternFeel } from '../grading/timing';
+import { closeEars } from '../games/listen';
+import { inputPref, TunerPanel, MetronomePanel } from './Tools';
+import { CalibrationCard } from './Timing';
+import { useRound, Stars } from './GameKit';
+import { NoteDrop, FretFinder, OctaveJump, ChoiceGame, DelayMath } from './ArcadeGames';
+import { BoxRunner, InThePocket } from './ArcadeTimed';
 
-const PLAYABLE = new Set(['G_note_drop', 'G_fret_finder', 'G_call_the_number', 'G_hear_the_change', 'G_capo_quick', 'G_delay_math']);
+/** Games built so far (G1 + G2); the rest fold into "Coming later". */
+const BUILT = new Set(['G_note_drop', 'G_fret_finder', 'G_call_the_number', 'G_hear_the_change', 'G_capo_quick', 'G_delay_math', 'G_octave_jump', 'G_box_runner', 'G_in_the_pocket']);
+/** Click-timed games: the round can't pause mid-click (pause stops it), Bluetooth output blocks them, points per beat. */
+const TIMED = new Set(['G_box_runner', 'G_in_the_pocket']);
 const ICON: Record<string, string> = { G_note_drop: '⬇', G_fret_finder: '🔎', G_call_the_number: '📣', G_hear_the_change: '👂', G_capo_quick: '🎚', G_delay_math: '⏱', G_triad_hunt: '△', G_octave_jump: '⇅', G_box_runner: '▦', G_in_the_pocket: '◎', G_change_sprint: '⚡', G_song_run: '★' };
-const Stars = ({ n }: { n: number }) => <span class="stars">{[1, 2, 3].map(i => <i class={i <= n ? 'on' : ''}>★</i>)}</span>;
+const MODE_LABEL: Record<Mode, string> = { tap: '👆 Tap', play: '🎸 Play' };
 
 // ---------- home ----------
 export function ArcadeHome({ cat }: { cat: Catalog }) {
   const x = useStore(xp), b = useStore(bests), pr = useStore(progress);
   useEffect(() => { if (!b.ready) void loadBests(); }, []);
   const lv = levelFor(x.total), today = dayOf();
-  const sunday = new Date().getDay() === 0, practicedToday = pr.days.includes(today);
+  const sk = streakInfo(today);
+  const sunday = new Date().getDay() === 0;
+  const mins = Math.floor(sk.todayS / 60);
   return (
     <div class="page arcade">
       <h1>Arcade</h1>
       <section class="card xpcard">
         <div class="row between"><b>Level {lv.level}</b><span class="muted">{x.total} XP · {lv.need - lv.into} to level {lv.level + 1}</span></div>
         <div class="xpbar"><i style={{ width: `${(lv.into / lv.need) * 100}%` }} /></div>
-        <p class="muted small">XP comes from games, lesson passes (+50) and reviews (+20). Levels are just for fun; lessons still unlock in order.</p>
-        {sunday || !practicedToday ? <button class="small" disabled={practicedToday} onClick={() => void markService()}>{practicedToday ? 'Today counts ✓' : '⛪ Played a service today'}</button> : null}
+        <a class="streaklink" href="#/progress" aria-label="Streak: see your progress"><p class="streakline"><b>{sk.current ? `🔥 ${sk.current}-day streak` : 'No streak yet'}</b>{sk.freezes ? <span class="muted"> · ❄ {sk.freezes} freeze{sk.freezes > 1 ? 's' : ''}</span> : null}
+          <span class="muted"> · today {sk.todayDone ? 'counts ✓' : `${mins} of 5 min`}</span> <span class="chev" aria-hidden="true">›</span></p></a>
+        <p class="muted small">XP comes from games, lesson passes (+50) and reviews (+20). Levels are just for fun; lessons still unlock in order. A day counts for the streak with 5 minutes of practice, games included; every 7 days earns a streak freeze (up to 2) that covers a missed day.</p>
+        {sunday || !sk.todayDone ? <button class="small" disabled={pr.services.includes(today)} onClick={() => void markService()}>{pr.services.includes(today) ? 'Today counts ✓' : '⛪ Played a service today'}</button> : null}
       </section>
       <div class="tiles">
-        {cat.games.filter(g => PLAYABLE.has(g.id)).map(g => {
-          const playable = true;
+        {cat.games.filter(g => BUILT.has(g.id)).map(g => {
           const lesson = cat.lessonById[g.unlock_lesson];
           const st = computeStates(cat.lessons, cat.tracks, pr.lp)[g.unlock_lesson];
+          const m = modeFor(g);
           return (
-            <section class={`card tile ${playable ? '' : 'dim'}`}>
-              <h2><span class="gicon">{ICON[g.id]}</span> {g.name}</h2>
+            <section class="card tile">
+              <h2><span class="gicon">{ICON[g.id]}</span> {g.name} <small class="modes muted">{g.modes.map(x => MODE_LABEL[x as Mode]).join(' · ')}</small></h2>
               <p class="muted small">{g.blurb}</p>
-              {!playable ? <p class="muted small">Coming later{g.modes.includes('play') && !g.modes.includes('tap') ? ': you play it on the guitar' : ''}.</p>
-                : <>{st === 'locked' || st === 'available' ? <p class="muted small">Taught in <a href={`#/lesson/${g.unlock_lesson}`}>{g.unlock_lesson} {lesson?.title}</a></p> : null}
-                  <ul class="levels">{g.levels.map((l, i) => {
-                    const lo = unlocked(cat, g, l), best = b.map[bestKey(g.id, l.id)];
-                    return <li>{lo ? <a href={`#/arcade/${g.id}/${l.id}`}><span>{l.name}</span><Stars n={best?.best_stars || 0} />{best ? <small>{best.best_score}</small> : null}</a>
-                      : <span class="muted">🔒 {l.name} <small>★★ on level {i} opens it</small></span>}</li>;
-                  })}</ul></>}
+              {st === 'locked' || st === 'available' ? <p class="muted small">Taught in <a href={`#/lesson/${g.unlock_lesson}`}>{g.unlock_lesson} {lesson?.title}</a></p> : null}
+              <ul class="levels">{g.levels.map((l, i) => {
+                const lo = unlocked(cat, g, l), best = b.map[bestKey(g.id, l.id, m)];
+                return <li>{lo ? <a href={`#/arcade/${g.id}/${l.id}`}><span>{l.name}</span><Stars n={bestStars(g, l)} />{best ? <small>{g.modes.length > 1 ? (m === 'play' ? '🎸 ' : '👆 ') : ''}{best.best_score}</small> : null}</a>
+                  : <span class="muted">🔒 {l.name} <small>★★ on level {i} opens it</small></span>}</li>;
+              })}</ul>
             </section>
           );
         })}
       </div>
-      {(() => { const later = cat.games.filter(g => !PLAYABLE.has(g.id)); return later.length ? (
+      {(() => { const later = cat.games.filter(g => !BUILT.has(g.id)); return later.length ? (
         <details class="card later">
-          <summary><b>Coming later</b> <span class="muted small">{later.length} games you play on the guitar</span></summary>
+          <summary><b>Coming later</b> <span class="muted small">{later.length} chord games, after the chord graders</span></summary>
           <ul class="list">{later.map(g => <li><span><span class="gicon">{ICON[g.id]}</span> <b>{g.name}</b><small class="muted"> · {g.blurb}</small></span></li>)}</ul>
         </details>) : null; })()}
     </div>
   );
 }
 
-// ---------- shared round state ----------
-interface Round {
-  score: number; streak: number; maxCombo: number; correct: number; total: number; lives: number; misses: string[];
-  answer: (ok: boolean, miss?: string, fastMs?: number, slowMs?: number) => void; addMisses: (n: number, miss: string) => void;
-  askedAt: { current: number }; elapsed: number; flash: 'ok' | 'bad' | null;
-}
-function useRound(l: GameLevel, onEnd: (finished: boolean) => void, running: boolean, finishedRule: (correct: number, timeUp: boolean) => boolean) {
-  const [st, setSt] = useState({ score: 0, streak: 0, maxCombo: 1, correct: 0, total: 0, lives: l.lives || 0, misses: [] as string[], flash: null as 'ok' | 'bad' | null });
-  const [elapsed, setElapsed] = useState(0);
-  const askedAt = useRef(performance.now()), t0 = useRef(performance.now()), ended = useRef(false), ghost = useRef<[number, number][]>([]);
-  const stRef = useRef(st); stRef.current = st;
-  const end = (timeUp: boolean) => { if (ended.current) return; ended.current = true; onEnd(finishedRule(stRef.current.correct, timeUp)); };
-  useEffect(() => {
-    if (!running) return;
-    t0.current = performance.now(); askedAt.current = performance.now(); ended.current = false;
-    const t = setInterval(() => {
-      const e = (performance.now() - t0.current) / 1000; setElapsed(e);
-      const sec = Math.floor(e); if (!ghost.current.length || ghost.current[ghost.current.length - 1][0] < sec) ghost.current.push([sec, stRef.current.score]);
-      if (l.round_s && e >= l.round_s) end(true);
-    }, 100);
-    return () => clearInterval(t);
-  }, [running]);
-  const flashT = useRef(0);
-  const answer: Round['answer'] = (ok, miss, fastMs, slowMs) => {
-    if (ended.current) return;
-    const ms = performance.now() - askedAt.current;
-    setSt(s => {
-      const streak = ok ? s.streak + 1 : 0;
-      const n = { ...s, total: s.total + 1, correct: s.correct + (ok ? 1 : 0), streak, maxCombo: Math.max(s.maxCombo, comboMult(streak)),
-        score: s.score + (ok ? points(ms, s.streak, fastMs, slowMs) : 0), lives: ok || !l.lives ? s.lives : s.lives - 1,
-        misses: ok || !miss ? s.misses : [...s.misses, miss], flash: (ok ? 'ok' : 'bad') as 'ok' | 'bad' };
-      stRef.current = n;
-      if (l.lives && n.lives <= 0) setTimeout(() => end(false), 350);
-      return n;
-    });
-    clearTimeout(flashT.current); flashT.current = window.setTimeout(() => setSt(s => ({ ...s, flash: null })), 250);
-    askedAt.current = performance.now();
-  };
-  const addMisses = (n: number, miss: string) => { if (n > 0) setSt(s => { const x = { ...s, total: s.total + n, streak: 0, misses: [...s.misses, ...Array(n).fill(miss)] }; stRef.current = x; return x; }); };
-  return { round: { ...st, answer, addMisses, askedAt, elapsed } as Round, ghost, end, durationS: () => (performance.now() - t0.current) / 1000, stRef };
-}
-
 // ---------- game screen ----------
+function ModeToggle({ g, mode, set }: { g: Game; mode: Mode; set: (m: Mode) => void }) {
+  if (g.modes.length < 2) return <p class="muted small">{mode === 'play' ? '🎸 Play mode: you answer on the guitar.' : '👆 Tap mode.'}</p>;
+  return (
+    <div class="segmented" role="radiogroup" aria-label="How you answer">
+      {(['tap', 'play'] as Mode[]).filter(m => g.modes.includes(m)).map(m => <button role="radio" aria-checked={mode === m} class={mode === m ? 'sel' : ''} onClick={() => set(m)}>{MODE_LABEL[m]}</button>)}
+    </div>
+  );
+}
+const dev = () => inputPref.get() || undefined;
+
 export function GameScreen({ cat, gameId, levelId }: { cat: Catalog; gameId: string; levelId: string }) {
   const g = cat.games.find(x => x.id === gameId), l = g?.levels.find(x => x.id === levelId);
   useStore(progress); const b = useStore(bests);
+  useStore(capture);
   useEffect(() => { if (!b.ready) void loadBests(); }, []);
   const [runId, setRunId] = useState(0);
   const [phase, setPhase] = useState<'ready' | 'play' | 'done'>('ready');
-  const [outcome, setOutcome] = useState<(RunOutcome & { score: number; misses: string[] }) | null>(null);
-  useEffect(() => { setPhase('ready'); setOutcome(null); }, [gameId, levelId]);
+  const [mode, setMode] = useState<Mode>(g ? modeFor(g) : 'tap');
+  const [outcome, setOutcome] = useState<(RunOutcome & { score: number; misses: string[]; mode: Mode }) | null>(null);
+  const [bt, setBt] = useState(false);
+  const [needCal, setNeedCal] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [calMsg, setCalMsg] = useState('');
+  useEffect(() => { setPhase('ready'); setOutcome(null); setNeedCal(false); if (g) setMode(modeFor(g)); }, [gameId, levelId]);
+  const timed = !!g && TIMED.has(g.id);
+  useEffect(() => { if (timed) void bluetoothOutputLikely().then(setBt); }, [gameId]);
+  useEffect(() => () => closeEars(), []);
   if (!g || !l) return <div class="page"><p>Game not found. <a href="#/arcade">Arcade</a></p></div>;
-  if (!PLAYABLE.has(g.id)) return <div class="page"><p>This game isn't ready yet. <a href="#/arcade">Back to the Arcade</a></p></div>;
+  if (!BUILT.has(g.id)) return <div class="page"><p>This game isn't ready yet. <a href="#/arcade">Back to the Arcade</a></p></div>;
   if (!unlocked(cat, g, l)) return <div class="page"><p>Get ★★ on the previous level to open this one. <a href="#/arcade">Back to the Arcade</a></p></div>;
-  const best = b.map[bestKey(g.id, l.id)];
+  const best = b.map[bestKey(g.id, l.id, mode)];
   const next = g.levels[g.levels.indexOf(l) + 1];
+  const pick = (m: Mode) => { setMode(m); setModeFor(g, m); };
+  const go = async () => {
+    if (mode === 'play' && g.id === 'G_in_the_pocket') {
+      // strums are graded against the click, so this input + posture needs a strum calibration first
+      setChecking(true);
+      try { await acquireCapture('game-check', dev()); const c = await getCalibration(routeName()); releaseCapture('game-check'); setChecking(false); if (!c) { setCalMsg(''); setNeedCal(true); return; } }
+      catch { releaseCapture('game-check'); setChecking(false); }
+    }
+    setNeedCal(false); setRunId(x => x + 1); setPhase('play');
+  };
+  const btBlock = timed && mode === 'play' && bt;
+  const calibrated = () => { const c = attempt.get().cal; setNeedCal(false); setCalMsg(c ? `Calibrated ✓ (${Math.round(c.offsetMs)} ms offset, saved for this input and posture). Ready when you are.` : 'Calibrated ✓'); };
+  const roundText = l.round_s ? `${l.round_s} seconds.` : l.lives ? `${l.lives} lives.`
+    : g.id === 'G_in_the_pocket' ? `${l.params.bars} bars${l.params.gap_bars ? `; the click drops out for ${l.params.gap_bars.join(', then ')} bars and you keep going` : ''}.`
+      : g.id === 'G_box_runner' ? `The path ${l.params.passes} times through, to the click.` : '';
+  const ready = (
+    <section class="card">
+      <p>{g.blurb}</p>
+      <ModeToggle g={g} mode={mode} set={pick} />
+      <p class="muted">{roundText} {timed ? 'Closer to the beat scores more' : 'Faster answers score more'}; 8 in a row raises the combo. ★★ = 85% right, ★★★ = 95% right and {l.target_score} points.{best ? ` Your best (${mode}): ${best.best_score}.` : ''}</p>
+      {mode === 'play' ? <p class="muted small">Prop the phone near the guitar or amp. The app listens {capture.get().label ? `with ${routeLabel()}` : 'with the input chosen in Settings'} and checks each note against the answer it expects.{timed ? ' One bar of count-in; the game runs the click.' : ''} Tap and play scores are kept apart. <a href="#/settings">Input</a></p> : null}
+      {(l.review_for || []).length ? <p class="muted small">★★ here counts as the review for {l.review_for!.join(', ')} when it's due.</p> : null}
+      {btBlock ? <><p class="error">Bluetooth audio looks active. Its delay (150–300 ms) puts the click out of step with your playing, so click-timed games are off.</p>
+        <p class="muted">Switch to the phone speaker or wired headphones, then <button class="small" onClick={() => void bluetoothOutputLikely().then(setBt)}>check again</button>.</p></> : null}
+      {needCal ? <div><p><b>First, a 30-second strum calibration</b> for {capture.get().label || 'this input'} ({posture()}), so strums are graded fairly.</p><CalibrationCard compact onDone={calibrated} /></div> : null}
+      {calMsg && !needCal ? <p class="okText">{calMsg}</p> : null}
+      {!needCal ? <button class="primary big" disabled={btBlock || checking} onClick={() => void go()}>{checking ? 'Checking the input…' : '▶ Start'}</button> : null}
+    </section>
+  );
   return (
     <div class="page game">
       <div class="crumbs"><a href="#/arcade">Arcade</a> › {g.name}</div>
       <h1>{ICON[g.id]} {g.name} <small class="muted">{l.name}</small></h1>
-      {phase === 'ready' ? (
-        <section class="card">
-          <p>{g.blurb}</p>
-          <p class="muted">{l.round_s ? `${l.round_s} seconds.` : l.lives ? `${l.lives} lives.` : ''} Faster answers score more; 8 in a row raises the combo. ★★★ = 95% right and {l.target_score} points.{best ? ` Your best: ${best.best_score}.` : ''}</p>
-          {(l.review_for || []).length ? <p class="muted small">★★ here counts as the review for {l.review_for!.join(', ')} when it's due.</p> : null}
-          <p class="muted small">Tap mode. Playing answers on the guitar arrives with the pitch grader.</p>
-          <button class="primary big" onClick={() => { setRunId(x => x + 1); setPhase('play'); }}>▶ Start</button>
-        </section>
-      ) : phase === 'play' ? (
-        <Play key={runId} cat={cat} g={g} l={l} ghost={best?.ghost || []} onDone={async (res) => { const o = await finishRun(cat, g, l, res); setOutcome({ ...o, score: res.score, misses: res.misses }); setPhase('done'); }} onQuit={() => setPhase('ready')} />
+      {phase === 'ready' ? ready : phase === 'play' ? (
+        <Play key={runId} cat={cat} g={g} l={l} mode={mode} ghost={best?.ghost || []}
+          onDone={async res => { const o = await finishRun(cat, g, l, res, mode); setOutcome({ ...o, score: res.score, misses: res.misses, mode }); setPhase('done'); }}
+          onQuit={() => setPhase('ready')} onRestart={() => setRunId(x => x + 1)} />
       ) : outcome ? (
         <section class="card result pass">
-          <h3><Stars n={outcome.stars} /> {outcome.stars === 3 ? 'Perfect!' : outcome.stars === 2 ? 'Great round' : outcome.stars === 1 ? 'Round complete' : 'Round over'}</h3>
+          <h3><Stars n={outcome.stars} /> {outcome.stars === 3 ? 'Perfect!' : outcome.stars === 2 ? 'Great round' : outcome.stars === 1 ? 'Round complete' : 'Round over'} <small class="muted">{MODE_LABEL[outcome.mode]}</small></h3>
           <div class="stats">
             <div><b>{outcome.score}</b><span>{outcome.pb ? (outcome.prevBest ? `new best! (was ${outcome.prevBest})` : 'first score') : `best ${best?.best_score ?? outcome.score}`}</span></div>
             <div><b>{Math.round(outcome.accuracy * 100)}%</b><span>right</span></div>
             <div><b>+{outcome.xp}</b><span>XP</span></div>
           </div>
           {outcome.reviewed.length ? <p class="note">That counted as your review for {outcome.reviewed.join(', ')}.</p> : null}
-          {outcome.misses.length ? <><h3>To work on</h3><ul class="misses">{tally(outcome.misses).map(([m, n]) => <li>{m}{n > 1 ? ` ×${n}` : ''}</li>)}</ul></> : null}
+          {outcome.misses.length ? <><h3>To work on</h3><ul class="misses">{tally(outcome.misses).map(([m, n]) => <li>{m}{n === 2 ? ', twice' : n > 2 ? `, ${n} times` : ''}</li>)}</ul></> : null}
+          <ModeToggle g={g} mode={mode} set={pick} />
           <div class="row">
-            <button class="primary" onClick={() => { setRunId(x => x + 1); setPhase('play'); }}>Replay</button>
+            <button class="primary" onClick={() => void go()}>Replay</button>
             {next && unlocked(cat, g, next) ? <a class="btn" href={`#/arcade/${g.id}/${next.id}`}>Next level ›</a> : null}
             <a class="btn" href="#/arcade">Arcade</a>
           </div>
+          {needCal ? <div><p><b>First, a strum calibration</b> for this input.</p><CalibrationCard compact onDone={calibrated} /></div> : null}
         </section>
       ) : <p class="muted">Saving…</p>}
     </div>
@@ -150,172 +167,62 @@ export function GameScreen({ cat, gameId, levelId }: { cat: Catalog; gameId: str
 }
 function tally(a: string[]): [string, number][] { const m = new Map<string, number>(); a.forEach(x => m.set(x, (m.get(x) || 0) + 1)); return [...m.entries()].sort((x, y) => y[1] - x[1]).slice(0, 8); }
 
-function Play({ cat, g, l, ghost, onDone, onQuit }: { cat: Catalog; g: Game; l: GameLevel; ghost: [number, number][]; onDone: (r: import('../arcade').RunResult) => void; onQuit: () => void }) {
+// ---------- the shared frame ----------
+function Play({ cat, g, l, mode, ghost, onDone, onQuit, onRestart }: { cat: Catalog; g: Game; l: GameLevel; mode: Mode; ghost: [number, number][]; onDone: (r: RunResult) => void; onQuit: () => void; onRestart: () => void }) {
   const r = useMemo(() => rng(Date.now() & 0xffffffff), []);
+  const [paused, setPaused] = useState(false);
+  const [sheet, setSheet] = useState<'tuner' | 'metro' | null>(null);
+  const timed = TIMED.has(g.id);
+  // click-timed games score 100 per beat, so an eighth note is worth 50 and a sixteenth 25
+  const base = g.id === 'G_box_runner' ? 100 / l.params.sub : g.id === 'G_in_the_pocket' ? 100 / patternFeel(cat.strums.find(s => s.id === l.params.pattern)!).sub : 100;
   const finishedRule = (correct: number, timeUp: boolean) => (g.id === 'G_note_drop' ? correct >= 20 : timeUp);
-  const { round, ghost: gh, durationS, stRef } = useRound(l, finished => {
+  const { round, ghost: gh, durationS, stRef, roundS } = useRound(l, mode, base, paused, finished => {
     const s = stRef.current;
     onDone({ score: s.score, correct: s.correct, total: s.total, maxCombo: s.maxCombo, finished, durationS: durationS(), misses: s.misses, ghost: gh.current });
-  }, true, finishedRule);
+  }, finishedRule);
+  // The game owns the click while a round runs: no metronome or tuner from the sheets once you resume.
+  useEffect(() => { if (!paused) { setSheet(null); if (metro.get().running) stopMetronome(); if (tuner.get().on) stopTuner(); } }, [paused]);
+  // Locking the phone or switching apps pauses the round (and closes the mic).
+  useEffect(() => { const f = () => { if (document.visibilityState === 'hidden') setPaused(true); }; document.addEventListener('visibilitychange', f); return () => document.removeEventListener('visibilitychange', f); }, []);
   const ghostScore = (() => { let v = 0; for (const [t, sc] of ghost) if (t <= round.elapsed) v = sc; return v; })();
   const ghostMax = Math.max(1, ghost.length ? ghost[ghost.length - 1][1] : 0, round.score);
   return (
-    <div class={`playarea flash-${round.flash || 'none'}`}>
-      <div class="hud">
-        <div><b>{round.score}</b><span>score</span></div>
-        <div><b>×{comboMult(round.streak)}</b><span>combo</span></div>
-        <div>{l.round_s ? <><b>{Math.max(0, Math.ceil(l.round_s - round.elapsed))}</b><span>sec</span></> : <><b>{'♥'.repeat(Math.max(0, round.lives))}<span class="lost">{'♥'.repeat(Math.max(0, (l.lives || 0) - round.lives))}</span></b><span>lives</span></>}</div>
-        <button class="small" onClick={onQuit} aria-label="Quit">✕</button>
+    <div class={`playarea ${timed ? 'timed' : ''} mode-${mode} flash-${round.flash || 'none'}`}>
+      <div class="ghud">
+        <div class="hud">
+          <div><b>{round.score}</b><span>score</span></div>
+          <div><b>×{comboMult(round.streak)}</b><span>combo</span></div>
+          <div>{roundS ? <><b>{Math.max(0, Math.ceil(roundS - round.elapsed))}</b><span>sec</span></> : l.lives ? <><b>{'♥'.repeat(Math.max(0, round.lives))}<span class="lost">{'♥'.repeat(Math.max(0, (l.lives || 0) - round.lives))}</span></b><span>lives</span></>
+            : <><b>{round.correct}/{round.total}</b><span>right</span></>}</div>
+          <button class="small" onClick={() => setPaused(true)} aria-label="Pause">⏸</button>
+        </div>
+        {ghost.length ? <div class="ghost"><i class="me" style={{ width: `${(round.score / ghostMax) * 100}%` }} /><i class="gh" style={{ left: `${(ghostScore / ghostMax) * 100}%` }} /><small>best run</small></div> : null}
       </div>
-      {ghost.length ? <div class="ghost"><i class="me" style={{ width: `${(round.score / ghostMax) * 100}%` }} /><i class="gh" style={{ left: `${(ghostScore / ghostMax) * 100}%` }} /><small>best run</small></div> : null}
       {g.id === 'G_note_drop' ? <NoteDrop l={l} round={round} r={r} />
         : g.id === 'G_fret_finder' ? <FretFinder l={l} round={round} r={r} />
-          : g.id === 'G_delay_math' ? <DelayMath l={l} round={round} r={r} />
-            : <ChoiceGame cat={cat} g={g} l={l} round={round} r={r} />}
-    </div>
-  );
-}
-
-// ---------- fretboard ----------
-function Fretboard({ zone, onTap, marks = [], frets }: { zone: Zone; onTap: (p: Pos) => void; marks?: { p: Pos; cls: string }[]; frets?: [number, number] }) {
-  const [f0, f1] = frets || zone.frets;
-  const n = f1 - f0 + 1, W = 340, H = 186, left = 6, cw = (W - left - 4) / n, rh = H / 6;
-  const x = (f: number) => left + (f - f0) * cw, y = (s: number) => (s - 1) * rh + rh / 2;
-  const inZone = (p: Pos) => zone.strings.includes(p.string) && p.fret >= zone.frets[0] && p.fret <= zone.frets[1];
-  const cells: Pos[] = []; for (let s = 1; s <= 6; s++) for (let f = f0; f <= f1; f++) cells.push({ string: s, fret: f });
-  return (
-    <svg class="fretboard" viewBox={`0 0 ${W} ${H + 18}`} width="100%" role="group" aria-label="Fretboard: tap a string and fret">
-      {cells.filter(inZone).map(p => <rect x={x(p.fret)} y={(p.string - 1) * rh} width={cw} height={rh} class="zone" />)}
-      {Array.from({ length: n + 1 }, (_, i) => <line x1={left + i * cw} x2={left + i * cw} y1={rh / 2} y2={H - rh / 2} class={i === 1 && f0 === 0 ? 'nut' : 'fret'} />)}
-      {[1, 2, 3, 4, 5, 6].map(s => <line x1={left} x2={W - 4} y1={y(s)} y2={y(s)} class={`str ${zone.strings.includes(s) ? '' : 'off'}`} style={{ strokeWidth: 0.6 + (s - 1) * 0.35 }} />)}
-      {[3, 5, 7, 9, 12, 15].filter(f => f >= f0 && f <= f1 && f > 0).map(f => <text x={x(f) + cw / 2} y={H + 13} class="fno">{f}</text>)}
-      {f0 === 0 ? <text x={x(0) + cw / 2} y={H + 13} class="fno">0</text> : null}
-      {marks.map(m => <circle cx={x(m.p.fret) + cw / 2} cy={y(m.p.string)} r={Math.min(cw, rh) * 0.36} class={`mark ${m.cls}`} />)}
-      {cells.filter(inZone).map(p => <rect x={x(p.fret)} y={(p.string - 1) * rh} width={cw} height={rh} class="hit" data-s={p.string} data-f={p.fret} onPointerDown={e => { e.preventDefault(); onTap(p); }} />)}
-    </svg>
-  );
-}
-const zoneOf = (l: GameLevel): Zone => ({ strings: l.params.zone.strings, frets: l.params.zone.frets });
-const posText = (p: Pos) => `string ${p.string}, fret ${p.fret}`;
-
-// ---------- Note Drop ----------
-function NoteDrop({ l, round, r }: { l: GameLevel; round: Round; r: Rng }) {
-  const zone = zoneOf(l);
-  const pcs = useMemo(() => Array.from({ length: 12 }, (_, pc) => pc).filter(pc => positionsOf(pc, zone).length), []);
-  const [q, setQ] = useState(() => ({ pc: pick(r, pcs), start: performance.now(), id: 0 }));
-  const [marks, setMarks] = useState<{ p: Pos; cls: string }[]>([]);
-  const [now, setNow] = useState(performance.now());
-  const speed = (l.params.speed || 1) * Math.pow(1.15, Math.floor(round.correct / 10));
-  const fallMs = 6000 / speed;
-  const next = () => setQ(o => { let pc = pick(r, pcs); if (pc === o.pc) pc = pick(r, pcs); round.askedAt.current = performance.now(); return { pc, start: performance.now(), id: o.id + 1 }; });
-  useEffect(() => { let raf = 0; const f = () => { setNow(performance.now()); raf = requestAnimationFrame(f); }; raf = requestAnimationFrame(f); return () => cancelAnimationFrame(raf); }, []);
-  useEffect(() => { if (now - q.start > fallMs && round.lives > 0) { const where = positionsOf(q.pc, zone); setMarks(where.map(p => ({ p, cls: 'show' }))); round.answer(false, `${noteLabel(q.pc)} (${where.map(posText).join(' or ')})`); next(); } }, [now]);
-  const tap = (p: Pos) => {
-    if (pcAt(p) === q.pc) { setMarks([{ p, cls: 'ok' }]); round.answer(true, undefined, 900, fallMs); }
-    else { setMarks([{ p, cls: 'bad' }, ...positionsOf(q.pc, zone).map(x => ({ p: x, cls: 'show' }))]); round.answer(false, `${noteLabel(q.pc)} (you tapped ${noteLabel(pcAt(p))} at ${posText(p)})`); }
-    next();
-  };
-  const frac = Math.min(1, (now - q.start) / fallMs);
-  return (
-    <div class="board">
-      <div class="sky"><b class="drop" style={{ top: `${frac * 82}%` }}>{noteLabel(q.pc)}</b><div class="landing" /></div>
-      <Fretboard zone={zone} onTap={tap} marks={marks} />
-      <p class="muted small center">{round.correct < 20 ? `${20 - round.correct} more to finish the round` : 'Round finished: keep going for points!'} · speed ×{speed.toFixed(2)}</p>
-    </div>
-  );
-}
-
-// ---------- Fret Finder ----------
-function FretFinder({ l, round, r }: { l: GameLevel; round: Round; r: Rng }) {
-  const zone = zoneOf(l);
-  const newNote = (prev?: number) => { let pc = Math.floor(r() * 12); while (pc === prev || !positionsOf(pc, zone).length) pc = Math.floor(r() * 12); return { pc, start: performance.now(), found: [] as Pos[] }; };
-  const [q, setQ] = useState(() => newNote());
-  const [bad, setBad] = useState<Pos | null>(null);
-  const [left, setLeft] = useState(20);
-  const targets = positionsOf(q.pc, zone);
-  useEffect(() => { const t = setInterval(() => {
-    const s = 20 - (performance.now() - q.start) / 1000; setLeft(Math.max(0, Math.ceil(s)));
-    if (s <= 0) { const missing = targets.filter(t => !q.found.some(f => f.string === t.string && f.fret === t.fret)); round.addMisses(missing.length, `${noteLabel(q.pc)} at ${missing.map(posText).join(', ')}`); setQ(newNote(q.pc)); round.askedAt.current = performance.now(); }
-  }, 200); return () => clearInterval(t); }, [q]);
-  const tap = (p: Pos) => {
-    if (q.found.some(f => f.string === p.string && f.fret === p.fret)) return;
-    if (pcAt(p) === q.pc) {
-      round.answer(true, undefined, 1200, 5000);
-      const found = [...q.found, p];
-      if (found.length === targets.length) { setQ(newNote(q.pc)); } else setQ({ ...q, found });
-    } else { setBad(p); setTimeout(() => setBad(null), 300); round.answer(false, `${noteLabel(q.pc)}: ${posText(p)} is ${noteLabel(pcAt(p))}`); }
-  };
-  return (
-    <div class="board">
-      <div class="target"><b>{noteLabel(q.pc)}</b><span>{q.found.length}/{targets.length} found · {left}s</span></div>
-      <Fretboard zone={zone} onTap={tap} marks={[...q.found.map(p => ({ p, cls: 'ok' })), ...(bad ? [{ p: bad, cls: 'bad' }] : [])]} />
-    </div>
-  );
-}
-
-// ---------- choice games: Call the Number, Capo Quick, Hear the Change ----------
-function songCalls(cat: Catalog, r: Rng): { prompts: { num: string; chord: string }[]; title: string; key: string; choices: string[] } {
-  const sl = getSetList();
-  const week = sl ? thisWeekSongs(sl).map(s => s.outlineId).filter((x): x is string => !!x && !!cat.outlineById[x]) : [];
-  const pool = week.length ? week : cat.outlines.map(o => o.id);
-  const o = cat.outlineById[pick(r, pool)];
-  const prompts = o.sections.flatMap(s => s.chords_in_chart_key.map((c, i) => ({ num: s.numbers[i], chord: c })));
-  return { prompts, title: o.title, key: o.chart_key, choices: [...new Set(prompts.map(p => p.chord))].slice(0, 9) };
-}
-function ChoiceGame({ cat, g, l, round, r }: { cat: Catalog; g: Game; l: GameLevel; round: Round; r: Rng }) {
-  const p = l.params;
-  const song = useRef<ReturnType<typeof songCalls> | null>(null), idx = useRef(0);
-  const gen = (prev?: ChoiceQ): ChoiceQ => {
-    if (g.id === 'G_capo_quick') return capoQ(r, p.ask, p.keys, p.shapes);
-    if (g.id === 'G_hear_the_change') return hearQ(r, p.numbers);
-    if (p.songs) {
-      if (!song.current || idx.current >= song.current.prompts.length) { song.current = songCalls(cat, r); idx.current = 0; }
-      const s = song.current, c = s.prompts[idx.current++];
-      return { prompt: c.num, sub: `${s.title} · key of ${pretty(s.key)}`, choices: s.choices, answer: c.chord, key: s.key, miss: `${c.num} in ${s.key} (${s.title}) is ${c.chord}` };
-    }
-    return callNumberQ(r, p.keys, p.numbers, prev);
-  };
-  const [q, setQ] = useState<ChoiceQ>(() => gen());
-  const [picked, setPicked] = useState<string | null>(null);
-  useEffect(() => { if (q.audio) playChords(q.audio, 0.9); }, [q]);
-  const choose = (c: string) => {
-    if (picked) return;
-    const ok = c === q.answer; setPicked(c);
-    round.answer(ok, ok ? undefined : q.miss, g.id === 'G_hear_the_change' ? 2200 : 1200, g.id === 'G_hear_the_change' ? 7000 : 5000);
-    setTimeout(() => { setPicked(null); setQ(gen(q)); round.askedAt.current = performance.now(); }, ok ? 220 : 900);
-  };
-  const isNum = g.id === 'G_call_the_number';
-  return (
-    <div class="board">
-      <div class="target"><b class={isNum ? 'num' : 'q'}>{q.prompt}</b>{q.sub ? <span>{q.sub}</span> : null}
-        {q.audio ? <button class="small" onClick={() => playChords(q.audio!, 0.9)}>🔊 Again</button> : null}</div>
-      <div class={`choices n${q.choices.length > 7 ? 'many' : q.choices.length}`}>
-        {q.choices.map(c => <button class={picked ? (c === q.answer ? 'right' : c === picked ? 'wrong' : '') : ''} onClick={() => choose(c)}>{pretty(c)}</button>)}
-      </div>
-    </div>
-  );
-}
-
-// ---------- Delay Math ----------
-function DelayMath({ l, round, r }: { l: GameLevel; round: Round; r: Rng }) {
-  const gen = () => delayQ(r, l.params.bpm, l.params.notes);
-  const [q, setQ] = useState<DelayQ>(gen);
-  const [v, setV] = useState('');
-  const [fb, setFb] = useState<string | null>(null);
-  const submit = () => {
-    if (!v) return;
-    const ok = Math.abs(+v - q.ms) <= 10;
-    round.answer(ok, ok ? undefined : `${q.bpm} BPM ${DELAY_NOTES[q.note].label} = ${Math.round(q.ms)} ms`, 3000, 12000);
-    setFb(ok ? `✓ ${Math.round(q.ms)} ms` : `✗ ${Math.round(q.ms)} ms`);
-    setTimeout(() => { setFb(null); setV(''); setQ(gen()); round.askedAt.current = performance.now(); }, ok ? 400 : 1300);
-  };
-  const key = (k: string) => { if (fb) return; if (k === '⌫') setV(v.slice(0, -1)); else if (k === '✓') submit(); else if (v.length < 4) setV(v + k); };
-  return (
-    <div class="board">
-      <div class="target"><b class="q">{q.bpm} BPM</b><span>{DELAY_NOTES[q.note].label} delay, in ms (±10)</span></div>
-      <div class="readout">{fb || v || ' '}<small>ms</small></div>
-      <div class="keypad">{['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✓'].map(k => <button class={k === '✓' ? 'primary' : ''} onClick={() => key(k)}>{k}</button>)}</div>
-      <p class="muted small center">Quarter = 60000 ÷ BPM · dotted eighth = ¾ of that</p>
+          : g.id === 'G_octave_jump' ? <OctaveJump l={l} round={round} r={r} />
+            : g.id === 'G_box_runner' ? <BoxRunner cat={cat} l={l} round={round} r={r} />
+              : g.id === 'G_in_the_pocket' ? <InThePocket cat={cat} l={l} round={round} />
+                : g.id === 'G_delay_math' ? <DelayMath l={l} round={round} r={r} />
+                  : <ChoiceGame cat={cat} g={g} l={l} round={round} r={r} />}
+      {paused ? (
+        <div class="pausemenu" role="dialog" aria-label="Paused">
+          <div class="card">
+            <h2>{timed ? 'Round stopped' : 'Paused'}</h2>
+            {timed ? <p class="muted small">A click-timed round can't pick up mid-bar; restart it when you're ready.</p> : null}
+            <div class="row wrap">
+              {!timed ? <button class="primary" onClick={() => setPaused(false)}>▶ Resume</button> : null}
+              <button class={timed ? 'primary' : ''} onClick={onRestart}>↻ Restart</button>
+              <button onClick={onQuit}>✕ Quit</button>
+            </div>
+            <div class="row">
+              <button class={sheet === 'tuner' ? 'sel' : ''} onClick={() => setSheet(sheet === 'tuner' ? null : 'tuner')}>🎚 Tuner</button>
+              <button class={sheet === 'metro' ? 'sel' : ''} onClick={() => setSheet(sheet === 'metro' ? null : 'metro')}>⏱ Metronome</button>
+            </div>
+            {sheet === 'tuner' ? <div class="sheet"><TunerPanel compact /></div> : sheet === 'metro' ? <div class="sheet"><MetronomePanel compact /></div> : null}
+            <p class="muted small">{mode === 'play' ? 'The mic is off while paused. ' : ''}The tuner and metronome stop when the round goes on: the game runs its own click.</p>
+          </div>
+        </div>) : null}
     </div>
   );
 }

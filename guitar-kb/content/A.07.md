@@ -13,7 +13,7 @@ Six eighth notes per bar, felt as **two** beats: **1** 2 3 **4** 5 6. Accent 1 a
 
 {{rhythm:S5_six_eight}}
 
-{{tool:metronome:bpm=60,beats=2,sub=3}}
+{{tool:metronome:bpm=60,beats=2,sub=3,meter=6/8}}
 
 > A 6/8 song's BPM is usually counted on the big beat (the dotted quarter), so 60 BPM in 6/8 has six eighths per 2 clicks. The metronome above is set up that way.
 

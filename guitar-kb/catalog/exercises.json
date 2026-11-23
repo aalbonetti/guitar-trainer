@@ -180,7 +180,74 @@
    ]
   ],
   "duration_s": 60,
-  "target_per_min": 30
+  "target_per_min": 30,
+  "voicings": {
+   "G_4f": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      2,
+      0,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "320033",
+    "root": "G",
+    "quality": "major",
+    "label": "G (4-finger)"
+   },
+   "Cadd9": {
+    "name": "Cadd9",
+    "frets": [
+     [
+      -1,
+      3,
+      2,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "x32033",
+    "root": "C",
+    "quality": "add9"
+   },
+   "Dsus4": {
+    "name": "Dsus4",
+    "frets": [
+     [
+      -1,
+      -1,
+      0,
+      2,
+      3,
+      3
+     ]
+    ],
+    "where": "xx0233",
+    "root": "D",
+    "quality": "sus4"
+   },
+   "Em7": {
+    "name": "Em7",
+    "frets": [
+     [
+      0,
+      2,
+      2,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "022033",
+    "root": "E",
+    "quality": "m7"
+   }
+  }
  },
  {
   "id": "EX_changes_open",
@@ -221,7 +288,153 @@
    ]
   ],
   "duration_s": 60,
-  "target_per_min": 30
+  "target_per_min": 30,
+  "voicings": {
+   "Em": {
+    "name": "Em",
+    "frets": [
+     [
+      0,
+      2,
+      2,
+      0,
+      0,
+      0
+     ]
+    ],
+    "where": "022000",
+    "root": "E",
+    "quality": "minor"
+   },
+   "Am": {
+    "name": "Am",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      2,
+      1,
+      0
+     ]
+    ],
+    "where": "x02210",
+    "root": "A",
+    "quality": "minor"
+   },
+   "A": {
+    "name": "A",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      2,
+      2,
+      0
+     ]
+    ],
+    "where": "x02220",
+    "root": "A",
+    "quality": "major"
+   },
+   "D": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      -1,
+      0,
+      2,
+      3,
+      2
+     ]
+    ],
+    "where": "xx0232",
+    "root": "D",
+    "quality": "major"
+   },
+   "G": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      2,
+      0,
+      0,
+      0,
+      3
+     ]
+    ],
+    "where": "320003",
+    "root": "G",
+    "quality": "major"
+   },
+   "C": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      3,
+      2,
+      0,
+      1,
+      0
+     ]
+    ],
+    "where": "x32010",
+    "root": "C",
+    "quality": "major"
+   },
+   "E": {
+    "name": "E",
+    "frets": [
+     [
+      0,
+      2,
+      2,
+      1,
+      0,
+      0
+     ]
+    ],
+    "where": "022100",
+    "root": "E",
+    "quality": "major"
+   },
+   "Dm": {
+    "name": "Dm",
+    "frets": [
+     [
+      -1,
+      -1,
+      0,
+      2,
+      3,
+      1
+     ]
+    ],
+    "where": "xx0231",
+    "root": "D",
+    "quality": "minor"
+   },
+   "Fmaj7": {
+    "name": "Fmaj7",
+    "frets": [
+     [
+      -1,
+      -1,
+      3,
+      2,
+      1,
+      0
+     ]
+    ],
+    "where": "xx3210",
+    "root": "F",
+    "quality": "maj7"
+   }
+  }
  },
  {
   "id": "EX_root_pulse_G",
@@ -786,7 +999,7 @@
   "type": "tab",
   "meter": "4/4",
   "tempo": {
-   "start": 60,
+   "start": 65,
    "target": 100,
    "step": 4
   },
@@ -889,5 +1102,2496 @@
    }
   ],
   "loop": false
+ },
+ {
+  "id": "EX_bends_G",
+  "name": "Bends in the G box: whole, whole, half",
+  "type": "tab",
+  "meter": "4/4",
+  "events": [
+   {
+    "beat": 0,
+    "string": 3,
+    "fret": 2,
+    "dur": 2.0,
+    "tech": "bend",
+    "bend": 2
+   },
+   {
+    "beat": 2,
+    "string": 2,
+    "fret": 3,
+    "dur": 2.0,
+    "tech": "bend",
+    "bend": 2
+   },
+   {
+    "beat": 4,
+    "string": 3,
+    "fret": 4,
+    "dur": 2.0,
+    "tech": "bend",
+    "bend": 1
+   }
+  ],
+  "loop": false
+ },
+ {
+  "id": "EX_sixths_G_major",
+  "name": "G major in 6ths (strings 3 & 1)",
+  "type": "tab",
+  "meter": "4/4",
+  "events": [
+   {
+    "beat": 0.0,
+    "string": 3,
+    "fret": 0,
+    "dur": 1.0
+   },
+   {
+    "beat": 0.0,
+    "string": 1,
+    "fret": 0,
+    "dur": 1.0
+   },
+   {
+    "beat": 1.0,
+    "string": 3,
+    "fret": 2,
+    "dur": 1.0
+   },
+   {
+    "beat": 1.0,
+    "string": 1,
+    "fret": 2,
+    "dur": 1.0
+   },
+   {
+    "beat": 2.0,
+    "string": 3,
+    "fret": 4,
+    "dur": 1.0
+   },
+   {
+    "beat": 2.0,
+    "string": 1,
+    "fret": 3,
+    "dur": 1.0
+   },
+   {
+    "beat": 3.0,
+    "string": 3,
+    "fret": 5,
+    "dur": 1.0
+   },
+   {
+    "beat": 3.0,
+    "string": 1,
+    "fret": 5,
+    "dur": 1.0
+   },
+   {
+    "beat": 4.0,
+    "string": 3,
+    "fret": 7,
+    "dur": 1.0
+   },
+   {
+    "beat": 4.0,
+    "string": 1,
+    "fret": 7,
+    "dur": 1.0
+   },
+   {
+    "beat": 5.0,
+    "string": 3,
+    "fret": 9,
+    "dur": 1.0
+   },
+   {
+    "beat": 5.0,
+    "string": 1,
+    "fret": 8,
+    "dur": 1.0
+   },
+   {
+    "beat": 6.0,
+    "string": 3,
+    "fret": 11,
+    "dur": 1.0
+   },
+   {
+    "beat": 6.0,
+    "string": 1,
+    "fret": 10,
+    "dur": 1.0
+   },
+   {
+    "beat": 7.0,
+    "string": 3,
+    "fret": 12,
+    "dur": 1.0
+   },
+   {
+    "beat": 7.0,
+    "string": 1,
+    "fret": 12,
+    "dur": 1.0
+   }
+  ],
+  "loop": false
+ },
+ {
+  "id": "EX_amazing_grace_lines12",
+  "name": "Amazing Grace melody, lines 1\u20132 (G box)",
+  "type": "tab",
+  "meter": "3/4",
+  "tempo": {
+   "start": 52,
+   "target": 80,
+   "step": 4
+  },
+  "events": [
+   {
+    "beat": 2,
+    "string": 5,
+    "fret": 5,
+    "dur": 1
+   },
+   {
+    "beat": 3,
+    "string": 4,
+    "fret": 5,
+    "dur": 2
+   },
+   {
+    "beat": 5,
+    "string": 3,
+    "fret": 4,
+    "dur": 0.5
+   },
+   {
+    "beat": 5.5,
+    "string": 4,
+    "fret": 5,
+    "dur": 0.5
+   },
+   {
+    "beat": 6,
+    "string": 3,
+    "fret": 4,
+    "dur": 2
+   },
+   {
+    "beat": 8,
+    "string": 3,
+    "fret": 2,
+    "dur": 1
+   },
+   {
+    "beat": 9,
+    "string": 4,
+    "fret": 5,
+    "dur": 2
+   },
+   {
+    "beat": 11,
+    "string": 4,
+    "fret": 2,
+    "dur": 1
+   },
+   {
+    "beat": 12,
+    "string": 5,
+    "fret": 5,
+    "dur": 2
+   },
+   {
+    "beat": 14,
+    "string": 5,
+    "fret": 5,
+    "dur": 1
+   },
+   {
+    "beat": 15,
+    "string": 4,
+    "fret": 5,
+    "dur": 2
+   },
+   {
+    "beat": 17,
+    "string": 3,
+    "fret": 4,
+    "dur": 0.5
+   },
+   {
+    "beat": 17.5,
+    "string": 4,
+    "fret": 5,
+    "dur": 0.5
+   },
+   {
+    "beat": 18,
+    "string": 3,
+    "fret": 4,
+    "dur": 2
+   },
+   {
+    "beat": 20,
+    "string": 3,
+    "fret": 2,
+    "dur": 1
+   },
+   {
+    "beat": 21,
+    "string": 2,
+    "fret": 3,
+    "dur": 3
+   }
+  ],
+  "loop": false
+ },
+ {
+  "id": "EX_harmonics_swells",
+  "name": "Harmonics at frets 12, 7, 5 (strings 3-2-1), then three swelled notes",
+  "type": "tab",
+  "meter": "4/4",
+  "events": [
+   {
+    "beat": 0.0,
+    "string": 3,
+    "fret": 12,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 2.0,
+    "string": 2,
+    "fret": 12,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 4.0,
+    "string": 1,
+    "fret": 12,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 6.0,
+    "string": 3,
+    "fret": 7,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 8.0,
+    "string": 2,
+    "fret": 7,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 10.0,
+    "string": 1,
+    "fret": 7,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 12.0,
+    "string": 3,
+    "fret": 5,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 14.0,
+    "string": 2,
+    "fret": 5,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 16.0,
+    "string": 1,
+    "fret": 5,
+    "dur": 2.0,
+    "tech": "harmonic"
+   },
+   {
+    "beat": 18.0,
+    "string": 2,
+    "fret": 3,
+    "dur": 2.0,
+    "tech": "swell"
+   },
+   {
+    "beat": 20.0,
+    "string": 2,
+    "fret": 5,
+    "dur": 2.0,
+    "tech": "swell"
+   },
+   {
+    "beat": 22.0,
+    "string": 1,
+    "fret": 3,
+    "dur": 2.0,
+    "tech": "swell"
+   }
+  ],
+  "loop": false
+ },
+ {
+  "id": "EX_changes_em_g",
+  "name": "Em \u2194 G one-minute changes",
+  "type": "chord_changes",
+  "pairs": [
+   [
+    "Em",
+    "G|G_4f"
+   ]
+  ],
+  "duration_s": 60,
+  "target_per_min": 30,
+  "voicings": {
+   "Em": {
+    "name": "Em",
+    "frets": [
+     [
+      0,
+      2,
+      2,
+      0,
+      0,
+      0
+     ]
+    ],
+    "where": "022000",
+    "root": "E",
+    "quality": "minor"
+   },
+   "G|G_4f": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      2,
+      0,
+      0,
+      0,
+      3
+     ],
+     [
+      3,
+      2,
+      0,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "320003 or 320033",
+    "root": "G",
+    "quality": "major"
+   }
+  }
+ },
+ {
+  "id": "EX_changes_dfamily",
+  "name": "D-family one-minute changes",
+  "type": "chord_changes",
+  "pairs": [
+   [
+    "D",
+    "A"
+   ],
+   [
+    "D",
+    "Bm_partial"
+   ]
+  ],
+  "duration_s": 60,
+  "target_per_min": 25,
+  "voicings": {
+   "D": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      -1,
+      0,
+      2,
+      3,
+      2
+     ]
+    ],
+    "where": "xx0232",
+    "root": "D",
+    "quality": "major"
+   },
+   "A": {
+    "name": "A",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      2,
+      2,
+      0
+     ]
+    ],
+    "where": "x02220",
+    "root": "A",
+    "quality": "major"
+   },
+   "Bm_partial": {
+    "name": "Bm",
+    "frets": [
+     [
+      -1,
+      -1,
+      4,
+      4,
+      3,
+      2
+     ]
+    ],
+    "where": "xx4432",
+    "root": "B",
+    "quality": "minor",
+    "label": "Bm (partial)"
+   }
+  }
+ },
+ {
+  "id": "EX_changes_cfamily",
+  "name": "C-family one-minute changes",
+  "type": "chord_changes",
+  "pairs": [
+   [
+    "C",
+    "Am"
+   ],
+   [
+    "C",
+    "Fmaj7"
+   ],
+   [
+    "G|G_4f",
+    "C"
+   ]
+  ],
+  "duration_s": 60,
+  "target_per_min": 25,
+  "voicings": {
+   "C": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      3,
+      2,
+      0,
+      1,
+      0
+     ]
+    ],
+    "where": "x32010",
+    "root": "C",
+    "quality": "major"
+   },
+   "Am": {
+    "name": "Am",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      2,
+      1,
+      0
+     ]
+    ],
+    "where": "x02210",
+    "root": "A",
+    "quality": "minor"
+   },
+   "Fmaj7": {
+    "name": "Fmaj7",
+    "frets": [
+     [
+      -1,
+      -1,
+      3,
+      2,
+      1,
+      0
+     ]
+    ],
+    "where": "xx3210",
+    "root": "F",
+    "quality": "maj7"
+   },
+   "G|G_4f": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      2,
+      0,
+      0,
+      0,
+      3
+     ],
+     [
+      3,
+      2,
+      0,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "320003 or 320033",
+    "root": "G",
+    "quality": "major"
+   }
+  }
+ },
+ {
+  "id": "EX_changes_triads_G",
+  "name": "Triad changes on strings 3-2-1, 1\u20135\u20136m\u20134 in G",
+  "type": "chord_changes",
+  "pairs": [
+   [
+    "tri_321_G_inv2",
+    "tri_321_D_root"
+   ],
+   [
+    "tri_321_D_root",
+    "tri_321_Em_root"
+   ],
+   [
+    "tri_321_Em_root",
+    "tri_321_C_inv1"
+   ],
+   [
+    "tri_321_C_inv1",
+    "tri_321_G_inv2"
+   ]
+  ],
+  "duration_s": 60,
+  "target_per_min": 20,
+  "voicings": {
+   "tri_321_G_inv2": {
+    "name": "G",
+    "frets": [
+     [
+      -1,
+      -1,
+      -1,
+      7,
+      8,
+      7
+     ]
+    ],
+    "where": "xxx787",
+    "root": "G",
+    "quality": "major"
+   },
+   "tri_321_D_root": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      -1,
+      -1,
+      7,
+      7,
+      5
+     ]
+    ],
+    "where": "xxx775",
+    "root": "D",
+    "quality": "major"
+   },
+   "tri_321_Em_root": {
+    "name": "Em",
+    "frets": [
+     [
+      -1,
+      -1,
+      -1,
+      9,
+      8,
+      7
+     ]
+    ],
+    "where": "xxx987",
+    "root": "E",
+    "quality": "minor"
+   },
+   "tri_321_C_inv1": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      -1,
+      -1,
+      9,
+      8,
+      8
+     ]
+    ],
+    "where": "xxx988",
+    "root": "C",
+    "quality": "major"
+   }
+  }
+ },
+ {
+  "id": "EX_changes_drone",
+  "name": "Drone-voicing one-minute changes (keys of E and D)",
+  "type": "chord_changes",
+  "pairs": [
+   [
+    "E",
+    "Bsus4_drone"
+   ],
+   [
+    "Csharpm7_drone",
+    "Asus2"
+   ],
+   [
+    "D",
+    "G_over_B"
+   ],
+   [
+    "Em7",
+    "A7sus4"
+   ]
+  ],
+  "duration_s": 60,
+  "target_per_min": 25,
+  "voicings": {
+   "E": {
+    "name": "E",
+    "frets": [
+     [
+      0,
+      2,
+      2,
+      1,
+      0,
+      0
+     ]
+    ],
+    "where": "022100",
+    "root": "E",
+    "quality": "major"
+   },
+   "Bsus4_drone": {
+    "name": "Bsus4",
+    "frets": [
+     [
+      -1,
+      2,
+      4,
+      4,
+      0,
+      0
+     ]
+    ],
+    "where": "x24400",
+    "root": "B",
+    "quality": "sus4"
+   },
+   "Csharpm7_drone": {
+    "name": "C#m7",
+    "frets": [
+     [
+      -1,
+      4,
+      6,
+      4,
+      0,
+      0
+     ]
+    ],
+    "where": "x46400",
+    "root": "C#",
+    "quality": "m7"
+   },
+   "Asus2": {
+    "name": "Asus2",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      4,
+      0,
+      0
+     ]
+    ],
+    "where": "x02400",
+    "root": "A",
+    "quality": "sus2"
+   },
+   "D": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      -1,
+      0,
+      2,
+      3,
+      2
+     ]
+    ],
+    "where": "xx0232",
+    "root": "D",
+    "quality": "major"
+   },
+   "G_over_B": {
+    "name": "G/B",
+    "frets": [
+     [
+      -1,
+      2,
+      0,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "x20033",
+    "root": "G",
+    "quality": "major"
+   },
+   "Em7": {
+    "name": "Em7",
+    "frets": [
+     [
+      0,
+      2,
+      2,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "022033",
+    "root": "E",
+    "quality": "m7"
+   },
+   "A7sus4": {
+    "name": "A7sus4",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      0,
+      3,
+      0
+     ]
+    ],
+    "where": "x02030",
+    "root": "A",
+    "quality": "7sus4"
+   }
+  }
+ },
+ {
+  "id": "EX_capo_keys",
+  "name": "Capo to the leader\u2019s key: 1\u20135\u20136m\u20134 twice",
+  "type": "chord_progression",
+  "meter": "4/4",
+  "pace": "own",
+  "pick": "random",
+  "show": "chords",
+  "variants": [
+   {
+    "key": "A",
+    "capo": 2,
+    "chords": [
+     "G|G_4f",
+     "D",
+     "Em",
+     "C|Cadd9",
+     "G|G_4f",
+     "D",
+     "Em",
+     "C|Cadd9"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ],
+    "shapes": "G",
+    "label": "Key of A, capo 2, G shapes"
+   },
+   {
+    "key": "Bb",
+    "capo": 3,
+    "chords": [
+     "G|G_4f",
+     "D",
+     "Em",
+     "C|Cadd9",
+     "G|G_4f",
+     "D",
+     "Em",
+     "C|Cadd9"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ],
+    "shapes": "G",
+    "label": "Key of Bb, capo 3, G shapes"
+   },
+   {
+    "key": "B",
+    "capo": 4,
+    "chords": [
+     "G|G_4f",
+     "D",
+     "Em",
+     "C|Cadd9",
+     "G|G_4f",
+     "D",
+     "Em",
+     "C|Cadd9"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ],
+    "shapes": "G",
+    "label": "Key of B, capo 4, G shapes"
+   },
+   {
+    "key": "Db",
+    "capo": 1,
+    "chords": [
+     "C",
+     "G|G_4f",
+     "Am",
+     "Fmaj7",
+     "C",
+     "G|G_4f",
+     "Am",
+     "Fmaj7"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ],
+    "shapes": "C",
+    "label": "Key of Db, capo 1, C shapes"
+   },
+   {
+    "key": "Eb",
+    "capo": 1,
+    "chords": [
+     "D",
+     "A",
+     "Bm_partial",
+     "G|G_4f",
+     "D",
+     "A",
+     "Bm_partial",
+     "G|G_4f"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ],
+    "shapes": "D",
+    "label": "Key of Eb, capo 1, D shapes"
+   },
+   {
+    "key": "F",
+    "capo": 3,
+    "chords": [
+     "D",
+     "A",
+     "Bm_partial",
+     "G|G_4f",
+     "D",
+     "A",
+     "Bm_partial",
+     "G|G_4f"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ],
+    "shapes": "D",
+    "label": "Key of F, capo 3, D shapes"
+   },
+   {
+    "key": "Ab",
+    "capo": 1,
+    "chords": [
+     "G|G_4f",
+     "D",
+     "Em",
+     "C|Cadd9",
+     "G|G_4f",
+     "D",
+     "Em",
+     "C|Cadd9"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ],
+    "shapes": "G",
+    "label": "Key of Ab, capo 1, G shapes"
+   },
+   {
+    "key": "F",
+    "capo": 1,
+    "chords": [
+     "E",
+     "A",
+     "E",
+     "B7",
+     "E",
+     "A",
+     "E",
+     "B7"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5(7)",
+     "1",
+     "4",
+     "1",
+     "5(7)"
+    ],
+    "shapes": "E",
+    "label": "Key of F, capo 1, E shapes"
+   },
+   {
+    "key": "Ab",
+    "capo": 4,
+    "chords": [
+     "E",
+     "A",
+     "E",
+     "B7",
+     "E",
+     "A",
+     "E",
+     "B7"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5(7)",
+     "1",
+     "4",
+     "1",
+     "5(7)"
+    ],
+    "shapes": "E",
+    "label": "Key of Ab, capo 4, E shapes"
+   },
+   {
+    "key": "Bb",
+    "capo": 1,
+    "chords": [
+     "A",
+     "D",
+     "A",
+     "E",
+     "A",
+     "D",
+     "A",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5",
+     "1",
+     "4",
+     "1",
+     "5"
+    ],
+    "shapes": "A",
+    "label": "Key of Bb, capo 1, A shapes"
+   },
+   {
+    "key": "B",
+    "capo": 2,
+    "chords": [
+     "A",
+     "D",
+     "A",
+     "E",
+     "A",
+     "D",
+     "A",
+     "E"
+    ],
+    "numbers": [
+     "1",
+     "4",
+     "1",
+     "5",
+     "1",
+     "4",
+     "1",
+     "5"
+    ],
+    "shapes": "A",
+    "label": "Key of B, capo 2, A shapes"
+   }
+  ],
+  "strums_per_chord": 4,
+  "notes": "The leader names a key; put the capo on and play the shapes shown.",
+  "voicings": {
+   "G|G_4f": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      2,
+      0,
+      0,
+      0,
+      3
+     ],
+     [
+      3,
+      2,
+      0,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "320003 or 320033",
+    "root": "G",
+    "quality": "major"
+   },
+   "D": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      -1,
+      0,
+      2,
+      3,
+      2
+     ]
+    ],
+    "where": "xx0232",
+    "root": "D",
+    "quality": "major"
+   },
+   "Em": {
+    "name": "Em",
+    "frets": [
+     [
+      0,
+      2,
+      2,
+      0,
+      0,
+      0
+     ]
+    ],
+    "where": "022000",
+    "root": "E",
+    "quality": "minor"
+   },
+   "C|Cadd9": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      3,
+      2,
+      0,
+      1,
+      0
+     ],
+     [
+      -1,
+      3,
+      2,
+      0,
+      3,
+      3
+     ]
+    ],
+    "where": "x32010 or x32033",
+    "root": "C",
+    "quality": "major"
+   },
+   "C": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      3,
+      2,
+      0,
+      1,
+      0
+     ]
+    ],
+    "where": "x32010",
+    "root": "C",
+    "quality": "major"
+   },
+   "Am": {
+    "name": "Am",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      2,
+      1,
+      0
+     ]
+    ],
+    "where": "x02210",
+    "root": "A",
+    "quality": "minor"
+   },
+   "Fmaj7": {
+    "name": "Fmaj7",
+    "frets": [
+     [
+      -1,
+      -1,
+      3,
+      2,
+      1,
+      0
+     ]
+    ],
+    "where": "xx3210",
+    "root": "F",
+    "quality": "maj7"
+   },
+   "A": {
+    "name": "A",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      2,
+      2,
+      0
+     ]
+    ],
+    "where": "x02220",
+    "root": "A",
+    "quality": "major"
+   },
+   "Bm_partial": {
+    "name": "Bm",
+    "frets": [
+     [
+      -1,
+      -1,
+      4,
+      4,
+      3,
+      2
+     ]
+    ],
+    "where": "xx4432",
+    "root": "B",
+    "quality": "minor",
+    "label": "Bm (partial)"
+   },
+   "E": {
+    "name": "E",
+    "frets": [
+     [
+      0,
+      2,
+      2,
+      1,
+      0,
+      0
+     ]
+    ],
+    "where": "022100",
+    "root": "E",
+    "quality": "major"
+   },
+   "B7": {
+    "name": "B7",
+    "frets": [
+     [
+      -1,
+      2,
+      1,
+      2,
+      0,
+      2
+     ]
+    ],
+    "where": "x21202",
+    "root": "B",
+    "quality": "7"
+   }
+  }
+ },
+ {
+  "id": "EX_amazing_grace_chords",
+  "name": "Amazing Grace chords (waltz strum, one bar per chord)",
+  "type": "chord_progression",
+  "meter": "3/4",
+  "pace": "timed",
+  "pick": "choose",
+  "show": "chords",
+  "variants": [
+   {
+    "key": "G",
+    "capo": 0,
+    "chords": [
+     "G",
+     "G",
+     "C",
+     "G",
+     "G",
+     "G",
+     "D",
+     "D",
+     "G",
+     "G7",
+     "C",
+     "G",
+     "G",
+     "D",
+     "G",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "1",
+     "4",
+     "1",
+     "1",
+     "1",
+     "5",
+     "5",
+     "1",
+     "1(7)",
+     "4",
+     "1",
+     "1",
+     "5",
+     "1",
+     "1"
+    ],
+    "shapes": "G",
+    "label": "Key of G, G shapes"
+   },
+   {
+    "key": "A",
+    "capo": 2,
+    "chords": [
+     "G",
+     "G",
+     "C",
+     "G",
+     "G",
+     "G",
+     "D",
+     "D",
+     "G",
+     "G7",
+     "C",
+     "G",
+     "G",
+     "D",
+     "G",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "1",
+     "4",
+     "1",
+     "1",
+     "1",
+     "5",
+     "5",
+     "1",
+     "1(7)",
+     "4",
+     "1",
+     "1",
+     "5",
+     "1",
+     "1"
+    ],
+    "shapes": "G",
+    "label": "Key of A, capo 2, G shapes"
+   },
+   {
+    "key": "Bb",
+    "capo": 3,
+    "chords": [
+     "G",
+     "G",
+     "C",
+     "G",
+     "G",
+     "G",
+     "D",
+     "D",
+     "G",
+     "G7",
+     "C",
+     "G",
+     "G",
+     "D",
+     "G",
+     "G"
+    ],
+    "numbers": [
+     "1",
+     "1",
+     "4",
+     "1",
+     "1",
+     "1",
+     "5",
+     "5",
+     "1",
+     "1(7)",
+     "4",
+     "1",
+     "1",
+     "5",
+     "1",
+     "1"
+    ],
+    "shapes": "G",
+    "label": "Key of Bb, capo 3, G shapes"
+   }
+  ],
+  "tempo": {
+   "start": 52,
+   "target": 80,
+   "step": 4
+  },
+  "beats_per_chord": 3,
+  "voicings": {
+   "G": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      2,
+      0,
+      0,
+      0,
+      3
+     ]
+    ],
+    "where": "320003",
+    "root": "G",
+    "quality": "major"
+   },
+   "C": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      3,
+      2,
+      0,
+      1,
+      0
+     ]
+    ],
+    "where": "x32010",
+    "root": "C",
+    "quality": "major"
+   },
+   "D": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      -1,
+      0,
+      2,
+      3,
+      2
+     ]
+    ],
+    "where": "xx0232",
+    "root": "D",
+    "quality": "major"
+   },
+   "G7": {
+    "name": "G7",
+    "frets": [
+     [
+      3,
+      2,
+      0,
+      0,
+      0,
+      1
+     ]
+    ],
+    "where": "320001",
+    "root": "G",
+    "quality": "7"
+   }
+  }
+ },
+ {
+  "id": "EX_barre_F_Bm",
+  "name": "F and Bm barres in context: C\u2013Am\u2013F\u2013G, then D\u2013Bm\u2013G\u2013A (each twice)",
+  "type": "chord_progression",
+  "meter": "4/4",
+  "pace": "own",
+  "pick": "only",
+  "show": "chords",
+  "variants": [
+   {
+    "key": "C",
+    "capo": 0,
+    "chords": [
+     "C",
+     "Am",
+     "F",
+     "G",
+     "C",
+     "Am",
+     "F",
+     "G",
+     "D",
+     "Bm",
+     "G",
+     "A",
+     "D",
+     "Bm",
+     "G",
+     "A"
+    ],
+    "label": "C\u2013Am\u2013F\u2013G and D\u2013Bm\u2013G\u2013A"
+   }
+  ],
+  "strums_per_chord": 4,
+  "notes": "Only the F and Bm strums are graded, and each needs the goal on its own. The app listens for the barre\u2019s low root, so Fmaj7 or the partial Bm doesn\u2019t count.",
+  "decoys": [
+   "Fmaj7",
+   "Bm_partial"
+  ],
+  "focus": [
+   "F",
+   "Bm"
+  ],
+  "voicings": {
+   "C": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      3,
+      2,
+      0,
+      1,
+      0
+     ]
+    ],
+    "where": "x32010",
+    "root": "C",
+    "quality": "major"
+   },
+   "Am": {
+    "name": "Am",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      2,
+      1,
+      0
+     ]
+    ],
+    "where": "x02210",
+    "root": "A",
+    "quality": "minor"
+   },
+   "F": {
+    "name": "F",
+    "frets": [
+     [
+      1,
+      3,
+      3,
+      2,
+      1,
+      1
+     ]
+    ],
+    "where": "133211",
+    "root": "F",
+    "quality": "major"
+   },
+   "G": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      2,
+      0,
+      0,
+      0,
+      3
+     ]
+    ],
+    "where": "320003",
+    "root": "G",
+    "quality": "major"
+   },
+   "D": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      -1,
+      0,
+      2,
+      3,
+      2
+     ]
+    ],
+    "where": "xx0232",
+    "root": "D",
+    "quality": "major"
+   },
+   "Bm": {
+    "name": "Bm",
+    "frets": [
+     [
+      -1,
+      2,
+      4,
+      4,
+      3,
+      2
+     ]
+    ],
+    "where": "x24432",
+    "root": "B",
+    "quality": "minor"
+   },
+   "A": {
+    "name": "A",
+    "frets": [
+     [
+      -1,
+      0,
+      2,
+      2,
+      2,
+      0
+     ]
+    ],
+    "where": "x02220",
+    "root": "A",
+    "quality": "major"
+   },
+   "Fmaj7": {
+    "name": "Fmaj7",
+    "frets": [
+     [
+      -1,
+      -1,
+      3,
+      2,
+      1,
+      0
+     ]
+    ],
+    "where": "xx3210",
+    "root": "F",
+    "quality": "maj7"
+   },
+   "Bm_partial": {
+    "name": "Bm",
+    "frets": [
+     [
+      -1,
+      -1,
+      4,
+      4,
+      3,
+      2
+     ]
+    ],
+    "where": "xx4432",
+    "root": "B",
+    "quality": "minor",
+    "label": "Bm (partial)"
+   }
+  }
+ },
+ {
+  "id": "EX_triads_432_G",
+  "name": "Triads on strings 4-3-2: 1\u20135\u20136m\u20134 in G",
+  "type": "chord_progression",
+  "meter": "4/4",
+  "pace": "timed",
+  "pick": "only",
+  "show": "chords",
+  "variants": [
+   {
+    "key": "G",
+    "capo": 0,
+    "chords": [
+     "tri_432_G_root",
+     "tri_432_D_inv1",
+     "tri_432_Em_inv1",
+     "tri_432_C_inv2",
+     "tri_432_G_root",
+     "tri_432_D_inv1",
+     "tri_432_Em_inv1",
+     "tri_432_C_inv2"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ],
+    "label": "Key of G"
+   }
+  ],
+  "bpm": 70,
+  "beats_per_chord": 4,
+  "voicings": {
+   "tri_432_G_root": {
+    "name": "G",
+    "frets": [
+     [
+      -1,
+      -1,
+      5,
+      4,
+      3,
+      -1
+     ]
+    ],
+    "where": "xx543x",
+    "root": "G",
+    "quality": "major"
+   },
+   "tri_432_D_inv1": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      -1,
+      4,
+      2,
+      3,
+      -1
+     ]
+    ],
+    "where": "xx423x",
+    "root": "D",
+    "quality": "major"
+   },
+   "tri_432_Em_inv1": {
+    "name": "Em",
+    "frets": [
+     [
+      -1,
+      -1,
+      5,
+      4,
+      5,
+      -1
+     ]
+    ],
+    "where": "xx545x",
+    "root": "E",
+    "quality": "minor"
+   },
+   "tri_432_C_inv2": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      -1,
+      5,
+      5,
+      5,
+      -1
+     ]
+    ],
+    "where": "xx555x",
+    "root": "C",
+    "quality": "major"
+   }
+  }
+ },
+ {
+  "id": "EX_barre_progression_G",
+  "name": "Barre chords: 1\u20135\u20136m\u20134 in G (G E-shape 3, D A-shape 5, Em A-shape 7, C A-shape 3)",
+  "type": "chord_progression",
+  "meter": "4/4",
+  "pace": "timed",
+  "pick": "only",
+  "show": "chords",
+  "variants": [
+   {
+    "key": "G",
+    "capo": 0,
+    "chords": [
+     "E_shape_major@3",
+     "A_shape_major@5",
+     "A_shape_minor@7",
+     "A_shape_major@3",
+     "E_shape_major@3",
+     "A_shape_major@5",
+     "A_shape_minor@7",
+     "A_shape_major@3"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "5",
+     "6m",
+     "4"
+    ],
+    "label": "Key of G"
+   }
+  ],
+  "bpm": 80,
+  "beats_per_chord": 4,
+  "voicings": {
+   "E_shape_major@3": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      5,
+      5,
+      4,
+      3,
+      3
+     ]
+    ],
+    "where": "355433",
+    "root": "G",
+    "quality": "major"
+   },
+   "A_shape_major@5": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      5,
+      7,
+      7,
+      7,
+      5
+     ]
+    ],
+    "where": "x57775",
+    "root": "D",
+    "quality": "major"
+   },
+   "A_shape_minor@7": {
+    "name": "Em",
+    "frets": [
+     [
+      -1,
+      7,
+      9,
+      9,
+      8,
+      7
+     ]
+    ],
+    "where": "x79987",
+    "root": "E",
+    "quality": "minor"
+   },
+   "A_shape_major@3": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      3,
+      5,
+      5,
+      5,
+      3
+     ]
+    ],
+    "where": "x35553",
+    "root": "C",
+    "quality": "major"
+   }
+  }
+ },
+ {
+  "id": "EX_number_chart",
+  "name": "Number chart in a key named on the spot (barre shapes)",
+  "type": "chord_progression",
+  "meter": "4/4",
+  "pace": "own",
+  "pick": "random",
+  "show": "numbers",
+  "variants": [
+   {
+    "key": "G",
+    "capo": 0,
+    "chords": [
+     "E_shape_major@3",
+     "A_shape_major@5",
+     "A_shape_minor@7",
+     "A_shape_major@3",
+     "E_shape_major@3",
+     "A_shape_major@3",
+     "E_shape_minor@5",
+     "A_shape_major@5"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "4",
+     "2m",
+     "5"
+    ],
+    "label": "Key of G"
+   },
+   {
+    "key": "A",
+    "capo": 0,
+    "chords": [
+     "E_shape_major@5",
+     "A_shape_major@7",
+     "A_shape_minor@9",
+     "A_shape_major@5",
+     "E_shape_major@5",
+     "A_shape_major@5",
+     "E_shape_minor@7",
+     "A_shape_major@7"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "4",
+     "2m",
+     "5"
+    ],
+    "label": "Key of A"
+   },
+   {
+    "key": "Bb",
+    "capo": 0,
+    "chords": [
+     "E_shape_major@6",
+     "A_shape_major@8",
+     "A_shape_minor@10",
+     "A_shape_major@6",
+     "E_shape_major@6",
+     "A_shape_major@6",
+     "E_shape_minor@8",
+     "A_shape_major@8"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "4",
+     "2m",
+     "5"
+    ],
+    "label": "Key of Bb"
+   },
+   {
+    "key": "B",
+    "capo": 0,
+    "chords": [
+     "E_shape_major@7",
+     "A_shape_major@9",
+     "A_shape_minor@11",
+     "A_shape_major@7",
+     "E_shape_major@7",
+     "A_shape_major@7",
+     "E_shape_minor@9",
+     "A_shape_major@9"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "4",
+     "2m",
+     "5"
+    ],
+    "label": "Key of B",
+    "names": {
+     "A_shape_minor@11": "G#m"
+    }
+   },
+   {
+    "key": "C",
+    "capo": 0,
+    "chords": [
+     "E_shape_major@8",
+     "A_shape_major@10",
+     "A_shape_minor@12",
+     "A_shape_major@8",
+     "E_shape_major@8",
+     "A_shape_major@8",
+     "E_shape_minor@10",
+     "A_shape_major@10"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "4",
+     "2m",
+     "5"
+    ],
+    "label": "Key of C"
+   },
+   {
+    "key": "F",
+    "capo": 0,
+    "chords": [
+     "E_shape_major@1",
+     "A_shape_major@3",
+     "A_shape_minor@5",
+     "A_shape_major@1",
+     "E_shape_major@1",
+     "A_shape_major@1",
+     "E_shape_minor@3",
+     "A_shape_major@3"
+    ],
+    "numbers": [
+     "1",
+     "5",
+     "6m",
+     "4",
+     "1",
+     "4",
+     "2m",
+     "5"
+    ],
+    "label": "Key of F"
+   }
+  ],
+  "strums_per_chord": 4,
+  "notes": "Only the numbers and the key are shown. Play them as barre chords from the neck map.",
+  "voicings": {
+   "E_shape_major@3": {
+    "name": "G",
+    "frets": [
+     [
+      3,
+      5,
+      5,
+      4,
+      3,
+      3
+     ]
+    ],
+    "where": "355433",
+    "root": "G",
+    "quality": "major"
+   },
+   "A_shape_major@5": {
+    "name": "D",
+    "frets": [
+     [
+      -1,
+      5,
+      7,
+      7,
+      7,
+      5
+     ]
+    ],
+    "where": "x57775",
+    "root": "D",
+    "quality": "major"
+   },
+   "A_shape_minor@7": {
+    "name": "Em",
+    "frets": [
+     [
+      -1,
+      7,
+      9,
+      9,
+      8,
+      7
+     ]
+    ],
+    "where": "x79987",
+    "root": "E",
+    "quality": "minor"
+   },
+   "A_shape_major@3": {
+    "name": "C",
+    "frets": [
+     [
+      -1,
+      3,
+      5,
+      5,
+      5,
+      3
+     ]
+    ],
+    "where": "x35553",
+    "root": "C",
+    "quality": "major"
+   },
+   "E_shape_minor@5": {
+    "name": "Am",
+    "frets": [
+     [
+      5,
+      7,
+      7,
+      5,
+      5,
+      5
+     ]
+    ],
+    "where": "577555",
+    "root": "A",
+    "quality": "minor"
+   },
+   "E_shape_major@5": {
+    "name": "A",
+    "frets": [
+     [
+      5,
+      7,
+      7,
+      6,
+      5,
+      5
+     ]
+    ],
+    "where": "577655",
+    "root": "A",
+    "quality": "major"
+   },
+   "A_shape_major@7": {
+    "name": "E",
+    "frets": [
+     [
+      -1,
+      7,
+      9,
+      9,
+      9,
+      7
+     ]
+    ],
+    "where": "x79997",
+    "root": "E",
+    "quality": "major"
+   },
+   "A_shape_minor@9": {
+    "name": "F#m",
+    "frets": [
+     [
+      -1,
+      9,
+      11,
+      11,
+      10,
+      9
+     ]
+    ],
+    "where": "x9(11)(11)(10)9",
+    "root": "F#",
+    "quality": "minor"
+   },
+   "E_shape_minor@7": {
+    "name": "Bm",
+    "frets": [
+     [
+      7,
+      9,
+      9,
+      7,
+      7,
+      7
+     ]
+    ],
+    "where": "799777",
+    "root": "B",
+    "quality": "minor"
+   },
+   "E_shape_major@6": {
+    "name": "Bb",
+    "frets": [
+     [
+      6,
+      8,
+      8,
+      7,
+      6,
+      6
+     ]
+    ],
+    "where": "688766",
+    "root": "Bb",
+    "quality": "major"
+   },
+   "A_shape_major@8": {
+    "name": "F",
+    "frets": [
+     [
+      -1,
+      8,
+      10,
+      10,
+      10,
+      8
+     ]
+    ],
+    "where": "x8(10)(10)(10)8",
+    "root": "F",
+    "quality": "major"
+   },
+   "A_shape_minor@10": {
+    "name": "Gm",
+    "frets": [
+     [
+      -1,
+      10,
+      12,
+      12,
+      11,
+      10
+     ]
+    ],
+    "where": "x(10)(12)(12)(11)(10)",
+    "root": "G",
+    "quality": "minor"
+   },
+   "A_shape_major@6": {
+    "name": "Eb",
+    "frets": [
+     [
+      -1,
+      6,
+      8,
+      8,
+      8,
+      6
+     ]
+    ],
+    "where": "x68886",
+    "root": "Eb",
+    "quality": "major"
+   },
+   "E_shape_minor@8": {
+    "name": "Cm",
+    "frets": [
+     [
+      8,
+      10,
+      10,
+      8,
+      8,
+      8
+     ]
+    ],
+    "where": "8(10)(10)888",
+    "root": "C",
+    "quality": "minor"
+   },
+   "E_shape_major@7": {
+    "name": "B",
+    "frets": [
+     [
+      7,
+      9,
+      9,
+      8,
+      7,
+      7
+     ]
+    ],
+    "where": "799877",
+    "root": "B",
+    "quality": "major"
+   },
+   "A_shape_major@9": {
+    "name": "F#",
+    "frets": [
+     [
+      -1,
+      9,
+      11,
+      11,
+      11,
+      9
+     ]
+    ],
+    "where": "x9(11)(11)(11)9",
+    "root": "F#",
+    "quality": "major"
+   },
+   "A_shape_minor@11": {
+    "name": "Abm",
+    "frets": [
+     [
+      -1,
+      11,
+      13,
+      13,
+      12,
+      11
+     ]
+    ],
+    "where": "x(11)(13)(13)(12)(11)",
+    "root": "Ab",
+    "quality": "minor"
+   },
+   "E_shape_minor@9": {
+    "name": "C#m",
+    "frets": [
+     [
+      9,
+      11,
+      11,
+      9,
+      9,
+      9
+     ]
+    ],
+    "where": "9(11)(11)999",
+    "root": "C#",
+    "quality": "minor"
+   },
+   "E_shape_major@8": {
+    "name": "C",
+    "frets": [
+     [
+      8,
+      10,
+      10,
+      9,
+      8,
+      8
+     ]
+    ],
+    "where": "8(10)(10)988",
+    "root": "C",
+    "quality": "major"
+   },
+   "A_shape_major@10": {
+    "name": "G",
+    "frets": [
+     [
+      -1,
+      10,
+      12,
+      12,
+      12,
+      10
+     ]
+    ],
+    "where": "x(10)(12)(12)(12)(10)",
+    "root": "G",
+    "quality": "major"
+   },
+   "A_shape_minor@12": {
+    "name": "Am",
+    "frets": [
+     [
+      -1,
+      12,
+      14,
+      14,
+      13,
+      12
+     ]
+    ],
+    "where": "x(12)(14)(14)(13)(12)",
+    "root": "A",
+    "quality": "minor"
+   },
+   "E_shape_minor@10": {
+    "name": "Dm",
+    "frets": [
+     [
+      10,
+      12,
+      12,
+      10,
+      10,
+      10
+     ]
+    ],
+    "where": "(10)(12)(12)(10)(10)(10)",
+    "root": "D",
+    "quality": "minor"
+   },
+   "E_shape_major@1": {
+    "name": "F",
+    "frets": [
+     [
+      1,
+      3,
+      3,
+      2,
+      1,
+      1
+     ]
+    ],
+    "where": "133211",
+    "root": "F",
+    "quality": "major"
+   },
+   "A_shape_minor@5": {
+    "name": "Dm",
+    "frets": [
+     [
+      -1,
+      5,
+      7,
+      7,
+      6,
+      5
+     ]
+    ],
+    "where": "x57765",
+    "root": "D",
+    "quality": "minor"
+   },
+   "A_shape_major@1": {
+    "name": "Bb",
+    "frets": [
+     [
+      -1,
+      1,
+      3,
+      3,
+      3,
+      1
+     ]
+    ],
+    "where": "x13331",
+    "root": "Bb",
+    "quality": "major"
+   },
+   "E_shape_minor@3": {
+    "name": "Gm",
+    "frets": [
+     [
+      3,
+      5,
+      5,
+      3,
+      3,
+      3
+     ]
+    ],
+    "where": "355333",
+    "root": "G",
+    "quality": "minor"
+   }
+  }
  }
 ]

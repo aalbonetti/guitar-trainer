@@ -23,6 +23,10 @@ When the chord changes, pick the inversion of the next chord that's **nearest** 
 
 {{exercise:EX_triads_I_V_vi_IV_G}}
 
+Then one minute on each change of the progression, counting clean triad changes:
+
+{{exercise:EX_changes_triads_G}}
+
 {{tool:metronome:bpm=60,beats=4,sub=1}}
 
 ### Goal

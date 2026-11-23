@@ -15,6 +15,8 @@ These chords live in the **key of D** and the **key of A**, two of the most comm
 - **A ↔ Asus4**: just string 2 moving between fret 2 and fret 3. Use it to decorate a long A chord.
 - **D ↔ Bm**: the biggest jump. Slow is fine.
 
+{{exercise:EX_changes_dfamily}}
+
 {{tool:metronome:bpm=60,beats=4,sub=1}}
 
 > Muting the low strings matters here: strum from string 4 for D and Bm, from string 5 for A. Aim your strum, don't just swing at all six.
