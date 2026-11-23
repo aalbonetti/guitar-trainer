@@ -595,7 +595,14 @@ GAMES = [
         lvl('dm2', 'Dotted eighths, 60–140 BPM', {'bpm': [60, 140], 'notes': ['dotted8']}, 1500, round_s=60, review_for=['T.07']),
         lvl('dm3', 'Quarter, eighth, dotted eighth', {'bpm': [60, 140], 'notes': ['quarter', 'eighth', 'dotted8']}, 1500, round_s=60, review_for=['T.07']),
     ], review_for=['T.07']),
-    game('G_triad_hunt', 'Triad Hunt', 'Find the triad on a string set, any inversion.', 'ER.04', 'G3', [], modes=('tap', 'play')),
+    # G3. Triad Hunt: a chord name, a string set and a fret window; tap the three notes (one per string) or strum the
+    # triad, any inversion that fits the window. Placements are worked out from the string set (games/chords.ts).
+    game('G_triad_hunt', 'Triad Hunt', 'A chord, a string set and a fret window: find the triad there, any inversion.', 'ER.04', 'G3', [
+        lvl('th1', 'Strings 3-2-1, major: G C D A E', {'string_sets': ['321'], 'keys': OPEN_KEYS, 'qualities': ['major'], 'window': 5}, 1500, round_s=60),
+        lvl('th2', 'Strings 3-2-1, major and minor', {'string_sets': ['321'], 'keys': OPEN_KEYS, 'qualities': ['major', 'minor'], 'window': 5}, 1500, round_s=60),
+        lvl('th3', 'Strings 4-3-2, major and minor', {'string_sets': ['432'], 'keys': OPEN_KEYS, 'qualities': ['major', 'minor'], 'window': 5}, 1400, round_s=60, unlock_lesson='ER.05'),
+        lvl('th4', 'Both string sets, all 12 roots', {'string_sets': ['321', '432'], 'keys': ALL_KEYS, 'qualities': ['major', 'minor'], 'window': 5}, 1200, round_s=60, unlock_lesson='ER.05'),
+    ], modes=('tap', 'play')),
     # G2. Octave Jump: a note on string 6 or 5; answer with its octave (the shape's high note, 2 strings over and
     # 2 frets up). Play mode checks the exact octave; tap mode is the fallback (07-games.md §1: tap in every game).
     game('G_octave_jump', 'Octave Jump', 'A note on string 6 or 5: play its octave, 2 strings over and 2 frets up, against the clock.', 'EL.04', 'G2', [
@@ -611,6 +618,8 @@ GAMES = [
         lvl('br3', 'Major box in threes, eighths, 70 BPM (G A C D)', {'scale': 'major_pentatonic', 'positions': [2], 'keys': ['G', 'A', 'C', 'D'], 'path': 'threes', 'bpm': 70, 'sub': 2, 'passes': 2}, 22000),
         lvl('br4', 'Minor box 1, up & down, eighths, 80 BPM (A E G)', {'scale': 'minor_pentatonic', 'positions': [1], 'keys': ['A', 'E', 'G'], 'path': 'updown', 'bpm': 80, 'sub': 2, 'passes': 4}, 15500, unlock_lesson='EL.02'),
         lvl('br5', 'Minor boxes 2 and 5 in A, eighths, 80 BPM', {'scale': 'minor_pentatonic', 'positions': [2, 5], 'keys': ['A'], 'path': 'updown', 'bpm': 80, 'sub': 2, 'passes': 4}, 15500, unlock_lesson='EL.02'),
+        # G3: boxes 3 and 4, so every pentatonic position has a level (the Five Boxes badge)
+        lvl('br6', 'Minor boxes 3 and 4 in A, eighths, 80 BPM', {'scale': 'minor_pentatonic', 'positions': [3, 4], 'keys': ['A'], 'path': 'updown', 'bpm': 80, 'sub': 2, 'passes': 4}, 15500, unlock_lesson='EL.02'),
     ], modes=('play',)),
     # In the Pocket: strum a pattern to the click, graded strum by strum against a window of 1.5 × the lesson's
     # max_err_ms. Gap Click: the click drops out for gap_bars (click_bars of click between gaps); you keep strumming.
@@ -621,8 +630,54 @@ GAMES = [
         lvl('pk4', 'Worship pattern, 90 BPM', {'pattern': 'S3_worship', 'bpm': 90, 'bars': 16, 'window_ms': 60}, 15500, unlock_lesson='A.06'),
         lvl('pk5', 'Sixteenth groove, 90 BPM', {'pattern': 'S8_sixteenths', 'bpm': 90, 'bars': 12, 'window_ms': 45}, 16500, unlock_lesson='ER.10'),
     ], modes=('play',)),
-    game('G_change_sprint', 'Change Sprint', '60 seconds of chord changes. Race your best run.', 'A.01', 'G3', [], modes=('play',)),
-    game('G_song_run', 'Song Run', 'The boss level: play a set-list song bar by bar at its tempo.', 'A.05', 'G3', [], modes=('play',)),
+    # G3. Change Sprint: 60 s of changes around a cycle of chords (a pair goes back and forth). A change counts when
+    # a strum is verified as the next chord; a strum heard as neither (or another chord of the cycle) is a miss.
+    # Voicings are resolved below, like the chord exercises'. target_per_min = the lesson's one-minute goal.
+    game('G_change_sprint', 'Change Sprint', '60 seconds of chord changes around a pair or a family. Race your best run.', 'A.01', 'G3', [
+        lvl('cs1', 'Em ↔ G', {'cycle': ['Em', 'G|G_4f'], 'target_per_min': 30}, 0, round_s=60, unlock_lesson='A.01'),
+        lvl('cs2', 'C ↔ Am', {'cycle': ['C', 'Am'], 'target_per_min': 25}, 0, round_s=60, unlock_lesson='A.04'),
+        lvl('cs3', 'D ↔ A', {'cycle': ['D', 'A'], 'target_per_min': 25}, 0, round_s=60, unlock_lesson='A.03'),
+        lvl('cs4', 'G ↔ C', {'cycle': ['G|G_4f', 'C'], 'target_per_min': 25}, 0, round_s=60, unlock_lesson='A.04'),
+        lvl('cs5', 'G family: G → Dsus4 → Em7 → Cadd9', {'cycle': ['G_4f', 'Dsus4', 'Em7', 'Cadd9'], 'target_per_min': 30}, 0, round_s=60, unlock_lesson='A.02'),
+        lvl('cs6', 'Triads 3-2-1: G → D → Em → C', {'cycle': ['tri_321_G_inv2', 'tri_321_D_root', 'tri_321_Em_root', 'tri_321_C_inv1'], 'target_per_min': 20}, 0, round_s=60, unlock_lesson='ER.04'),
+    ], modes=('play',)),
+    # G3. Song Run: one level per song outline, generated by build_song_outlines.py (it runs after this script and
+    # owns the outlines). Each song is open from the start; its practice_for lessons are shown as pointers.
+    game('G_song_run', 'Song Run', 'The boss level: a song’s chords scroll at its tempo in your key and capo. Scored per bar.', 'A.05', 'G3', [], modes=('play',)),
+]
+
+# Arcade scoring, mirrored from web/src/games/core.ts (speedBonus, comboMult): used to set target scores from a
+# level's goal, so ★★★ means "about the lesson's goal, at 95%".
+def combo_mult(streak): return min(4, 1 + streak // 8)
+def speed_bonus(ms, fast, slow): return 2 - max(0, min(1, (ms - fast) / (slow - fast)))
+def run_score(n, bonus, acc=1.0):
+    """Score of n answers at a fixed bonus, with (1 - acc) of them missed, spread evenly (each miss resets the combo)."""
+    miss_every = round(1 / (1 - acc)) if acc < 1 else 0
+    total, streak = 0, 0
+    for i in range(n):
+        if miss_every and (i + 1) % miss_every == 0: streak = 0; continue
+        total += round(100 * bonus * combo_mult(streak)); streak += 1
+    return total
+# Change Sprint: speed bonus 2.0 at one change a second, 1.0 at one every 4 s (web/src/games/chords.ts SPRINT_FAST/SLOW_MS).
+SPRINT_FAST_MS, SPRINT_SLOW_MS = 1000, 4000
+for g in GAMES:
+    if g['id'] != 'G_change_sprint': continue
+    for l in g['levels']:
+        n = l['params']['target_per_min'] * l['round_s'] // 60
+        # target: the lesson's goal rate for the whole minute at 95% (one unclear strum in 20), rounded down to 50
+        l['target_score'] = run_score(round(n / 0.95), speed_bonus(60000 / l['params']['target_per_min'], SPRINT_FAST_MS, SPRINT_SLOW_MS), 0.95) // 50 * 50
+        l['params']['voicings'] = {r: v for r in dict.fromkeys(l['params']['cycle']) for v in [resolve(r)] if v}
+
+# ---------------- badges (07-games.md §5) ----------------
+# Each badge is a rule the app evaluates from its own records (web/src/badges.ts). IDs are stable.
+BADGES = [
+    dict(id='B_set_ready', name='Set Ready', blurb='A 3-star Song Run on every song in the church list.', rule=dict(kind='song_run_all', game='G_song_run', stars=3)),
+    dict(id='B_all_twelve', name='All Twelve', blurb='Call the Number with ★★ in all 12 keys (85% of a key’s calls right in a ★★ round, at least 3 calls).', rule=dict(kind='keys_all', game='G_call_the_number', keys=ALL_KEYS, accuracy=0.85, min_calls=3)),
+    dict(id='B_whole_neck', name='Whole Neck', blurb='Note Drop ★★★ on the whole-neck level in play mode.', rule=dict(kind='level_stars', game='G_note_drop', level='nd4', mode='play', stars=3)),
+    dict(id='B_five_boxes', name='Five Boxes', blurb='Box Runner ★★ in all 5 pentatonic positions.', rule=dict(kind='positions_all', game='G_box_runner', positions=[1, 2, 3, 4, 5], stars=2)),
+    dict(id='B_in_the_pocket', name='In the Pocket', blurb='Gap Click: land within 20 ms after the 4-bar gap, 5 rounds in a row.', rule=dict(kind='gap_landing', game='G_in_the_pocket', level='pk3', gap_bars=4, within_ms=20, in_a_row=5)),
+    dict(id='B_capo_brain', name='Capo Brain', blurb='Capo Quick: 30 right in a row.', rule=dict(kind='streak_in_round', game='G_capo_quick', streak=30)),
+    dict(id='B_faithful', name='Faithful', blurb='A 30-day streak.', rule=dict(kind='streak_days', days=30)),
 ]
 
 # ---------------- reference validation ----------------
@@ -700,7 +755,8 @@ for g in GAMES:
     gids.add(g['id'])
     for ref in [g['unlock_lesson'], *g['review_for'], *[l.get('unlock_lesson') for l in g['levels']], *[r for l in g['levels'] for r in l.get('review_for', [])]]:
         if ref and ref not in lesson_ids: errors.append(f"{g['id']}: unknown lesson {ref}")
-    if g['milestone'] in ('G1', 'G2') and not g['levels']: errors.append(f"{g['id']}: {g['milestone']} game without levels")
+    # every game has levels, except Song Run, whose levels (one per song outline) build_song_outlines.py adds
+    if not g['levels'] and g['id'] != 'G_song_run': errors.append(f"{g['id']}: {g['milestone']} game without levels")
     if not g['modes'] or not set(g['modes']) <= {'tap', 'play'}: errors.append(f"{g['id']}: bad modes {g['modes']}")
     lids = [l['id'] for l in g['levels']]
     if len(set(lids)) != len(lids): errors.append(f"{g['id']}: duplicate level ids")
@@ -733,6 +789,28 @@ for g in GAMES:
                     if not fits: errors.append(f"{where}: {sc['id']} doesn't fit frets 0–15 in {k}"); continue
                     got = {(OPEN[i] + f + fits[0]) % 12 for i, fl in enumerate(sc['frets']) for f in fl}
                     if got != {(PC[k] + x) % 12 for x in SCALE_FORMULAS[p['scale']]}: errors.append(f"{where}: {sc['id']} in {k} has the wrong notes")
+        if g['id'] == 'G_triad_hunt':
+            if not p.get('string_sets') or not set(p['string_sets']) <= {'321', '432'}: errors.append(f"{where}: string_sets must be 321 and/or 432")
+            if not p.get('qualities') or not set(p['qualities']) <= {'major', 'minor'}: errors.append(f"{where}: qualities")
+            if not 3 <= p.get('window', 0) <= 7: errors.append(f"{where}: window of 3–7 frets")
+            # every chord asked for has a closed triad (one note per string) that fits some window on frets 0–15
+            for ss in p.get('string_sets', []):
+                strs = [int(c) for c in ss]
+                for k in p.get('keys', []):
+                    for q in p.get('qualities', []):
+                        pcs = {(PC[k] + x) % 12 for x in FORMULAS[q]}
+                        fits = [fr for a in range(0, 16) for b in range(0, 16) for c in range(0, 16)
+                                for fr in [(a, b, c)] if {(OPEN[6 - s_] + f) % 12 for s_, f in zip(strs, fr)} == pcs and max(fr) - min(fr) < p.get('window', 5)]
+                        if not fits: errors.append(f"{where}: no {k}{QSUF.get(q, q)} triad on strings {ss} within {p.get('window')} frets")
+        if g['id'] == 'G_change_sprint':
+            cyc = p.get('cycle', [])
+            if len(cyc) < 2 or len(set(cyc)) != len(cyc): errors.append(f"{where}: a cycle needs 2+ different chords")
+            if set(cyc) != set(p.get('voicings', {})): errors.append(f"{where}: unresolved chords in the cycle")
+            if not 10 <= p.get('target_per_min', 0) <= 60: errors.append(f"{where}: target_per_min")
+            # the goal matches the lesson that teaches these changes (A.01 30/min, …)
+            ul = l.get('unlock_lesson'); pc_ = next((x['pass_criteria'] for x in LESSONS if x['id'] == ul), {})
+            if pc_.get('type') == 'changes_per_min' and pc_['target'] != p.get('target_per_min'): errors.append(f"{where}: target_per_min {p.get('target_per_min')} but {ul} wants {pc_['target']}")
+            if l.get('round_s') != 60: errors.append(f"{where}: Change Sprint rounds are 60 s")
         if g['id'] == 'G_in_the_pocket':
             pat = next((r for r in RHYTHM if r['id'] == p.get('pattern')), None)
             if not pat: errors.append(f"{where}: unknown pattern {p.get('pattern')}")
@@ -743,6 +821,24 @@ for g in GAMES:
                 p['bars'] = p['click_bars'] * (len(p['gap_bars']) + 1) + sum(p['gap_bars'])
             if p.get('bars', 0) < 4: errors.append(f"{where}: bars")
             if pat and p.get('bars') and not 20 <= p['bars'] * int(pat['meter'][0]) * 60 / p['bpm'] <= 180: errors.append(f"{where}: a round should be 20 s to 3 minutes")
+# badges: games, levels and parameters they name exist
+GAME_BY_ID = {g['id']: g for g in GAMES}
+bids = [b['id'] for b in BADGES]
+if len(set(bids)) != len(bids): errors.append('duplicate badge ids')
+for b in BADGES:
+    r = b['rule']
+    if r['kind'] not in ('song_run_all', 'keys_all', 'level_stars', 'positions_all', 'gap_landing', 'streak_in_round', 'streak_days'): errors.append(f"{b['id']}: unknown rule {r['kind']}")
+    g = GAME_BY_ID.get(r.get('game')) if r.get('game') else None
+    if r.get('game') and not g: errors.append(f"{b['id']}: unknown game {r['game']}"); continue
+    if r.get('level') and not any(l['id'] == r['level'] for l in g['levels']): errors.append(f"{b['id']}: unknown level {r['level']}")
+    if r.get('mode') and r['mode'] not in g['modes']: errors.append(f"{b['id']}: {g['id']} has no {r['mode']} mode")
+    for k in r.get('keys', []):
+        if k not in PC: errors.append(f"{b['id']}: bad key {k}")
+    if r['kind'] == 'keys_all' and not set(r['keys']) <= {k for l in g['levels'] for k in l['params'].get('keys', [])}: errors.append(f"{b['id']}: not every key is offered by a level")
+    if r['kind'] == 'positions_all' and not set(r['positions']) <= {x for l in g['levels'] for x in l['params'].get('positions', [])}: errors.append(f"{b['id']}: not every position has a level")
+    if r['kind'] == 'gap_landing':
+        lv = next((l for l in g['levels'] if l['id'] == r['level']), None)
+        if lv and r['gap_bars'] not in lv['params'].get('gap_bars', []): errors.append(f"{b['id']}: {r['level']} has no {r['gap_bars']}-bar gap")
 # cycle check
 state = {}
 def visit(n):
@@ -760,7 +856,7 @@ meta = dict(schema_version=1, string_order='6_to_1', muted=-1, tuning=dict(stand
 files = {'meta.json': meta, 'tracks.json': TRACKS, 'lessons.json': LESSONS, 'chords.json': C,
          'shapes.json': dict(movable_chords=shapes_out, triads=TRIADS, octaves=[dict(low_string=a, high_string=b, fret_offset=d) for a, b, d in OCTAVES]),
          'scales.json': SCALES, 'rhythm.json': dict(strumming=RHYTHM, picking=PICKING),
-         'exercises.json': EXERCISES, 'songs.json': SONGS, 'quizzes.json': QUIZZES, 'games.json': GAMES}
+         'exercises.json': EXERCISES, 'songs.json': SONGS, 'quizzes.json': QUIZZES, 'games.json': GAMES, 'badges.json': BADGES}
 for name, data in files.items():
     with open(os.path.join(OUT, name), 'w') as fh:
         json.dump(data, fh, indent=1)

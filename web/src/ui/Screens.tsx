@@ -22,6 +22,7 @@ import { ChordLibrary, ScaleViewer, CapoCalc } from './ToolsExtra';
 import { fitLine } from '../songfit';
 import { songPool, songOfWeek } from '../practice';
 import { attempt } from '../grading/runner';
+import { DailyBanner } from './Daily';
 
 export const trackVisibleFor = (cat: Catalog) => (id: string) => trackVisible(cat, id);
 export const instrumentPref = persisted<'acoustic' | 'electric' | 'both'>('gt_instruments', 'both');
@@ -55,6 +56,7 @@ export function Today({ cat }: { cat: Catalog }) {
             </div>
           </section>
           <StorageNote />
+          <DailyBanner cat={cat} visible={vis} />
           {(() => { const pool = songPool({ cat, setlist: sl }); const id = songOfWeek(pool.ids, new Date()); const o = id ? cat.outlineById[id] : null;
             return o ? <a class="card tap-card" href={`#/song/${o.id}`} aria-label={`Song of the week: ${o.title}`}><h2>Song of the week <span class="chev" aria-hidden="true">›</span></h2><p><span class="big-link">{o.title}</span> <small class="muted">{o.artist}</small></p>
               <p class="small fit">{(() => { const st = songSettings(cat, o, pr.lp); return st.suggested || st.capo === st.fit.capo ? fitLine(st.fit) : `Capo ${st.capo}${st.key !== o.chart_key ? `, key of ${st.key}` : ''} (your choice).`; })()}</p>
