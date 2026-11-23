@@ -4,7 +4,8 @@
 # Settings rows (assisted by default) → A.01 Em↔G changes in assisted mode (confirm) at 380 px, then auto mode:
 # same chord only fails → ER.05 triads to a click at 760 px: right chords pass (with a fold mid-attempt), two
 # wrong bars fail with the confusion shown → A.12 own pace in assisted mode, with the Fmaj7 stand-in caught →
-# A.08 capo key named on the spot, forgetting the capo fails → attempts saved with grader_mode + session_id.
+# A.08 capo key named on the spot, forgetting the capo fails → A.11 Amazing Grace in G to a click (G must not be
+# heard as G7) → attempts saved with grader_mode + session_id.
 # Run after `npm run build`.
 import asyncio, http.server, threading, functools, sys, json, tempfile, os
 from playwright.async_api import async_playwright
@@ -28,7 +29,8 @@ L=json.load(open('public/catalog/lessons.json'))
 def seed(passed, kv=()):
     lp=[{'lesson_id':i,'state':'passed','first_pass_day':'2026-01-01','passed_day':'2026-01-02','review_index':5,'mastered':True,'updated_at':0} for i in passed]
     f=os.path.join(tempfile.mkdtemp(),'seed.json'); json.dump({'lesson_progress':lp,'kv':list(kv)},open(f,'w')); return f
-SEED=seed([l['id'] for l in L if l['track'] in ('F','T')] + ['A.02','A.03','A.04','A.05','A.06','A.07','ER.01','ER.02','ER.03','ER.04'])
+SEED=seed([l['id'] for l in L if l['track'] in ('F','T')] + ['A.02','A.03','A.04','A.05','A.06','A.07','ER.01','ER.02','ER.03','ER.04'],
+          [{'key':'ladder:A.11','v':{'bpm':80,'clean':0,'sloppy':0}}])
 ok=True
 def check(name, cond, extra=''):
     global ok; ok &= bool(cond); print('PASS' if cond else 'FAIL', name, extra if not cond else '')
@@ -46,7 +48,7 @@ async def go(pg, label='Start'):
     await pg.locator(f'{PASS} button:has-text("{label}"), {PASS} button:has-text("Go again")').first.click()
 ROW={'chord_accuracy':'Chords: right chord on each strum','changes_per_min':'Chords: one-minute changes'}
 async def set_mode(pg, key, mode):
-    # the way Connor would: Settings → Grading mode
+    # the way the user would: Settings → Grading mode
     await pg.goto(f'http://127.0.0.1:{PORT}/?sim#/settings'); await pg.wait_for_selector('section.card:has-text("Grading mode")')
     await pg.locator('section.card:has-text("Grading mode") label.field', has_text=ROW[key]).locator('select').select_option(mode)
 async def main():
@@ -114,13 +116,19 @@ async def main():
         check('A.12 detected right, asks to confirm', 'Check this attempt' in res and 'meets the goal' in res and 'Count it' in res, res)
         await pg.click('button:has-text("Count it")'); await pg.wait_for_timeout(800)
         res=await pg.inner_text(PASS); check('A.12 confirmed → passed', 'Passed this attempt' in res, res)
-        # Fmaj7 instead of F (box 2): the stand-in is a decoy, so those strums are wrong
-        await pg.evaluate("window.__swap=(i,r)=>i===2?[-1,-1,3,2,1,0]:r")
+        # Fmaj7 instead of every F: F is graded on its own and the barre's low root is checked, so this fails
+        await pg.evaluate("window.__swap=(i,r)=>r==='F'?[-1,-1,3,2,1,0]:r")
         await pg.click(f'{PASS} button:has-text("Go again")')
         res=await result(pg); print('--- A.12 Fmaj7 for F:\n', res)
-        check('A.12 Fmaj7 strums heard as Fmaj7 (decoy)', 'Fmaj7 ×' in res, res)
+        check('A.12 Fmaj7 for F is detected as a miss (heard as Fmaj7)', 'misses the goal' in res and 'Fmaj7 ×' in res, res)
         await pg.click('button:has-text("Doesn\'t count")'); await pg.wait_for_timeout(800)
         res=await pg.inner_text(PASS); check('A.12 rejected → not yet, saved', 'Not yet' in res and 'Saved on this phone' in res, res)
+        # the partial Bm (xx4432) for every Bm: same notes, no low B → fails
+        await pg.evaluate("window.__swap=(i,r)=>r==='Bm'?[-1,-1,4,4,3,2]:r")
+        await pg.click(f'{PASS} button:has-text("Go again")')
+        res=await result(pg); print('--- A.12 partial Bm:\n', res)
+        check('A.12 partial Bm is detected as a miss (heard as Bm (partial))', 'misses the goal' in res and 'Bm (partial) ×' in res, res)
+        await pg.click('button:has-text("Doesn\'t count")'); await pg.wait_for_timeout(800)
         await pg.evaluate("window.__swap=(i,r)=>r")
         # ---- A.08: key named on the spot; forgetting the capo fails, 380 px ----
         await set_mode(pg, 'chord_accuracy', 'auto')
@@ -138,15 +146,29 @@ async def main():
         check('A.08 without the capo fails and says so', 'Not yet' in res and 'capo' in res.split('Heard instead')[-1], res)
         await pg.locator(PASS).screenshot(path='/tmp/m8_capo_fail_380.png')
         await pg.evaluate('window.__capo=c=>c')
+        # ---- A.11 Amazing Grace in G, 3/4 to a click at 80 (ladder seeded at the goal), 760 px ----
+        await pg.set_viewport_size({'width':760,'height':900})
+        await lesson(pg, 'A.11')
+        txt=await pg.inner_text(PASS); check('A.11: timed at 80 BPM, choose the capo', 'Start at 80 BPM' in txt and 'Key of G' in txt, txt)
+        await go(pg, 'Start at 80 BPM')
+        res=await result(pg); print('--- A.11 key of G:\n', res)
+        grow=[x for x in res.split('\n') if x.startswith('G\t')]
+        check('A.11 key of G passes and G is not heard as G7', 'Passed this attempt' in res and grow and 'G7' not in grow[0], res)
         # ---- saved attempts ----
         att=await pg.evaluate(ATT)
         for a in att: print({k:(v if k!='m' else {x:v[x] for x in ('kind','detected_met','variant','correct','total','ratio','changes') if x in v}) for k,v in a.items()})
         by={}
         for a in att: by.setdefault(a['l'],[]).append((a['mode'],a['met']))
-        exp={'A.01':[('assisted',True),('auto',False)],'ER.05':[('auto',True),('auto',False)],'A.12':[('assisted',True),('assisted',False)],'A.08':[('auto',True),('auto',False)]}
+        exp={'A.01':[('assisted',True),('auto',False)],'ER.05':[('auto',True),('auto',False)],'A.12':[('assisted',True),('assisted',False),('assisted',False)],'A.08':[('auto',True),('auto',False)],'A.11':[('auto',True)]}
         check('attempts saved with grader_mode, result and session_id', by==exp and all(a['sess'] for a in att), by)
-        check('criterion types recorded', {a['l']:a['type'] for a in att}=={'A.01':'changes_per_min','ER.05':'chord_accuracy','A.12':'chord_accuracy','A.08':'chord_accuracy'})
-        check('first passes for A.01, ER.05, A.12, A.08', sorted(a['l'] for a in att if a['ev']=='first_pass')==['A.01','A.08','A.12','ER.05'], [(a['l'],a['ev']) for a in att])
+        check('criterion types recorded', {a['l']:a['type'] for a in att}=={'A.01':'changes_per_min','ER.05':'chord_accuracy','A.12':'chord_accuracy','A.08':'chord_accuracy','A.11':'chord_accuracy'})
+        check('first passes for A.01, ER.05, A.12, A.08, A.11', sorted(a['l'] for a in att if a['ev']=='first_pass')==['A.01','A.08','A.11','A.12','ER.05'], [(a['l'],a['ev']) for a in att])
+        # a double tap on Start must not start two attempts
+        await lesson(pg, 'ER.05'); await pg.locator(f'{PASS} button:has-text("Go again"), {PASS} button:has-text("Start")').first.dblclick()
+        await pg.wait_for_selector('.chordrun', timeout=8000); await pg.wait_for_timeout(1500)
+        await pg.click('.chordrun button:has-text("Cancel")'); await pg.wait_for_timeout(1500)
+        g2=await pg.evaluate('JSON.stringify(__gtAudio().capture)')
+        check('double tap + cancel leaves the mic closed (one attempt only)', '"on":false' in g2, g2)
         g=await pg.evaluate('JSON.stringify(__gtAudio().capture)'); print('capture:', g)
         check('mic closed after the attempts', '"on":false' in g, g)
         check('no page errors', not errs, errs)

@@ -3,7 +3,7 @@
 import { Store } from '../store';
 import * as db from '../db';
 import { OnsetDetector, BandOnsetDetector } from '../dsp/dsp.js';
-import { acquireCapture, releaseCapture, onBlock, playClickPlan, cancelClickPlan, ctxNow, waitUntil, sampleRate, capture, audioContext, routeLabel } from '../audio/engine';
+import { stopSimAudio, acquireCapture, releaseCapture, onBlock, playClickPlan, cancelClickPlan, ctxNow, waitUntil, sampleRate, capture, audioContext, routeLabel } from '../audio/engine';
 import { buildPlan, gradeTiming, lessonFeel, calibrationOffset, bleedDelay, ladderStart, ladderStep, type Plan, type TimingResult, type Ladder, type TimingCriteria } from './timing';
 import { PitchTracker, HoldTracker, segmentNotes, gradeNotes, buildNotePlan, noteTolerance, trackerRange, pitchSetup, midiName, type PitchFrame, type NotesGrade, type PitchSetup } from './pitch';
 import { meterInfo } from '../audio/meter';
@@ -78,7 +78,10 @@ let unsub: (() => void) | null = null;
 const WHO = 'grader';
 
 function finish() { unsub?.(); unsub = null; cancelClickPlan(); releaseCapture(WHO); }
+/** An attempt or calibration is under way (opening the mic, count-in or playing). */
+const running = () => { const p = attempt.get().phase; return p === 'starting' || p === 'countin' || p === 'playing'; };
 export function cancelAttempt() {
+  stopSimAudio(); // ?sim only: strums already scheduled for this attempt mustn't sound in the next one
   cancelled.cancelled = true; finish(); pendingConfirm = null;
   attempt.set({ phase: 'idle', kind: null, beat: -1, message: '' });
 }
@@ -144,7 +147,9 @@ export async function runCalibration(deviceId?: string) {
 
 // ---------- graded timing attempt ----------
 export async function runTimingAttempt(l: Lesson, cat: Catalog, opts: { bpm?: number; deviceId?: string } = {}) {
+  if (running()) return; // a double tap on Start / Go again
   cancelled = { cancelled: false }; const sig = cancelled;
+  attempt.set({ phase: 'starting', kind: 'timing', lessonId: l.id, result: null, message: '' }); // before any await
   const crit = l.pass_criteria as unknown as TimingCriteria;
   const ladder = await getLadder(l);
   const bpm = opts.bpm ?? ladder.bpm;
@@ -190,7 +195,9 @@ const setLive = (p: Partial<PitchLive>) => { const cur = attempt.get().pitch; if
 /** Run one pitch attempt. Hold: each target in turn (25 s each). Timed: the exercise to a click at the ladder
  *  tempo. Free: the exercise at your own pace (finishes when every note is heard, or on "I'm done"). */
 export async function runPitchAttempt(l: Lesson, cat: Catalog, opts: { bpm?: number; deviceId?: string; mode?: GraderMode } = {}) {
+  if (running()) return; // a double tap on Start / Go again
   cancelled = { cancelled: false }; const sig = cancelled;
+  attempt.set({ phase: 'starting', kind: 'pitch', lessonId: l.id, pitchResult: null, pending: false, message: '' }); // before any await
   skipFlag = false; doneFlag = false; pendingConfirm = null;
   const setup = pitchSetup(l, cat), crit = setup.crit, gm: GraderMode = opts.mode ?? 'auto';
   (globalThis as any).__gtLastPitchSetup = setup; // test-only: ?sim plays notes against it
@@ -361,7 +368,8 @@ let nextPairFlag = false;
 export function startNextPair() { nextPairFlag = true; }
 const setChord = (p: Partial<ChordLive>) => { const cur = attempt.get().chord; if (cur) attempt.set({ chord: { ...cur, ...p } }); };
 const simWindow = (): number | undefined => (globalThis as any).__gtChangesWindowS; // test-only: shorter changes window
-const nameOf = (s: ChordSetup) => Object.fromEntries(Object.entries(s.ex.voicings).map(([k, v]) => [k, v.name]));
+// decoys show their longer label ('Bm (partial)'), so they aren't confused with the chord they imitate
+const nameOf = (s: ChordSetup) => Object.fromEntries(Object.entries(s.ex.voicings).map(([k, v]) => [k, s.kind === 'accuracy' && s.ex.decoys?.includes(k) ? v.label ?? v.name : v.name]));
 const boxState = (rs: StrumResult[]): 'ok' | 'mixed' | 'miss' => { const g = rs.filter(r => !r.skipped); const ok = g.filter(r => r.ok).length; return !g.length ? 'miss' : ok === g.length ? 'ok' : ok >= g.length / 2 ? 'mixed' : 'miss'; };
 
 /** Run one chord attempt. accuracy + timed: the progression to a click (tempo ladder when the lesson has a bpm).
@@ -369,13 +377,15 @@ const boxState = (rs: StrumResult[]): 'ok' | 'mixed' | 'miss' => { const g = rs.
  *  counting changes; every pair must reach the target. `variant` = the player's choice when the exercise lets
  *  them choose (capo for Amazing Grace); keys "named on the spot" are picked here. */
 export async function runChordAttempt(l: Lesson, cat: Catalog, opts: { bpm?: number; deviceId?: string; mode?: GraderMode; variant?: number } = {}) {
+  if (running()) return; // a double tap on Start / Go again
   cancelled = { cancelled: false }; const sig = cancelled;
+  attempt.set({ phase: 'starting', kind: 'chord', lessonId: l.id, chordResult: null, pending: false, message: '' }); // before any await
   nextPairFlag = false; doneFlag = false; pendingConfirm = null;
   const setup = chordSetup(l, cat);
   if (!setup) { attempt.set({ phase: 'error', kind: 'chord', lessonId: l.id, message: 'This lesson has no chord exercise to grade.' }); return; }
-  const gm: GraderMode = opts.mode ?? 'assisted', names = nameOf(setup);
   const vi = setup.kind === 'accuracy' ? pickVariant(setup.ex, opts.variant) : 0;
   const v = setup.kind === 'accuracy' ? setup.ex.variants[vi] : null;
+  const gm: GraderMode = opts.mode ?? 'assisted', names = { ...nameOf(setup), ...(v?.names || {}) };
   const timed = setup.kind === 'accuracy' && setup.ex.pace === 'timed';
   const ladder = setup.kind === 'accuracy' && setup.ladder ? await getLadder(l) : null;
   const bpm = timed ? opts.bpm ?? ladder?.bpm ?? (setup as Extract<ChordSetup, { kind: 'accuracy' }>).bpm! : null;
@@ -439,7 +449,7 @@ async function chordTimed(setup: Extract<ChordSetup, { kind: 'accuracy' }>, v: C
   hook(s => {
     const tt = s.t - offsetS, bi = plan.boxes.findIndex(b => tt >= b.t0 - 0.08 && tt < b.t1 - 0.08);
     if (bi < 0) return;
-    const b = plan.boxes[bi], vv = verifyChord(s.chroma, tg.targets[b.ref], all);
+    const b = plan.boxes[bi], vv = verifyChord(s.chroma, tg.targets[b.ref], all, undefined, undefined, s.low ?? null);
     live.push({ t: s.t, box: bi, expected: b.ref, heard: vv.heard, ok: vv.ok, score: vv.score, margin: vv.margin });
     const status = [...(attempt.get().chord?.status || [])]; status[bi] = boxState(live.filter(r => r.box === bi));
     setChord({ last: { expected: names[b.ref], heard: vv.heard ? names[vv.heard] ?? (vv.heard.startsWith('nocapo:') ? 'no capo' : vv.heard.replace(/^decoy:/, '')) : null, ok: vv.ok }, status });
@@ -464,7 +474,7 @@ async function chordTimed(setup: Extract<ChordSetup, { kind: 'accuracy' }>, v: C
     await waitUntil(plan.end + 0.6, sig);
   } finally { clearInterval(beatTimer); off(); hook(null); }
   strums.push(...an.flush());
-  const g = gradeTimedChords(strums.filter(s => s.t < plan.end + 0.3 + offsetS), plan, tg, { offsetS, ratio: setup.ratio });
+  const g = gradeTimedChords(strums.filter(s => s.t < plan.end + 0.3 + offsetS), plan, tg, { offsetS, ratio: setup.ratio, focus: ex.focus });
   setChord({ status: plan.boxes.map((_, i) => (g.boxes[i].strums === 0 ? 'miss' : boxState(g.strums.filter(r => r.box === i)))) });
   return { kind: 'accuracy', met: g.met, score: g.ratio, graderMode: gm, bpm, grade: g, changes: [], names, label: v.label, capo: v.capo, show: setup.ex.show };
 }
@@ -482,7 +492,7 @@ async function chordOwn(setup: Extract<ChordSetup, { kind: 'accuracy' }>, v: Cho
   };
   hook(s => {
     const bi = boxOf.get(s.t); if (bi === undefined) return;
-    const ref = v.chords[bi], vv = verifyChord(s.chroma, tg.targets[ref], all);
+    const ref = v.chords[bi], vv = verifyChord(s.chroma, tg.targets[ref], all, undefined, undefined, s.low ?? null);
     res.push({ t: s.t, box: bi, expected: ref, heard: vv.heard, ok: vv.ok, score: vv.score, margin: vv.margin });
     const status = [...(attempt.get().chord?.status || [])]; status[bi] = boxState(res.filter(r => r.box === bi));
     setChord({ last: { expected: names[ref], heard: vv.heard ? names[vv.heard] ?? (vv.heard.startsWith('nocapo:') ? 'no capo' : vv.heard.replace(/^decoy:/, '')) : null, ok: vv.ok }, status });
@@ -499,10 +509,10 @@ async function chordOwn(setup: Extract<ChordSetup, { kind: 'accuracy' }>, v: Cho
     tick();
   });
   an.onOnset = null;
-  for (const s of an.flush()) { strums.push(s); const bi = boxOf.get(s.t); if (bi !== undefined && !res.some(r => r.t === s.t)) { const vv = verifyChord(s.chroma, tg.targets[v.chords[bi]], all); res.push({ t: s.t, box: bi, expected: v.chords[bi], heard: vv.heard, ok: vv.ok, score: vv.score, margin: vv.margin }); } }
+  for (const s of an.flush()) { strums.push(s); const bi = boxOf.get(s.t); if (bi !== undefined && !res.some(r => r.t === s.t)) { const vv = verifyChord(s.chroma, tg.targets[v.chords[bi]], all, undefined, undefined, s.low ?? null); res.push({ t: s.t, box: bi, expected: v.chords[bi], heard: vv.heard, ok: vv.ok, score: vv.score, margin: vv.margin }); } }
   hook(null);
   const boxes = v.chords.map((ref, i) => ({ ref, label: boxLabel(ex, v, i) }));
-  const g = gradeOwnChords(res.sort((a, b) => a.t - b.t), boxes, per, setup.ratio);
+  const g = gradeOwnChords(res.sort((a, b) => a.t - b.t), boxes, per, setup.ratio, ex.focus);
   setChord({ status: boxes.map((_, i) => { const rs = res.filter(r => r.box === i); return rs.length ? boxState(rs) : 'miss'; }) });
   return { kind: 'accuracy', met: g.met, score: g.ratio, graderMode: gm, bpm: null, grade: g, changes: [], names, label: v.label, capo: v.capo, show: ex.show };
 }

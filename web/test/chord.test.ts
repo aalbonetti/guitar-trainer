@@ -166,21 +166,28 @@ describe('verifier: right chord vs similar wrong chords (synthetic strums)', () 
     const b = confusion({ F: [1, 3, 3, 2, 1, 1], Fmaj7: [-1, -1, 3, 2, 1, 0], C: [-1, 3, 2, 0, 1, 0], Am: [-1, 0, 2, 2, 1, 0] }, 8); log('F / Fmaj7 / C / Am', b);
     expect(a.acc).toBeGreaterThanOrEqual(0.9); expect(b.acc).toBeGreaterThanOrEqual(0.85);
   });
-  it('A.12 in context, at own-pace speed (4 strums per chord, 0.45 s apart), with the Fmaj7 stand-in as a decoy', () => {
+  it('A.12 own pace: right barres pass; Fmaj7 for F and the partial Bm fail (F and Bm graded on their own, low root checked)', () => {
     const ex = EX('EX_barre_F_Bm') as ChordProgEx, v = ex.variants[0], tg = progressionTargets(ex, v), all = [...Object.values(tg.targets), ...tg.decoys];
-    const run = (swapF: boolean) => {
+    expect(ex.focus).toEqual(['F', 'Bm']); expect(v.chords.filter(c => c === 'F')).toHaveLength(2);
+    const run = (play: (r: string) => number[]) => {
       const specs: StrumSpec[] = []; let t = 0.4;
-      v.chords.forEach(r => { for (let k = 0; k < 4; k++) { specs.push({ frets: swapF && r === 'F' ? [-1, -1, 3, 2, 1, 0] : ex.voicings[r].frets[0], t, dur: 0.6 }); t += 0.45; } t += 0.25; });
-      const st = analyze(render(specs, t + 1)), conf: Record<string, number> = {}; let ok = 0;
-      specs.forEach((sp, i) => { const s = st.find(x => Math.abs(x.t - sp.t) < 0.06), r = v.chords[Math.floor(i / 4)], vv = verifyChord(s?.chroma ?? null, tg.targets[r], all); if (vv.ok) ok++; const k = `${r}>${vv.heard ?? 'unclear'}`; conf[k] = (conf[k] || 0) + 1; });
-      return { ok, total: specs.length, conf };
+      v.chords.forEach(r => { for (let k = 0; k < 4; k++) { specs.push({ frets: play(r), t, dur: 0.6 }); t += 0.45; } t += 0.25; });
+      const st = analyze(render(specs, t + 1));
+      const res: StrumResult[] = specs.map((sp, i) => { const s = st.find(x => Math.abs(x.t - sp.t) < 0.06), box = Math.floor(i / 4), r = v.chords[box];
+        const vv = verifyChord(s?.chroma ?? null, tg.targets[r], all, undefined, undefined, s?.low ?? null);
+        return { t: sp.t, box, expected: r, heard: vv.heard, ok: vv.ok, score: vv.score, margin: vv.margin }; });
+      return gradeOwnChords(res, v.chords.map(r => ({ ref: r, label: r })), 4, 0.8, ex.focus);
     };
-    const right = run(false), stand = run(true);
-    log('A.12 progression, own pace', right); log('A.12 with Fmaj7 for F', stand);
-    // 6 seeds: right 30–32/32; the stand-in is flagged on 2–4 of its 8 strums (the rest mostly still pass as F)
-    expect(right.ok / right.total).toBeGreaterThanOrEqual(0.9);
-    expect((stand.conf['F>decoy:Fmaj7'] || 0)).toBeGreaterThanOrEqual(2);
-    expect(stand.ok).toBeLessThan(right.ok);
+    const right = run(r => ex.voicings[r].frets[0]);
+    const fmaj7 = run(r => (r === 'F' ? [-1, -1, 3, 2, 1, 0] : ex.voicings[r].frets[0]));
+    const partial = run(r => (r === 'Bm' ? [-1, -1, 4, 4, 3, 2] : ex.voicings[r].frets[0]));
+    const f = (g: typeof right) => g.focus.map(x => `${x.ref} ${x.correct}/${x.graded}`).join(', ');
+    report.push(`A.12 right barres: ${f(right)} · Fmaj7 for F: ${f(fmaj7)} · partial Bm: ${f(partial)}`);
+    expect(right.met).toBe(true);
+    expect(fmaj7.met).toBe(false); expect(fmaj7.focus[0].met).toBe(false); expect(fmaj7.confusion.F['decoy:Fmaj7']).toBeGreaterThanOrEqual(5);
+    expect(partial.met).toBe(false); expect(partial.focus[1].met).toBe(false); expect(partial.confusion.Bm['decoy:Bm_partial']).toBeGreaterThanOrEqual(5);
+    // only F and Bm strums count
+    expect(right.graded).toBe(16);
   });
   it('A.11: G vs G7 (G7 holds all of G plus F; G2/G3’s 7th harmonic sits ~31¢ flat of F)', () => {
     const r = confusion({ G: [3, 2, 0, 0, 0, 3], G7: [3, 2, 0, 0, 0, 1], C: [-1, 3, 2, 0, 1, 0], D: [-1, -1, 0, 2, 3, 2] }, 10); log('A.11 G / G7 / C / D', r);
@@ -241,9 +248,19 @@ describe('chord_accuracy grading', () => {
     const bleed = (b: Float32Array) => { for (const c of plan.clicks) { const i0 = Math.round((c.t + 0.09) * SR), fq = c.kind === 0 ? 2600 : 2000; for (let i = 0; i < 0.06 * SR && i0 + i < b.length; i++) { const t = i / SR; b[i0 + i] += 0.25 * Math.min(1, t / 0.002) * Math.exp(-(t - 0.002) / 0.006) * Math.sin(2 * Math.PI * fq * t); } } };
     const strums = analyze(play(plan, i => ex.voicings[v.chords[i]].frets[0], 0.05, bleed));
     const g = gradeTimedChords(strums, plan, tg, { offsetS: 0.05, ratio: 0.9 });
-    report.push(`ER.05 timed, right chords: ${g.correct}/${g.graded} (${g.strums.filter(s => s.skipped).length} change strums ungraded)`);
-    expect(g.met).toBe(true); expect(g.ratio).toBeGreaterThanOrEqual(0.9); expect(g.missedBoxes).toBe(0);
-    expect(g.graded).toBeGreaterThanOrEqual(50);
+    const strumOk = g.strums.filter(s => !s.skipped && s.ok).length, strumN = g.strums.filter(s => !s.skipped).length;
+    report.push(`ER.05 timed, right chords: ${g.correct}/${g.graded} bars, ${strumOk}/${strumN} strums`);
+    expect(g.unit).toBe('bars'); expect(g.met).toBe(true); expect(g.correct).toBe(8); expect(g.missedBoxes).toBe(0);
+    expect(strumN).toBeGreaterThanOrEqual(50);
+  });
+  it('one wrong strum in a bar doesn’t sink it; a bar of mostly wrong strums costs the whole bar', () => {
+    const b = (i: number, ok: boolean, n: number): StrumResult[] => Array.from({ length: n }, (_, k) => ({ t: plan.boxes[i].t0 + k * 0.3 + 0.01, box: i, expected: plan.boxes[i].ref, heard: null, ok: k === 0 ? ok : !ok, score: 0.8, margin: 0 }));
+    // gradeTimedChords works on strums; check the per-bar rule through the same summary via own-pace grading of one box
+    expect(gradeOwnChords([...b(0, false, 8)], [{ ref: plan.boxes[0].ref, label: '' }], 8, 0.9).correct).toBe(7);
+    // timed: a bar of 8 strums with 7 wrong is wrong as a bar, whatever the other bars do
+    const strums = analyze(play(plan, i => (i === 0 ? ex.voicings[v.chords[1]].frets[0] : ex.voicings[v.chords[i]].frets[0])));
+    const g = gradeTimedChords(strums, plan, tg, { offsetS: 0.05, ratio: 0.9 });
+    expect(g.boxes[0].ok * 2).toBeLessThanOrEqual(g.boxes[0].strums); expect(g.correct).toBe(7); expect(g.met).toBe(false);
   });
   it('two bars of wrong chords fail; the confusion shows what was played', () => {
     const wrong = (i: number) => (i === 1 || i === 5 ? ex.voicings[v.chords[2]].frets[0] : ex.voicings[v.chords[i]].frets[0]); // Em where D belongs

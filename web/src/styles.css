@@ -333,3 +333,4 @@ table.confusion th, table.confusion td { text-align:left; padding:4px 6px; borde
 table.confusion td:nth-child(2) { color:var(--ok); font-variant-numeric:tabular-nums; }
 details.shapes { margin:6px 0; } details.shapes summary { cursor:pointer; color:var(--accent); }
 .changelist li { line-height:1.5; } .changelist b { font-size:18px; }
+.stats div.missed b { color:var(--bad); }
