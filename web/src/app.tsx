@@ -3,8 +3,6 @@ import { loadCatalog, type Catalog } from './catalog';
 import { Today, Path, LessonView, Songs, Tools, Settings, trackVisibleFor } from './ui/Screens';
 import { SessionBar, useDueCount } from './ui/Practice';
 import { Progress } from './ui/Progress';
-import { ImportView, ChartView } from './ui/Charts';
-import { loadCharts } from './charts';
 import { ArcadeHome, GameScreen } from './ui/Arcade';
 import { loadXp } from './xp';
 import { loadBests } from './arcade';
@@ -47,7 +45,7 @@ export function App() {
   const ear = useStore(ears);
   const busy = att.phase === 'countin' || att.phase === 'playing' || att.phase === 'starting' || ear.on;
   useEffect(() => {
-    void expireIdle(); void loadProgress(); void loadCharts(); void loadXp(); void loadBests(); loadCatalog().then(setCat).catch(e => setErr(String(e)));
+    void expireIdle(); void loadProgress(); void loadXp(); void loadBests(); loadCatalog().then(setCat).catch(e => setErr(String(e)));
     onFirstTune(() => noteTuned());
     startActivityClock();
     const vis = () => { if (document.visibilityState === 'visible') void expireIdle(); };
@@ -57,15 +55,13 @@ export function App() {
   useEffect(() => { touch(); }, [hash]);
   const due = useDueCount(cat, cat ? trackVisibleFor(cat) : () => true);
   const [, route, arg] = hash.split('/');
-  const active = NAV.find(n => n.h.split('/')[1] === route || (route === 'lesson' && n.label === 'Path') || ((route === 'song' || route === 'import' || route === 'chart') && n.label === 'Songs'));
+  const active = NAV.find(n => n.h.split('/')[1] === route || (route === 'lesson' && n.label === 'Path') || (route === 'song' && n.label === 'Songs'));
   let body;
   if (err) body = <div class="page"><p class="error">Couldn't load the catalog: {err}</p></div>;
   else if (!cat) body = <div class="page"><p class="muted">Loading…</p></div>;
   else if (route === 'path') body = <Path cat={cat} />;
   else if (route === 'lesson') body = <LessonView cat={cat} id={decodeURIComponent(arg || '')} />;
   else if (route === 'songs') body = <Songs cat={cat} initialTab={arg} />;
-  else if (route === 'import') body = <ImportView cat={cat} />;
-  else if (route === 'chart') body = <ChartView cat={cat} id={decodeURIComponent(arg || '')} />;
   else if (route === 'song') body = <Songs cat={cat} selected={decodeURIComponent(arg || '')} />;
   else if (route === 'tools') body = <Tools which={arg} cat={cat} />;
   else if (route === 'arcade') body = arg ? <GameScreen cat={cat} gameId={decodeURIComponent(arg)} levelId={decodeURIComponent(hash.split('/')[3] || '')} /> : <ArcadeHome cat={cat} />;
