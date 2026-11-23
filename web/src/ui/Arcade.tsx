@@ -40,8 +40,8 @@ export function ArcadeHome({ cat }: { cat: Catalog }) {
       <section class="card xpcard">
         <div class="row between"><b>Level {lv.level}</b><span class="muted">{x.total} XP · {lv.need - lv.into} to level {lv.level + 1}</span></div>
         <div class="xpbar"><i style={{ width: `${(lv.into / lv.need) * 100}%` }} /></div>
-        <p class="streakline"><b>{sk.current ? `🔥 ${sk.current}-day streak` : 'No streak yet'}</b>{sk.freezes ? <span class="muted"> · ❄ {sk.freezes} freeze{sk.freezes > 1 ? 's' : ''}</span> : null}
-          <span class="muted"> · today {sk.todayDone ? 'counts ✓' : `${mins} of 5 min`}</span></p>
+        <a class="streaklink" href="#/progress" aria-label="Streak: see your progress"><p class="streakline"><b>{sk.current ? `🔥 ${sk.current}-day streak` : 'No streak yet'}</b>{sk.freezes ? <span class="muted"> · ❄ {sk.freezes} freeze{sk.freezes > 1 ? 's' : ''}</span> : null}
+          <span class="muted"> · today {sk.todayDone ? 'counts ✓' : `${mins} of 5 min`}</span> <span class="chev" aria-hidden="true">›</span></p></a>
         <p class="muted small">XP comes from games, lesson passes (+50) and reviews (+20). Levels are just for fun; lessons still unlock in order. A day counts for the streak with 5 minutes of practice, games included; every 7 days earns a streak freeze (up to 2) that covers a missed day.</p>
         {sunday || !sk.todayDone ? <button class="small" disabled={pr.services.includes(today)} onClick={() => void markService()}>{pr.services.includes(today) ? 'Today counts ✓' : '⛪ Played a service today'}</button> : null}
       </section>

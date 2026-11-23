@@ -23,10 +23,12 @@ const NAV = [
   { h: '#/path', label: 'Path', icon: '🧭' },
   { h: '#/songs', label: 'Songs', icon: '♪' },
   { h: '#/arcade', label: 'Arcade', icon: '🎮' },
-  { h: '#/progress', label: 'Progress', icon: '📈' },
+  { h: '#/progress', label: 'Progress', icon: '📈', railOnly: true },
   { h: '#/tools/tuner', label: 'Tools', icon: '🎚' },
-  { h: '#/settings', label: 'Settings', icon: '⚙' },
+  { h: '#/settings', label: 'Settings', icon: '⚙', railOnly: true },
 ];
+/* Progress and Settings leave the cover-screen bottom bar (5 tabs) and sit as header buttons; the rail keeps all 7. */
+const HEAD = NAV.filter(n => n.railOnly);
 
 function useHash() {
   const [h, setH] = useState(location.hash || '#/today');
@@ -74,9 +76,9 @@ export function App() {
     <div class="shell">
       <nav class="nav">
         <div class="brand">Guitar<span>Trainer</span></div>
-        {NAV.map(n => <a href={n.h} class={active === n ? 'on' : ''}><i>{n.icon}{n.label === 'Today' && due ? <b class="navbadge" aria-label={`${due} reviews due`}>{due}</b> : null}</i><span>{n.label}</span></a>)}
+        {NAV.map(n => <a href={n.h} class={(active === n ? 'on' : '') + (n.railOnly ? ' railonly' : '')} aria-current={active === n ? 'page' : undefined}><i>{n.icon}{n.label === 'Today' && due ? <b class="navbadge" aria-label={`${due} reviews due`}>{due}</b> : null}</i><span>{n.label}</span></a>)}
       </nav>
-      <main class="main">{upd.ready && !busy ? <div class="updatebanner">✨ Update ready <button class="small primary" onClick={applyUpdate}>Reload now</button></div> : null}{save.state === 'error' || save.state === 'blocked' ? <div class="savebanner">⚠ {save.msg} <button class="small" onClick={() => location.reload()}>Retry</button></div> : null}{body}</main>
+      <main class="main"><header class="topbar"><span class="brand">Guitar<span>Trainer</span></span>{HEAD.map(n => <a href={n.h} class={'headbtn' + (active === n ? ' on' : '')} aria-label={n.label} title={n.label} aria-current={active === n ? 'page' : undefined}>{n.icon}</a>)}</header>{upd.ready && !busy ? <div class="updatebanner">✨ Update ready <button class="small primary" onClick={applyUpdate}>Reload now</button></div> : null}{save.state === 'error' || save.state === 'blocked' ? <div class="savebanner">⚠ {save.msg} <button class="small" onClick={() => location.reload()}>Retry</button></div> : null}{body}</main>
       <div class="bottombars"><SessionBar /><MetroStrip /></div>
     </div>
   );
