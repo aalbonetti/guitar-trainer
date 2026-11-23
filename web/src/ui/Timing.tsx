@@ -1,11 +1,11 @@
 // Timing attempt runner (count-in → play → result card) and strum calibration UI.
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Catalog, Lesson } from '../catalog';
 import { useStore } from '../store';
 import { attempt, runCalibration, runTimingAttempt, cancelAttempt, getCalibration, getLadder, allCalibrations, posture, routeName, type Calibration } from '../grading/runner';
 import { lessonFeel, coachLine, type TimingCriteria, type TimingResult } from '../grading/timing';
 import type { Ladder } from '../grading/timing';
-import { bluetoothOutputLikely, tunedThisSession, capture } from '../audio/engine';
+import { bluetoothOutputLikely, tunedThisSession, capture, routeLabel } from '../audio/engine';
 import { inputPref, TunerPanel } from './Tools';
 import { EVENT_TEXT } from '../progress';
 import { saveStatus, progress } from '../progressStore';
@@ -19,7 +19,8 @@ const dev = () => inputPref.get() || undefined;
 export function usePracticeTempo(l: Lesson): { bpm: number; goal: number; atGoal: boolean } | null {
   const a = useStore(attempt); const pr = useStore(progress);
   const [ladder, setLadder] = useState<Ladder | null>(null);
-  const timing = l.pass_criteria.type === 'timing';
+  // timing lessons, and pitch/chord lessons played to a click (they have a bpm and a tempo ladder)
+  const timing = l.pass_criteria.type === 'timing' || ((l.pass_criteria.type === 'pitch' || l.pass_criteria.type === 'chord_accuracy') && !!l.pass_criteria.bpm);
   useEffect(() => { if (timing) void getLadder(l).then(setLadder); }, [l.id, a.phase]);
   if (!timing) return null;
   const goal = (l.pass_criteria as unknown as TimingCriteria).bpm;
@@ -29,7 +30,7 @@ export function usePracticeTempo(l: Lesson): { bpm: number; goal: number; atGoal
   return { bpm, goal, atGoal: atGoal || bpm >= goal };
 }
 
-function Beats({ n, on, count }: { n: number; on: number; count: boolean }) {
+export function Beats({ n, on, count }: { n: number; on: number; count: boolean }) {
   return <div class={`attbeats ${count ? 'count' : ''}`}>{Array.from({ length: n }, (_, i) => <i class={`${on === i ? 'on' : ''} ${i === 0 ? 'one' : ''}`} />)}</div>;
 }
 
@@ -39,7 +40,10 @@ export function CalibrationCard({ compact = false, onDone }: { compact?: boolean
   const [list, setList] = useState<Calibration[]>([]);
   const refresh = () => void allCalibrations().then(setList);
   useEffect(refresh, [a.phase]);
-  useEffect(() => { if (a.kind === 'calibration' && a.phase === 'result') onDone?.(); }, [a.phase]);
+  // Only a calibration that finished after this card appeared counts: an old result left in the shared attempt
+  // store (another input, the other fold posture) must not look like "calibrated" here.
+  const stale = useRef(a.kind === 'calibration' && a.phase === 'result' ? a.calAt : undefined);
+  useEffect(() => { if (a.kind === 'calibration' && a.phase === 'result' && a.calAt !== stale.current) onDone?.(); }, [a.phase, a.calAt]);
   const mine = a.kind === 'calibration';
   const busy = mine && (a.phase === 'starting' || a.phase === 'countin' || a.phase === 'playing');
   return (
@@ -56,7 +60,7 @@ export function CalibrationCard({ compact = false, onDone }: { compact?: boolean
           <button onClick={cancelAttempt}>Cancel</button>
         </div>
       ) : <button class="primary" onClick={() => runCalibration(dev())}>{list.length ? 'Calibrate this input' : 'Calibrate (30 seconds)'}</button>}
-      {mine && a.phase === 'result' && a.cal ? <p class="okText">Offset {a.cal.offsetMs.toFixed(0)} ms · spread {a.cal.spreadMs.toFixed(0)} ms · {a.cal.matched}/16 strums. {a.message}</p> : null}
+      {mine && a.phase === 'result' && a.cal && a.calAt !== stale.current ? <p class="okText">Offset {a.cal.offsetMs.toFixed(0)} ms · spread {a.cal.spreadMs.toFixed(0)} ms · {a.cal.matched}/16 strums. {a.message}</p> : null}
       {mine && a.phase === 'error' ? <p class="error">{a.message}</p> : null}
       {!compact && list.length ? (
         <ul class="list callist">{list.map(c => <li>{c.input_route} · {c.posture}<small>{c.offset_ms.toFixed(0)} ms (±{c.spread_ms.toFixed(0)}) · {new Date(c.measured_at).toLocaleDateString()}</small></li>)}</ul>
@@ -155,7 +159,7 @@ export function TimingPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Le
       <div class="row wrap">
         <button class="primary" onClick={() => start(ladderBpm)}>{r ? 'Go again' : 'Start'} at {ladderBpm} BPM</button>
       </div>
-      <p class="muted small">Grading {cap.label ? `with ${cap.label}` : 'with the selected input'} · {posture()} · <a href="#/settings">calibration</a></p>
+      <p class="muted small">Grading {cap.label ? `with ${routeLabel()}` : 'with the selected input'} · {posture()} · <a href="#/settings">calibration</a></p>
     </div>
   );
 }

@@ -191,6 +191,9 @@
     "Em",
     "G",
     "G_4f"
+   ],
+   "exercises": [
+    "EX_changes_em_g"
    ]
   },
   "content": "content/A.01.md",
@@ -251,6 +254,9 @@
     "Asus4",
     "A7sus4",
     "Bm_partial"
+   ],
+   "exercises": [
+    "EX_changes_dfamily"
    ]
   },
   "content": "content/A.03.md",
@@ -281,7 +287,7 @@
     "G"
    ],
    "exercises": [
-    "EX_changes_open"
+    "EX_changes_cfamily"
    ]
   },
   "content": "content/A.04.md",
@@ -390,7 +396,11 @@
    "type": "chord_accuracy",
    "ratio": 0.9
   },
-  "assets": {},
+  "assets": {
+   "exercises": [
+    "EX_capo_keys"
+   ]
+  },
   "content": "content/A.08.md",
   "review_days": [
    1,
@@ -465,11 +475,21 @@
   ],
   "pass_criteria": {
    "type": "chord_accuracy",
-   "ratio": 0.9
+   "ratio": 0.9,
+   "bpm": 80
   },
   "assets": {
    "songs": [
     "SONG_amazing_grace"
+   ],
+   "chords": [
+    "G",
+    "C",
+    "D",
+    "G7"
+   ],
+   "exercises": [
+    "EX_amazing_grace_chords"
    ]
   },
   "content": "content/A.11.md",
@@ -500,6 +520,9 @@
    "shapes": [
     "E_shape_major",
     "A_shape_minor"
+   ],
+   "exercises": [
+    "EX_barre_F_Bm"
    ]
   },
   "content": "content/A.12.md",
@@ -614,7 +637,8 @@
     "tri_321_Gm_inv2"
    ],
    "exercises": [
-    "EX_triads_I_V_vi_IV_G"
+    "EX_triads_I_V_vi_IV_G",
+    "EX_changes_triads_G"
    ]
   },
   "content": "content/ER.04.md",
@@ -641,7 +665,13 @@
    "triads": [
     "tri_432_G_root",
     "tri_432_G_inv1",
-    "tri_432_G_inv2"
+    "tri_432_G_inv2",
+    "tri_432_D_inv1",
+    "tri_432_Em_inv1",
+    "tri_432_C_inv2"
+   ],
+   "exercises": [
+    "EX_triads_432_G"
    ]
   },
   "content": "content/ER.05.md",
@@ -675,6 +705,9 @@
     "A7sus4",
     "G_over_B",
     "Em7"
+   ],
+   "exercises": [
+    "EX_changes_drone"
    ]
   },
   "content": "content/ER.06.md",
@@ -744,6 +777,9 @@
     "E_shape_minor",
     "A_shape_major",
     "A_shape_minor"
+   ],
+   "exercises": [
+    "EX_barre_progression_G"
    ]
   },
   "content": "content/ER.09.md",
@@ -798,6 +834,9 @@
   "assets": {
    "quizzes": [
     "Q_nashville"
+   ],
+   "exercises": [
+    "EX_number_chart"
    ]
   },
   "content": "content/ER.11.md",
@@ -901,7 +940,8 @@
   ],
   "pass_criteria": {
    "type": "pitch",
-   "note_accuracy": 0.9
+   "note_accuracy": 0.9,
+   "bpm": 100
   },
   "assets": {
    "exercises": [
@@ -928,7 +968,11 @@
    "type": "pitch",
    "cents": 15
   },
-  "assets": {},
+  "assets": {
+   "exercises": [
+    "EX_bends_G"
+   ]
+  },
   "content": "content/EL.05.md",
   "review_days": [
    1,
@@ -949,7 +993,11 @@
    "type": "pitch",
    "note_accuracy": 0.9
   },
-  "assets": {},
+  "assets": {
+   "exercises": [
+    "EX_sixths_G_major"
+   ]
+  },
   "content": "content/EL.06.md",
   "review_days": [
    1,
@@ -968,11 +1016,16 @@
   ],
   "pass_criteria": {
    "type": "pitch",
-   "note_accuracy": 0.9
+   "note_accuracy": 0.9,
+   "bpm": 80,
+   "any_octave": true
   },
   "assets": {
    "songs": [
     "SONG_amazing_grace"
+   ],
+   "exercises": [
+    "EX_amazing_grace_lines12"
    ]
   },
   "content": "content/EL.07.md",
@@ -1067,7 +1120,11 @@
    "type": "pitch",
    "note_accuracy": 0.9
   },
-  "assets": {},
+  "assets": {
+   "exercises": [
+    "EX_harmonics_swells"
+   ]
+  },
   "content": "content/EL.11.md",
   "review_days": [
    1,

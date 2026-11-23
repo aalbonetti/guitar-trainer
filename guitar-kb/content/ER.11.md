@@ -22,5 +22,9 @@ Practice the shapes until you see "1, 4, 5, 6m" as a box of positions, not as le
 
 {{quiz:Q_nashville}}
 
+4. Pass it: the app names a key and shows only numbers. Play each as a barre chord from the neck map, four strums each.
+
+{{exercise:EX_number_chart}}
+
 ### Goal
 Play a chorus correctly from a number chart, in a key named on the spot.

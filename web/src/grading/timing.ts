@@ -29,14 +29,16 @@ export function lessonFeel(l: Lesson, cat: Catalog): Feel {
   const ids = [...(l.assets.rhythm || []), ...(l.assets.picking || [])];
   const pats: (Strum | Picking)[] = ids.map(id => cat.strums.find(s => s.id === id) || cat.picking.find(s => s.id === id)).filter((x): x is Strum | Picking => !!x);
   const pat = pats.find(x => x.grid === p.subdivision);
-  if (pat) {
-    const beats = PER_BEAT[pat.meter] || 4, sub = pat.grid / beats;
-    // strum steps are D/U/X/- ; a picking step is an object (every one is played)
-    const steps = (pat.steps as unknown[]).map(s => (typeof s === 'string' ? s : 'N'));
-    return { beats, sub, grid: pat.grid, steps, patternId: pat.id, patternName: pat.name || pat.id, meter: pat.meter };
-  }
+  if (pat) return patternFeel(pat);
   const beats = p.subdivision === 6 ? 3 : 4;
   return { beats, sub: p.subdivision / beats, grid: p.subdivision, steps: null, patternId: null, patternName: null, meter: beats === 3 ? '3/4' : '4/4' };
+}
+/** How the click counts a strum or picking pattern, and which of its steps are played (also used by In the Pocket). */
+export function patternFeel(pat: Strum | Picking): Feel {
+  const beats = PER_BEAT[pat.meter] || 4, sub = pat.grid / beats;
+  // strum steps are D/U/X/- ; a picking step is an object (every one is played)
+  const steps = (pat.steps as unknown[]).map(s => (typeof s === 'string' ? s : 'N'));
+  return { beats, sub, grid: pat.grid, steps, patternId: pat.id, patternName: pat.name || pat.id, meter: pat.meter };
 }
 
 /** Click and slot times for one attempt starting (first count-in click) at context time `t0`. One bar of count-in. */

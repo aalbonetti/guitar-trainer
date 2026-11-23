@@ -26,5 +26,9 @@ The Am shape with the index barring from string 5. Root on **string 5**: fret 2 
 ### Use it
 Replace Fmaj7 with F in **C – Am – F – G**, and the partial Bm with a full Bm in **D – Bm – G – A**.
 
+{{exercise:EX_barre_F_Bm}}
+
+> Only the F and Bm strums are graded, and each chord needs 80% on its own. The app listens for the barre's low root (F on string 6, B on string 5), so your old Fmaj7 or the partial Bm doesn't count. It can't hear every string, though: check for dead strings yourself, one at a time.
+
 ### Goal
 80% of strums ring clean on F and Bm.

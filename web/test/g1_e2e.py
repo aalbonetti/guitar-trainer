@@ -30,7 +30,8 @@ async def main():
         await pg.goto(f'http://127.0.0.1:{PORT}/#/settings'); await pg.wait_for_selector('text=Restore from file')
         await pg.set_input_files('section.card:has-text("Backup") input[type=file]', BK); await pg.wait_for_timeout(1500)
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade'); await pg.wait_for_selector('text=Note Drop'); await pg.wait_for_timeout(300)
-        t=await pg.inner_text('.tiles'); check('Taught in' not in t.split('Triad Hunt')[0], 'F + T passed: no "taught in" tips on the G1 games')
+        g1=['Note Drop','Fret Finder','Call the Number','Hear the Change','Capo Quick','Delay Math']
+        t=' '.join([await pg.inner_text(f'section.tile:has-text("{n}")') for n in g1]); check('Taught in' not in t, 'F + T passed: no "taught in" tips on the G1 games')
         await pg.screenshot(path='/tmp/g1_home.png', full_page=True)
         # --- Call the Number cn1, a full 60 s round, all correct ---
         await pg.goto(f'http://127.0.0.1:{PORT}/#/arcade/G_call_the_number/cn1'); await pg.click('text=▶ Start')
