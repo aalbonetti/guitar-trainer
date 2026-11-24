@@ -160,7 +160,8 @@
   },
   "chords_verified": "full",
   "notes": null,
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_build_my_life",
@@ -247,7 +248,8 @@
   },
   "chords_verified": "full",
   "notes": "Time signature 4/4 per Musicnotes listing.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": false
  },
  {
   "id": "MS_what_a_beautiful_name",
@@ -365,7 +367,8 @@
   },
   "chords_verified": "partial (bridge not captured)",
   "notes": null,
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_10000_reasons",
@@ -508,7 +511,8 @@
   },
   "chords_verified": "full",
   "notes": null,
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_holy_forever",
@@ -642,7 +646,8 @@
   },
   "chords_verified": "full",
   "notes": null,
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": false
  },
  {
   "id": "MS_gratitude",
@@ -755,7 +760,8 @@
   },
   "chords_verified": "full",
   "notes": "WorshipTogether lists 155 BPM (eighth-note count); MultiTracks master is 78 BPM in 6/8. Use 78 dotted-quarter.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": false
  },
  {
   "id": "MS_cornerstone",
@@ -863,7 +869,8 @@
   },
   "chords_verified": "full",
   "notes": "Verse text is the 1834 hymn \"My Hope Is Built\" (PD); the modern chorus/arrangement is copyrighted (2011).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_living_hope",
@@ -990,7 +997,8 @@
   },
   "chords_verified": "full",
   "notes": "Chart source is in E; original recording is Eb (play E shapes and tune down, or capo 1 with D shapes).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": false
  },
  {
   "id": "MS_way_maker",
@@ -1047,7 +1055,8 @@
   },
   "chords_verified": "core loop only",
   "notes": "4 1 5 6m loop confirmed by three independent charts (E, capo-4 C shapes, capo-2 G shapes).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": false
  },
  {
   "id": "MS_king_of_kings",
@@ -1157,7 +1166,8 @@
   },
   "chords_verified": "full",
   "notes": null,
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_firm_foundation",
@@ -1255,7 +1265,8 @@
   },
   "chords_verified": "partial (chorus not captured cleanly)",
   "notes": "WorshipTogether lists 148 BPM (eighth-note count); master is 75 BPM in 6/8.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": false
  },
  {
   "id": "MS_raise_a_hallelujah",
@@ -1324,7 +1335,8 @@
   },
   "chords_verified": "core loops only",
   "notes": "Chart source in G; original is Db (capo 1 with C shapes, or capo 6 with G shapes).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": false
  },
  {
   "id": "MS_great_are_you_lord",
@@ -1406,7 +1418,8 @@
   },
   "chords_verified": "full",
   "notes": "With capo 2 and G shapes this becomes Cadd9-Em-D: a G-family song.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": false
  },
  {
   "id": "MS_who_you_say_i_am",
@@ -1510,7 +1523,8 @@
   },
   "chords_verified": "full",
   "notes": "Original master is Gb; chart source in G (a half step up) is the common church key.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": false
  },
  {
   "id": "MS_in_christ_alone",
@@ -1590,7 +1604,8 @@
   },
   "chords_verified": "full",
   "notes": "No original-master entry on MultiTracks; BPM varies by recording (62-79). Some charts use Bm for the 3rd chord.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_love_of_god",
@@ -1712,8 +1727,9 @@
    "chords": "https://www.worshiptogether.com/songs/love-of-god-brandon-lake-phil-wickham/"
   },
   "chords_verified": "full",
-  "notes": "Most-played song in the HOPE set (4x Aug-Nov 2026). Gb: capo 2 with E shapes or capo 4 with D shapes.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "notes": "Gb: capo 2 with E shapes or capo 4 with D shapes.",
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_o_come_to_the_altar",
@@ -1790,7 +1806,8 @@
   },
   "chords_verified": "verse and chorus",
   "notes": "B: capo 4 with G shapes (G C Em / G Am Em C G).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_reckless_love",
@@ -1846,7 +1863,8 @@
   },
   "chords_verified": "core loop only",
   "notes": "6m 5 4 1 loop throughout; a second chart (Em D C G, tuned down) agrees. Gb original: capo 2 with E shapes = C#m B A E.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_blessed_be_your_name",
@@ -1963,7 +1981,8 @@
   },
   "chords_verified": "full",
   "notes": "Chart in G; Bb master = capo 3 with G shapes. Methodist Church hymnal chart in Bb matches.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_glorious_day",
@@ -2032,7 +2051,8 @@
   },
   "chords_verified": "partial",
   "notes": "Intro/verse often played as single notes on low E (10-7-3 = D-Bm-G roots): a good ER.02 riff exercise.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_holy_is_the_lord",
@@ -2137,7 +2157,8 @@
   },
   "chords_verified": "full",
   "notes": "Key/BPM from WorshipTogether (no MultiTracks check); 4/4 not confirmed by source. B7 = secondary dominant (II7); G2 = borrowed bVII.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_i_will_follow",
@@ -2226,7 +2247,8 @@
   },
   "chords_verified": "full",
   "notes": "Chart in G = capo 3 to Bb (Tomlin plays it this way).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_hymn_of_heaven",
@@ -2351,7 +2373,8 @@
   },
   "chords_verified": "full",
   "notes": "Chart in D; E original = capo 2 with D shapes.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_at_the_cross_love_ran_red",
@@ -2461,7 +2484,8 @@
   },
   "chords_verified": "full",
   "notes": "Chart in G; Ab original = capo 1. G is the common church key (Tomlin live version is in G).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_amazing_grace_my_chains",
@@ -2558,7 +2582,8 @@
   },
   "chords_verified": "full",
   "notes": "Verses are the PD hymn (Newton); the chorus is Tomlin/Giglio (copyrighted). Links to catalog song SONG_amazing_grace for the hymn melody.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_everlasting_god",
@@ -2658,7 +2683,8 @@
   },
   "chords_verified": "full",
   "notes": "No original-master listing found; B at 100-113 BPM across recordings (Tomlin \"See the Morning\" track used). Chart in G = capo 4.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_come_as_you_are",
@@ -2784,7 +2810,8 @@
   },
   "chords_verified": "full",
   "notes": "All open C-family chords: a great first 6/8 song.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_all_the_people_said_amen",
@@ -2900,7 +2927,8 @@
   },
   "chords_verified": "full",
   "notes": "B major in the chorus is a III (secondary dominant of Em): good ear-training moment.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_this_is_amazing_grace",
@@ -2983,7 +3011,8 @@
   },
   "chords_verified": "full",
   "notes": "Tempo listed only as \"Fast\". Bb original = capo 3 with G shapes.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_o_church_arise",
@@ -3074,7 +3103,8 @@
   },
   "chords_verified": "full",
   "notes": "Modern hymn (2005). Lots of slash-chord bass walking: good for D/F# and A/C# practice.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_o_praise_the_name",
@@ -3184,7 +3214,8 @@
   },
   "chords_verified": "full",
   "notes": "Tempo listed only as \"Medium slow\".",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_hosanna_praise_is_rising",
@@ -3284,7 +3315,8 @@
   },
   "chords_verified": "full",
   "notes": "Tempo 114 from WeAreWorship.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_made_for_more",
@@ -3397,7 +3429,8 @@
   },
   "chords_verified": "full",
   "notes": "Key taken from the chart (C); original recording key and tempo not confirmed.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_hear_our_praises",
@@ -3480,7 +3513,8 @@
   },
   "chords_verified": "full",
   "notes": "Tempo listed only as \"Fast\"; key taken from the chart.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_here_i_am_lord",
@@ -3539,7 +3573,8 @@
   },
   "chords_verified": "partial",
   "notes": "1981 hymn (OCP, copyrighted). Licensed via OneLicense (#80670), not CCLI. Only the refrain ending was captured.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_graves_into_gardens",
@@ -3644,7 +3679,8 @@
   },
   "chords_verified": "full",
   "notes": "Tempo listed only as \"Medium fast\". B = capo 4 with G shapes (G, C/G, Em, D, C).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_here_i_am_to_worship",
@@ -3732,7 +3768,8 @@
   },
   "chords_verified": "full",
   "notes": "Key taken from the chart (D); original recording key, tempo and meter not confirmed.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_how_great_is_our_god",
@@ -3820,7 +3857,8 @@
   },
   "chords_verified": "full",
   "notes": "Only 4 chords. Db original = capo 1 with C shapes.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_mighty_to_save",
@@ -3926,7 +3964,8 @@
   },
   "chords_verified": "full",
   "notes": "Verse starts on the 4 chord. A = capo 2 with G shapes.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_lead_me_to_the_cross",
@@ -4038,7 +4077,8 @@
   },
   "chords_verified": "full",
   "notes": "Minor-feel verse in D (6m start). Chart prints F#/A; read as F#/A# (V of Bm), confirm against SongSelect.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_run_to_the_father",
@@ -4126,7 +4166,8 @@
   },
   "chords_verified": "full",
   "notes": "One 4-chord loop almost the whole song; tempo listed only as \"Medium slow\".",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_above_all",
@@ -4253,7 +4294,8 @@
   },
   "chords_verified": "full",
   "notes": "Key taken from the chart (G). B7 = III7 (secondary dominant to Em). Lots of walking slash-chord bass.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_how_deep_the_fathers_love",
@@ -4329,7 +4371,8 @@
   },
   "chords_verified": "full",
   "notes": "Modern hymn (1995) in 3/4, tempo \"Slow\". Chart is in E; original key D.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_ancient_words",
@@ -4427,7 +4470,8 @@
   },
   "chords_verified": "partial",
   "notes": "Key taken from the chart (E, Robin Mark version); tempo and meter not confirmed.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_lay_me_down",
@@ -4506,7 +4550,8 @@
   },
   "chords_verified": "full",
   "notes": "Source lists original key C but the chart is marked \"Capo 5\" (would sound in F). Confirm with your SongSelect chart.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_your_grace_is_enough",
@@ -4606,7 +4651,8 @@
   },
   "chords_verified": "full",
   "notes": "A original = capo 2 with G shapes.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_the_wonderful_cross",
@@ -4679,7 +4725,8 @@
   },
   "chords_verified": "full",
   "notes": "Verses are Isaac Watts (1707, PD) over a D5 drone: a great power-chord/drone exercise.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_thank_you_jesus_for_the_blood",
@@ -4796,7 +4843,8 @@
   },
   "chords_verified": "full",
   "notes": "Descending bass line (1 - 5/7 - 6m) throughout. Chart in C; Bb original.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_open_the_eyes_of_my_heart",
@@ -4890,7 +4938,8 @@
   },
   "chords_verified": "full",
   "notes": "Simplified chart in G. E original = capo 4 with C shapes or capo 2 with D shapes.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_chain_breaker",
@@ -4977,7 +5026,8 @@
   },
   "chords_verified": "partial",
   "notes": "Bluesy rock; sus-chord embellishments. Original key/tempo not confirmed.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_change_my_heart_oh_god",
@@ -5068,7 +5118,8 @@
   },
   "chords_verified": "full",
   "notes": "E major (III) leading to Am and D7 (II7) leading to G are secondary dominants: great ear-training song.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_come_now_is_the_time",
@@ -5150,7 +5201,8 @@
   },
   "chords_verified": "full",
   "notes": "Tempo listed only as \"Medium fast\".",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_come_thou_fount_come_thou_king",
@@ -5244,7 +5296,8 @@
   },
   "chords_verified": "partial",
   "notes": "Verses are the 1758 hymn (PD); the \"Come Thou King\" chorus is modern and copyrighted. B = VI major (V of ii).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_shine_jesus_shine",
@@ -5347,7 +5400,8 @@
   },
   "chords_verified": "full",
   "notes": "1987. F = borrowed bVII in the \"shine on me\" build.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_the_potters_hand",
@@ -5415,7 +5469,8 @@
   },
   "chords_verified": "verse only",
   "notes": "Borrowed Cm6 (iv) and Eb (bVI) give the verse its color; A/C# = II major. Intermediate chord vocabulary.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_christ_above_me",
@@ -5504,7 +5559,8 @@
   },
   "chords_verified": "chorus only",
   "notes": "Based on the St. Patrick's Breastplate text. E major = VI major (secondary dominant to Am).",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_for_all_youve_done",
@@ -5604,7 +5660,8 @@
   },
   "chords_verified": "full",
   "notes": "Chorus is a descending bass line (1 - 5/7 - 4/6 - 5). Key from chart.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_more_like_jesus",
@@ -5672,7 +5729,8 @@
   },
   "chords_verified": "partial",
   "notes": "Bb = capo 3 with G shapes. Chorus not captured.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  },
  {
   "id": "MS_sing_wherever_i_go",
@@ -5762,6 +5820,7 @@
   },
   "chords_verified": "full",
   "notes": "Upbeat folk-pop; key from chart (A). Verse starts on the 6m.",
-  "content_policy": "facts only: no lyrics, melody, or signature riffs"
+  "content_policy": "facts only: no lyrics, melody, or signature riffs",
+  "weekly_pool": true
  }
 ]

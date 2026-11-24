@@ -19,7 +19,7 @@ export interface Exercise {
 export interface Section { name: string; chords_in_chart_key: string[]; numbers: string[] }
 export interface Outline {
   id: string; title: string; artist: string; ccli: number | null; original_key: string; bpm: number | null; meter: string | null;
-  chart_key: string; sections: Section[]; capo_options: { shapes: string; capo: number }[]; practice_for: string[];
+  chart_key: string; sections: Section[]; capo_options: { shapes: string; capo: number }[]; practice_for: string[]; weekly_pool?: boolean;
   links: { songselect: string | null }; chords_verified: string; notes: string | null;
 }
 export interface GameLevel { id: string; name: string; params: Record<string, any>; target_score: number; round_s?: number; lives?: number; unlock_lesson?: string; review_for?: string[] }

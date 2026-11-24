@@ -96,11 +96,14 @@ export function songOfWeek(pool: string[], now: Date): string | null {
   if (n > 1 && cycle > 0 && o[0] === order(cycle - 1)[n - 1]) [o[0], o[1]] = [o[1], o[0]];
   return o[((w % n) + n) % n];
 }
-/** The pool: every song on the imported church list that has a chart outline (else all outlines with lessons). */
+/** The pool: songs on a set list saved on this phone (older installs), else the catalog's weekly pool, else all outlines with lessons. */
 export function songPool(q: Pick<QueueInput, 'cat' | 'setlist'>): { ids: string[]; fromList: boolean } {
   const has = (id: string | null): id is string => !!id && q.cat.outlines.some(o => o.id === id);
   const list = q.setlist ? q.setlist.songs.map(s => s.outlineId).filter(has) : [];
-  return list.length ? { ids: list, fromList: true } : { ids: q.cat.outlines.filter(o => o.practice_for.length).map(o => o.id), fromList: false };
+  if (list.length) return { ids: list, fromList: true };
+  const weekly = q.cat.outlines.filter(o => o.weekly_pool).map(o => o.id);
+  if (weekly.length) return { ids: weekly, fromList: true };
+  return { ids: q.cat.outlines.filter(o => o.practice_for.length).map(o => o.id), fromList: false };
 }
 
 export const totalMinutes = (items: Item[]) => items.reduce((s, i) => s + (i.minutes || 0), 0);
