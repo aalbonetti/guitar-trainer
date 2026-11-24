@@ -1,4 +1,5 @@
 // Screens: Today, Path, Lesson, Songs, Song, Tools, Settings.
+import { getThemePref, setThemePref, type ThemePref } from '../theme';
 import { useEffect, useState } from 'preact/hooks';
 import type { Catalog, Lesson } from '../catalog';
 import { describePass, lessonTempo } from '../catalog';
@@ -323,6 +324,16 @@ function AudioCheckCard() {
   );
 }
 
+function Appearance() {
+  const [pref, setPref] = useState(getThemePref());
+  const opts: [ThemePref, string][] = [['light', 'Light'], ['dark', 'Dark'], ['auto', 'Match phone']];
+  return (
+    <section class="card"><h2>Appearance</h2>
+      <div class="row" role="group" aria-label="Theme">{opts.map(([v, l]) => <button class={pref === v ? 'sel' : ''} aria-pressed={pref === v} onClick={() => { setThemePref(v); setPref(v); }}>{l}</button>)}</div>
+      <p class="muted">Light is the walnut-and-cream look; Dark is easier on the eyes in a dim room. "Match phone" follows your phone's dark mode setting.</p>
+    </section>
+  );
+}
 export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void }) {
   const [msg, setMsg] = useState('');
   const [inst, setInst] = useState(instrumentPref.get());
@@ -332,6 +343,7 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
   return (
     <div class="page">
       <h1>Settings</h1>
+      <Appearance />
       <section class="card">
         <h2>Instrument</h2>
         <div class="row">{(['acoustic', 'electric', 'both'] as const).map(v => <button class={inst === v ? 'sel' : ''} onClick={() => { instrumentPref.set(v); setInst(v); }}>{v}</button>)}</div>
