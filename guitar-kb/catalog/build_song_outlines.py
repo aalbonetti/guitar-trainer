@@ -185,7 +185,7 @@ SONGS = [
          notes='No original-master entry on MultiTracks; BPM varies by recording (62-79). Some charts use Bm for the 3rd chord.'),
 ]
 
-# ---- Faith Lutheran (HOPE) set list additions, Nov 2026 ----
+# ---- Worship set list additions, Nov 2026 ----
 SONGS += [
     song('MS_love_of_god', 'Love of God', 'Phil Wickham & Brandon Lake', 7241154, 'Gb', 74, '4/4', 'Gb',
          [('Intro', ['Gb', 'Bbm', 'Cb']),
@@ -193,7 +193,7 @@ SONGS += [
           ('Chorus', ['Gb/Bb', 'Cb', 'Gb', 'Db', 'Ebm7', 'Cb', 'Gb/Bb', 'Dbsus', 'Db', 'Gb/Bb', 'Cb', 'Db', 'Gb', 'Bbm7', 'Cb', 'Ebm7', 'Db', 'Gb'])],
          ['A.08', 'ER.03', 'ER.08', 'EL.07'],
          {'meta': MT + 'Brandon-Lake/Love-of-God/Love-of-God/', 'chords': WT + 'love-of-god-brandon-lake-phil-wickham/'},
-         notes='Most-played song in the HOPE set (4x Aug-Nov 2026). Gb: capo 2 with E shapes or capo 4 with D shapes.'),
+         notes='Gb: capo 2 with E shapes or capo 4 with D shapes.'),
     song('MS_o_come_to_the_altar', 'O Come to the Altar', 'Elevation Worship', 7051511, 'B', 70, '6/8', 'B',
          [('Verse', ['B', 'E', 'B', 'E', 'G#m', 'E']),
           ('Chorus', ['B', 'C#m', 'G#m', 'E', 'B'])],
@@ -243,7 +243,7 @@ SONGS += [
          notes='Chart in G = capo 3 to Bb (Tomlin plays it this way).'),
 ]
 
-# ---- HOPE set list batch 2: most recently played (Oct 18 - Nov 15, 2026). CCLI # not captured (None) ----
+# ---- Batch 2. CCLI # not captured (None) ----
 SONGS += [
     song('MS_hymn_of_heaven', 'Hymn of Heaven', 'Phil Wickham', None, 'E', 71, '4/4', 'D',
          [('Intro', ['D', 'D/F#', 'G', 'Bm7', 'A(add4)']),
@@ -292,7 +292,7 @@ SONGS += [
 ]
 
 
-# ---- HOPE set list batch 3 (Nov 2026). bpm/meter None = not found in any source; app should tap-tempo or ask ----
+# ---- Batch 3 (Nov 2026). bpm/meter None = not found in any source; app should tap-tempo or ask ----
 WC = 'https://worshipchords.com/'
 SONGS += [
     song('MS_this_is_amazing_grace', 'This Is Amazing Grace', 'Phil Wickham', 6333821, 'Bb', None, '4/4', 'G',
@@ -348,7 +348,7 @@ SONGS += [
 ]
 
 
-# ---- HOPE set list batch 4 (Nov 2026): metadata from WorshipChords "About This Song" where available ----
+# ---- Batch 4 (Nov 2026): metadata from WorshipChords "About This Song" where available ----
 SONGS += [
     song('MS_graves_into_gardens', 'Graves Into Gardens', 'Elevation Worship', 7138219, 'B', None, '6/8', 'B',
          [('Intro', ['B', 'E/B', 'B']),
@@ -402,7 +402,7 @@ SONGS += [
 ]
 
 
-# ---- HOPE set list batch 5 (Nov 2026) ----
+# ---- Batch 5 (Nov 2026) ----
 SONGS += [
     song('MS_how_deep_the_fathers_love', "How Deep the Father's Love for Us", 'Stuart Townend', 1558110, 'D', None, '3/4', 'E',
          [('Verse', ['E', 'F#m', 'E/G#', 'A', 'E/G#', 'C#m', 'B', 'E', 'F#m', 'E/G#', 'A', 'E/B', 'B', 'E'])],
@@ -450,7 +450,7 @@ SONGS += [
 ]
 
 
-# ---- HOPE set list batch 6 (Nov 2026). Keys from charts unless noted ----
+# ---- Batch 6 (Nov 2026). Keys from charts unless noted ----
 SONGS += [
     song('MS_chain_breaker', 'Chain Breaker', 'Zach Williams', None, 'C', None, None, 'C',
          [('Verse', ['C5', 'Csus', 'C', 'Am', 'Asus', 'Am', 'G', 'Gsus', 'G', 'F', 'F2', 'Gsus', 'G']),
@@ -494,7 +494,7 @@ SONGS += [
 ]
 
 
-# ---- HOPE set list batch 7 (Nov 2026) ----
+# ---- Batch 7 (Nov 2026) ----
 SONGS += [
     song('MS_christ_above_me', 'Christ Above Me', 'John Chisum & George Searcy', None, 'G', None, None, 'G',
          [('Chorus', ['G', 'D', 'G', 'C', 'G', 'D', 'E', 'Em7', 'Am7', 'C', 'D', 'G', 'D', 'G', 'D/F#', 'Em7', 'Am7', 'G/B', 'Dsus', 'D', 'G'])],
@@ -522,6 +522,13 @@ SONGS += [
          {'meta': WC + 'sing-wherever-i-go-chords/', 'chords': WC + 'pdf/sing-wherever-i-go-chords-key-c-91890.pdf'},
          notes='Upbeat folk-pop; key from chart (A). Verse starts on the 6m.'),
 ]
+
+# Weekly practice song pool (song of the week, Set Ready, Call the Number songs mode): every outline except these.
+# Kept in the catalog so the app needs no import; edit this set to change the pool.
+NOT_IN_WEEKLY_POOL = {'MS_build_my_life', 'MS_holy_forever', 'MS_gratitude', 'MS_living_hope', 'MS_way_maker',
+                      'MS_firm_foundation', 'MS_raise_a_hallelujah', 'MS_great_are_you_lord', 'MS_who_you_say_i_am'}
+for s in SONGS:
+    s['weekly_pool'] = s['id'] not in NOT_IN_WEEKLY_POOL
 
 # validate lesson refs against lessons.json
 lessons = {l['id'] for l in json.load(open(os.path.join(OUT, 'lessons.json')))}
