@@ -10,7 +10,7 @@ F  Foundations (shared) ──┬── A  Acoustic Worship (basic)
                           └── EL Electric Worship Lead  ◄──┘ (EL.04+ needs ER.04)
 T  Theory & Ear (shared, runs alongside every track)
 ```
-A student picks acoustic, electric, or both after Foundations. Theory lessons are unlocked by the track lessons that need them.
+A student picks acoustic, electric, or both after Foundations. Theory lessons chain on their own prerequisites, and some track lessons require them (A.08 needs T.04, ER.03 needs T.07, ER.11 needs T.03).
 
 ## Pass criterion types (what the app measures)
 | Type | Measured by | Example |
@@ -85,15 +85,15 @@ A student picks acoustic, electric, or both after Foundations. Theory lessons ar
 | **Milestone** | Intro hook plus an 8-bar instrumental over I–V–vi–IV in 3 keys | |
 
 ## T — Theory & Ear (shared)
-| ID | Lesson | Unlocked by |
+| ID | Lesson | Prerequisites (catalog is the source of truth) |
 |---|---|---|
 | T.01 | Intervals and the fretboard | F.07 |
-| T.02 | Major scale and diatonic chords | A.04 / ER.02 |
-| T.03 | Nashville Number System | A.06 / ER.04 |
-| T.04 | Capo math and transposing | A.08 |
-| T.05 | Ear: major vs minor chords | A.02 |
-| T.06 | Ear: hearing I, IV, V, and vi movement | T.03 |
-| T.07 | Tempo, subdivisions, and delay time | ER.03 |
+| T.02 | Major scale and diatonic chords | T.01 |
+| T.03 | Nashville Number System | T.02 |
+| T.04 | Capo math and transposing | T.01 (A.08 needs it) |
+| T.05 | Ear: major vs minor chords | F.06 |
+| T.06 | Ear: hearing I, IV, V, and vi movement | T.03, T.05 |
+| T.07 | Tempo, subdivisions, and delay time | F.06 (ER.03 needs it) |
 
 ## Practice routines (suggested)
 | Length | Acoustic | Electric |

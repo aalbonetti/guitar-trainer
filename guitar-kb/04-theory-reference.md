@@ -38,7 +38,7 @@ The circle of fifths, clockwise: C G D A E B F#/Gb Db Ab Eb Bb F. Each step adds
 Relative minor = the 6th degree of a major key (C major ↔ A minor). Both share the same notes and key signature.
 
 ## Common progressions (Nashville numbers)
-| Name | Numbers | In G |
+| Name | Numbers | Example |
 |---|---|---|
 | Three-chord | I–IV–V | G–C–D |
 | Pop axis | I–V–vi–IV | G–D–Em–C |

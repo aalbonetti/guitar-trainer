@@ -23,11 +23,11 @@ The full chord library (828 chords, 3,283 voicings) comes from **chords-db** (MI
 | Cmaj7 | x 3 2 0 0 0 | – 3 2 – – – | |
 | Fmaj7 | x x 3 2 1 0 | – – 3 2 1 – | |
 | Am7 | x 0 2 0 1 0 | – – 2 – 1 – | |
-| Em7 | 0 2 2 0 3 0 | – 1 2 – 4 – | simpler: 0 2 0 0 0 0 |
+| Em7 | 0 2 2 0 3 3 | – 1 2 – 3 4 | G-family voicing (ring + pinky anchored). Simpler: 0 2 0 0 0 0 |
 | Dsus2 | x x 0 2 3 0 | | |
 | Dsus4 | x x 0 2 3 3 | | |
 | Asus4 | x 0 2 2 3 0 | | |
-| Cadd9 | x 3 2 0 3 0 | – 2 1 – 3 – | |
+| Cadd9 | x 3 2 0 3 3 | – 2 1 – 3 4 | G-family voicing (ring + pinky anchored) |
 
 ## Movable shapes
 | Shape | Frets (6→1), root at fret *n* | Root string |

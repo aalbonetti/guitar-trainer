@@ -7,3 +7,4 @@ web/test/*.wav
 # personal: the church set list stays on the phone, never in this public repo
 guitar-kb/catalog/HOPE_Worship_Songs.csv
 guitar-kb/catalog/setlist.json
+guitar-kb/catalog/build_setlist.py

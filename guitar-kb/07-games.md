@@ -40,7 +40,7 @@ Every game's **first level is open from the start**; each next level opens with 
 |---|---|---|---|
 | `G_note_drop` | **Note Drop** | Note names fall toward the fretboard. Play or tap the note in the highlighted zone before it lands. Speed rises every 10 notes; 3 misses end the round | Note names · F.07 |
 | `G_fret_finder` | **Fret Finder** | One note name, 20 seconds: find **every** place it appears in the zone | Fretboard map · T.01 |
-| `G_call_the_number` | **Call the Number** | A key is set. A "band leader" calls numbers ("4", "6m", "5/7") at the click tempo, and you play or tap the chord in that key. Songs mode uses real progressions from `song_outlines` (*This month* first) | Nashville numbers · T.03 |
+| `G_call_the_number` | **Call the Number** | A key is set. A "band leader" calls numbers ("4", "6m", "5/7") at the click tempo, and you play or tap the chord in that key. Songs mode uses real progressions from `song_outlines` (the weekly pool) | Nashville numbers · T.03 |
 | `G_hear_the_change` | **Hear the Change** | The app plays 1 and then another chord (synthesized, §9 of the spec), and you name the number. Starts with 1/4/5/6m, then adds 2m, 3m and slash chords | Ear: I–IV–V–vi · T.06 (T.05 for the major/minor-only level) |
 | `G_capo_quick` | **Capo Quick** | "Song in Bb. You want G shapes. Capo?" and the reverse: "Capo 3, playing C shapes. Real key?" | Capo math · T.04 |
 | `G_triad_hunt` | **Triad Hunt** | A chord name and a string set (3-2-1 or 4-3-2): tap or play the triad in a set fret window, any inversion | Triads · ER.04 (4-3-2 level: ER.05) |
