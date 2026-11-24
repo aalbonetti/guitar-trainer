@@ -60,7 +60,7 @@ export function Today({ cat }: { cat: Catalog }) {
           {(() => { const pool = songPool({ cat, setlist: sl }); const id = songOfWeek(pool.ids, new Date()); const o = id ? cat.outlineById[id] : null;
             return o ? <a class="card tap-card" href={`#/song/${o.id}`} aria-label={`Song of the week: ${o.title}`}><h2>Song of the week <span class="chev" aria-hidden="true">›</span></h2><p><span class="big-link">{o.title}</span> <small class="muted">{o.artist}</small></p>
               <p class="small fit">{(() => { const st = songSettings(cat, o, pr.lp); return st.suggested || st.capo === st.fit.capo ? fitLine(st.fit) : `Capo ${st.capo}${st.key !== o.chart_key ? `, key of ${st.key}` : ''} (your choice).`; })()}</p>
-              <p class="muted small">Picked at random from {pool.fromList ? 'your church’s song list' : 'the song library'}. A new one every Monday at 12:01 am.</p></a> : null; })()}
+              <p class="muted small">Picked at random from {pool.fromList ? 'your song list' : 'the song library'}. A new one every Monday at 12:01 am.</p></a> : null; })()}
         </div>
       </div>
     </div>

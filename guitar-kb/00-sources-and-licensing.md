@@ -27,8 +27,8 @@ In the US, works published in 1930 or earlier are public domain as of 2026. Stil
 - **Blues/folk standards:** use original 12-bar exercises rather than recordings
 
 ## Modern worship songs: how we handle them (personal-use app)
-- **Song outlines** (`catalog/song_outlines.json`) store facts only: title, artist, CCLI number, key, BPM, time signature, section chord progressions as Nashville numbers, and lesson links. Keys, tempos, and time signatures come from MultiTracks' original-master listings. Chord progressions come from published charts (WorshipTogether, Essential Worship, and others) and are checked against the key. **No lyrics, melody, or signature riffs are stored.**
-- **Full charts** come from your own SongSelect/CCLI access via the app's import feature, and stay on the device.
+- **Song outlines** (`catalog/song_outlines.json`) store facts only: title, artist, CCLI number, key, BPM, time signature, section chord progressions as Nashville numbers, and lesson links. Keys, tempos, and time signatures come from MultiTracks' original-master listings. Chord progressions were read from published charts for reference (WorshipTogether, Essential Worship, WorshipChords and a few others) and are checked against the key. The `sources` links in each outline are citations only; no chart content is copied. **No lyrics, melody, or signature riffs are stored.**
+- **Full charts** are not in the app (it has no import). Use your own SongSelect/CCLI access and the outline's SongSelect link.
 - If the app ever goes public, review this with your own CCLI license or a lawyer.
 
 ## Avoid (copyrighted — don't scrape or bundle)

@@ -53,6 +53,14 @@ describe('practice queue', () => {
   });
   const ids = outlines.slice(0, 5).map((o: any) => o.id);
   const sl = (weeks: string[], played: string[][]) => ({ weeks, importedAt: '', songs: ids.map((id: string, i: number) => ({ name: 'x' + i, plays: 1, isNew: false, weeks: played[i] || [], last: null, lastIndex: -1, outlineId: id })) });
+  it('song pool without a saved set list: the catalog weekly pool, else all outlines with lessons', () => {
+    const flagged = outlines.map((o: any, i: number) => ({ ...o, weekly_pool: i % 2 === 0 }));
+    const pool = songPool({ cat: { lessons, tracks, outlines: flagged }, setlist: null });
+    expect(pool.fromList).toBe(true);
+    expect(pool.ids).toEqual(flagged.filter((o: any) => o.weekly_pool).map((o: any) => o.id));
+    const plain = songPool({ cat: { lessons, tracks, outlines: outlines.map((o: any) => ({ ...o, weekly_pool: false })) }, setlist: null });
+    expect(plain.fromList).toBe(false);
+  });
   it('song of the week: from the whole church list, fixed all week, rolls over Monday 12:01 am Central', () => {
     const setlist = sl(['Nov 8', 'Nov 15'], [['Nov 8'], ['Nov 15'], [], [], []]);
     const pool = songPool({ cat: { lessons, tracks, outlines }, setlist });
