@@ -6,8 +6,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#14161a",
-  "theme_color": "#14161a",
+  "background_color": "#F6EFE4",
+  "theme_color": "#F6EFE4",
   "shortcuts": [
     { "name": "Tuner", "url": "./#/tools/tuner", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
     { "name": "Metronome", "url": "./#/tools/metronome", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
