@@ -1,6 +1,6 @@
 # Update banner: load the app (service worker installs), simulate a new deploy (sw.js changes), and check that
 # "Update ready" appears, that one tap switches to the new version, and that the app still works offline after.
-import asyncio, http.server, threading, functools, re, shutil, tempfile, os
+import asyncio, http.server, threading, functools, re, shutil, tempfile, os, sys
 from playwright.async_api import async_playwright
 PORT = 8781
 root = tempfile.mkdtemp(); site = os.path.join(root, 'site'); shutil.copytree('dist', site)
@@ -19,18 +19,20 @@ async def main():
         await pg.reload(); await pg.wait_for_selector("text=Today's practice")
         check(await pg.evaluate("!!navigator.serviceWorker.controller"), 'service worker controls the page')
         check(await pg.locator('.updatebanner').count() == 0, 'no banner on first install')
-        sw = open(os.path.join(site, 'sw.js')).read(); old = re.search(r"gt-\w+", sw).group(0)
-        open(os.path.join(site, 'sw.js'), 'w').write(sw.replace(old, old + 'x'))   # a new deploy
+        sw = open(os.path.join(site, 'sw.js')).read(); ver = re.search(r"const CACHE = PREFIX \+ '(\w+)'", sw).group(1); old = 'gt-' + ver
+        await pg.evaluate("caches.open('another-app-v1')")   # another site on the same origin
+        open(os.path.join(site, 'sw.js'), 'w').write(sw.replace(f"'{ver}'", f"'{ver}x'"))   # a new deploy
         await pg.evaluate("navigator.serviceWorker.getRegistration().then(r => r.update())")
         await pg.wait_for_selector('.updatebanner', timeout=15000); check(True, 'Update ready banner appears')
         async with pg.expect_navigation(): await pg.click('.updatebanner >> text=Reload now')
         await pg.wait_for_selector("text=Today's practice")
         check(await pg.locator('.updatebanner').count() == 0, 'banner gone after reload')
-        keys = await pg.evaluate("caches.keys()"); check(keys == [old + 'x'], f'only the new cache is left {keys}')
+        keys = sorted(await pg.evaluate("caches.keys()")); check(keys == ['another-app-v1', old + 'x'], f"only the new cache is left, and another app's cache is untouched {keys}")
+        check(await pg.evaluate("caches.open('" + old + "x').then(c => c.match('./licenses.txt')).then(r => !!r)"), 'licenses.txt is precached')
         await ctx.set_offline(True); await pg.reload(); await pg.wait_for_selector("text=Today's practice")
         await pg.goto(f'http://127.0.0.1:{PORT}/#/lesson/F.05'); await pg.wait_for_selector('text=Why the spider')
         check(True, 'works offline from the new cache (Today + lesson text)')
         check(not errs, f'no page errors {errs}')
         await b.close()
-    print('E2E PASS' if ok else 'E2E FAIL')
+    print('E2E PASS' if ok else 'E2E FAIL'); sys.exit(0 if ok else 1)
 asyncio.run(main())

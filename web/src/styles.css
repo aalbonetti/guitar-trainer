@@ -136,7 +136,6 @@ pre.tab { font:13px/1.35 ui-monospace,Menlo,Consolas,monospace; overflow-x:auto;
 .b-passed { color:var(--ok); border-color:var(--c-2d4a3a); } .b-in_progress { color:var(--accent); border-color:var(--c-4a3c17); } .b-due { color:var(--c-7cc4ff); border-color:var(--c-27435a); }
 .sticon { font-style:normal; display:inline-block; width:22px; color:var(--muted); } .st-passed .sticon { color:var(--ok); } .st-in_progress .sticon { color:var(--accent); } .st-locked a { opacity:.6; }
 .legend { font-size:13px; }
-textarea.backup { width:100%; height:120px; background:var(--field-bg); color:var(--ink); border:1px solid var(--line); border-radius:10px; margin:8px 0; font:12px ui-monospace,monospace; }
 button:disabled { opacity:.55; }
 
 /* timing grader (M4) */
@@ -194,7 +193,6 @@ ul.levels a, ul.levels li > span { display:flex; align-items:center; gap:8px; pa
 .hud > div { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:6px; text-align:center; } .hud b { display:block; font-size:22px; font-variant-numeric:tabular-nums; } .hud span { font-size:11px; color:var(--muted); } .hud .lost { color:var(--c-3a404b); font-size:22px; }
 .ghost { position:relative; height:8px; background:var(--card2); border-radius:5px; margin:0 0 10px; } .ghost .me { position:absolute; left:0; top:0; bottom:0; background:var(--accent); border-radius:5px; }
 .ghost .gh { position:absolute; top:-3px; width:3px; height:14px; background:var(--c-cfd3da); border-radius:2px; } .ghost small { position:absolute; right:0; top:10px; font-size:10px; color:var(--muted); }
-.board { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:10px; }
 .sky { position:relative; height:150px; background:linear-gradient(var(--sky-a),var(--sky-b)); border-radius:10px; margin-bottom:6px; overflow:hidden; }
 .sky .drop { position:absolute; left:50%; transform:translateX(-50%); background:var(--drop-bg); color:var(--drop-ink); font-size:22px; padding:4px 14px; border-radius:999px; }
 .sky .landing { position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--bad); opacity:.6; }
@@ -262,14 +260,9 @@ button.chordbtn:active { transform:scale(.97); }
 .capocalc .spot { padding:9px 2px; display:flex; flex-direction:column; gap:2px; } .capocalc .spot small { color:var(--muted); }
 .capocalc .transout { font-size:20px; font-weight:700; letter-spacing:.5px; white-space:pre-wrap; }
 
-/* Today backup reminder, Settings audio check, Arcade "coming later" */
+/* highlighted cards */
 .card.nudge { border-color:var(--accent); }
 .card.attn { border-color:var(--accent); }
-details.card.later summary { cursor:pointer; list-style:none; display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; }
-details.card.later summary::-webkit-details-marker { display:none; }
-details.card.later summary::after { content:'›'; margin-left:auto; color:var(--muted); transition:transform .15s; }
-details.card.later[open] summary::after { transform:rotate(90deg); }
-details.card.later ul.list li > span { font-weight:400; }
 /* pitch attempts (M7) */
 .notechips { list-style:none; margin:8px 0; padding:0; display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
 .notechips li { min-width:44px; padding:4px 8px; border-radius:10px; background:var(--card); border:1px solid var(--line); text-align:center; font-variant-numeric:tabular-nums; }

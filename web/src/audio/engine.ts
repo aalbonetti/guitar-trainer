@@ -27,7 +27,10 @@ async function updateWakeLock(attempt = false) {
     if (!want && wake) { await wake.release(); wake = null; }
   } catch { /* not fatal */ }
 }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wake = null; void updateWakeLock(); } });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') { wake = null; void updateWakeLock(); }
+  else stopTuner(); // nobody can read the needle: let go of the mic (also drops a start that's still pending)
+});
 
 // ---------- metronome ----------
 // Accent 2600 Hz, beat 2000 Hz, subdivision 1500 Hz quieter. 2 ms raised-cosine attack, 6 ms decay.
@@ -44,10 +47,16 @@ function click(t: number, kind: 0 | 1 | 2, vol: number): OscillatorNode {
   o.start(t); o.stop(t + 0.06);
   return o;
 }
-let timer: number | null = null, nextT = 0, tickN = 0;
+let timer: number | null = null, nextT = 0, tickN = 0, visualRaf = 0;
 const queue: { t: number; tick: number; light: number | null }[] = [];
 function schedule() {
   const c = audioContext(), s = metro.get();
+  // Ticks missed while the timer was held up are skipped, not played late in a burst; numbering carries on,
+  // so the beat lands where it would have been.
+  if (nextT < c.currentTime) {
+    const step = 60 / s.bpm / s.sub, missed = Math.ceil((c.currentTime - nextT) / step);
+    tickN += missed; nextT += missed * step;
+  }
   while (nextT < c.currentTime + 0.15) {
     const perBeat = s.sub, inBar = s.beats * perBeat, pos = tickN % inBar;
     click(nextT, clickKind(pos, perBeat, s.meter, s.accents), s.volume);
@@ -62,7 +71,7 @@ function visual() {
   let cur: { t: number; tick: number; light: number | null } | undefined;
   while (queue.length && queue[0].t <= now) cur = queue.shift();
   if (cur) { const s = metro.get(); metro.set({ tick: cur.tick, beat: Math.floor(cur.tick / s.sub) % s.beats, ...(cur.light !== null ? { light: cur.light } : {}) }); }
-  requestAnimationFrame(visual);
+  visualRaf = requestAnimationFrame(visual);
 }
 export type MetroPreset = Partial<Pick<MetroState, 'bpm' | 'beats' | 'sub' | 'volume' | 'accents'>> & { meter?: string };
 /** Resolve meter/beats/sub/accents so they always agree. A preset with only beats + sub gets its meter from them. */
@@ -91,12 +100,13 @@ export function startMetronome(opts: MetroPreset = {}) {
   nextT = c.currentTime + 0.08; tickN = 0; queue.length = 0;
   schedule();
   timer = window.setInterval(schedule, 25);
-  requestAnimationFrame(visual);
+  visualRaf = requestAnimationFrame(visual);
   void updateWakeLock();
 }
 export function stopMetronome() {
   if (timer !== null) clearInterval(timer);
   timer = null; queue.length = 0;
+  cancelAnimationFrame(visualRaf);
   if (metro.get().running) metro.set({ running: false, beat: -1, tick: -1, light: -1 });
   void updateWakeLock();
 }
@@ -123,9 +133,9 @@ export function tapTempo() {
 // Multichannel inputs (the Kemper over USB can show up with several channels): the worklet reports the
 // channel count, forwards only the chosen channel to the analyzers, and sends per-channel peaks so the
 // Settings picker can show which channel carries the guitar.
-const WORKLET = `class Cap extends AudioWorkletProcessor{constructor(){super();this.b=new Float32Array(512);this.n=0;this.s=0;this.ch=0;this.nc=-1;this.pk=new Float32Array(1);
-this.port.onmessage=e=>{if(e.data&&e.data.ch!=null)this.ch=e.data.ch|0;};}
-process(i){const inp=i[0];if(!inp||!inp.length)return true;
+const WORKLET = `class Cap extends AudioWorkletProcessor{constructor(){super();this.b=new Float32Array(512);this.n=0;this.s=0;this.ch=0;this.nc=-1;this.pk=new Float32Array(1);this.off=false;
+this.port.onmessage=e=>{if(!e.data)return;if(e.data.ch!=null)this.ch=e.data.ch|0;if(e.data.stop)this.off=true;};}
+process(i){if(this.off)return false;const inp=i[0];if(!inp||!inp.length)return true;
 if(inp.length!==this.nc){this.nc=inp.length;this.pk=new Float32Array(inp.length);this.port.postMessage({chs:inp.length});}
 for(let q=0;q<inp.length;q++){const x=inp[q];let m=this.pk[q];for(let k=0;k<x.length;k++){const a=x[k]<0?-x[k]:x[k];if(a>m)m=a;}this.pk[q]=m;}
 const c=inp[Math.min(this.ch,inp.length-1)];
@@ -159,7 +169,7 @@ type BlockFn = (d: Float32Array, frame: number) => void;
 const blockSubs = new Set<BlockFn>();
 /** Subscribe to raw input blocks (Float32Array of 512 samples, absolute context frame of sample 0). */
 export function onBlock(fn: BlockFn): () => void { blockSubs.add(fn); return () => { blockSubs.delete(fn); }; }
-let stream: MediaStream | null = null, node: AudioWorkletNode | null = null, srcNode: AudioNode | null = null;
+let stream: MediaStream | null = null, node: AudioWorkletNode | null = null, srcNode: AudioNode | null = null, sinkNode: GainNode | null = null;
 let workletReady: Promise<void> | null = null, openDevice: string | undefined;
 const users = new Set<string>();
 const RING = 48000 * 4; const ring = new Float32Array(RING); let wAbs = 0;
@@ -172,8 +182,6 @@ const SIM = typeof location !== 'undefined' && /[?&]sim\b/.test(location.search)
 const simQ = (k: string, d: number) => { const m = typeof location !== 'undefined' ? new RegExp(`[?&]${k}=(\\d+)`).exec(location.search) : null; return m ? +m[1] : d; };
 /** Test mode (?sim): simulated input, and the test-only globals games publish. */
 export const isSim = () => SIM;
-/** Test-only (`?sim`): lets the e2e suites seed a backup. The app itself has no restore/upload control. */
-if (SIM) (globalThis as any).__gtImport = async (d: Record<string, unknown>) => (await import('../db')).importAll(d);
 // ?sim&simdelay=800 delays opening the simulated input, like a slow getUserMedia (permission prompt).
 const SIM_DELAY = SIM ? simQ('simdelay', 0) : 0;
 const SIM_CHS = SIM ? Math.max(1, Math.min(8, simQ('simchs', 1))) : 1, SIM_CH = Math.min(SIM_CHS, Math.max(1, simQ('simch', 1))) - 1;
@@ -191,32 +199,51 @@ function simSource(c: AudioContext): AudioNode {
   return simMerge;
 }
 
+// Openings run one at a time, so overlapping requests can't each open a stream and orphan all but the last.
+let openQueue: Promise<unknown> = Promise.resolve();
+const asks = new Map<string, number>(); // the latest request per user, so an old failure can't drop a newer one
 /** Open the mic (or keep it open) for `who`. Reopens if a different input is asked for. */
-export async function acquireCapture(who: string, deviceId?: string): Promise<void> {
-  const c = audioContext();
+export function acquireCapture(who: string, deviceId?: string): Promise<void> {
+  const c = audioContext(); // now, while still inside the user's tap
   users.add(who);
+  const ask = (asks.get(who) || 0) + 1; asks.set(who, ask);
+  const run = openQueue.then(() => openCapture(c, who, deviceId)).catch(err => {
+    if (asks.get(who) === ask) users.delete(who);
+    capture.set({ on: false, error: (err as Error).message || 'Microphone not available' });
+    throw err;
+  });
+  openQueue = run.catch(() => undefined);
+  return run;
+}
+async function openCapture(c: AudioContext, who: string, deviceId?: string): Promise<void> {
+  if (!users.has(who)) return; // let go while waiting its turn
   if (node && openDevice === deviceId) return;
   closeStream();
+  let media: MediaStream | null = null;
   try {
-    if (!workletReady) workletReady = c.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' })));
-    let label = 'simulated input';
-    if (SIM) { if (SIM_DELAY) await new Promise(r => setTimeout(r, SIM_DELAY)); srcNode = simSource(c); }
+    if (!workletReady) {
+      workletReady = c.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' })));
+      workletReady.catch(() => { workletReady = null; }); // a failed load is retried next time
+    }
+    const ready = workletReady;
+    let label = 'simulated input', src: AudioNode;
+    if (SIM) { if (SIM_DELAY) await new Promise(r => setTimeout(r, SIM_DELAY)); src = simSource(c); }
     else {
       // up to 8 channels, as in the M0 page (a USB interface may offer several; a phone mic gives 1 or 2)
       const audio: MediaTrackConstraints = { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 8 } };
       if (deviceId) audio.deviceId = { exact: deviceId };
-      stream = await navigator.mediaDevices.getUserMedia({ audio });
-      srcNode = c.createMediaStreamSource(stream);
-      label = stream.getAudioTracks()[0]?.label || 'microphone';
+      media = await navigator.mediaDevices.getUserMedia({ audio });
+      src = c.createMediaStreamSource(media);
+      label = media.getAudioTracks()[0]?.label || 'microphone';
     }
-    await workletReady;
+    await ready;
     // Everyone who asked let go while the mic was opening (e.g. a game paused during the permission prompt):
     // don't leave it open with nobody listening.
-    if (!users.size) { closeStream(); return; }
-    node = new AudioWorkletNode(c, 'cap', { numberOfInputs: 1, numberOfOutputs: 1, channelCountMode: 'max' }); wAbs = 0;
+    if (!users.size) { media?.getTracks().forEach(t => t.stop()); return; }
+    const cap = new AudioWorkletNode(c, 'cap', { numberOfInputs: 1, numberOfOutputs: 1, channelCountMode: 'max' }); wAbs = 0;
     const want = channelFor(label, deviceId);
-    node.port.postMessage({ ch: want });
-    node.port.onmessage = (e: MessageEvent) => {
+    cap.port.postMessage({ ch: want });
+    cap.port.onmessage = (e: MessageEvent) => {
       if (e.data.chs != null) { const n = e.data.chs as number; capture.set({ channels: n, channel: Math.min(channelFor(capture.get().label, openDevice), n - 1) }); return; }
       const { f, d, pk } = e.data as { f: number; d: Float32Array; pk?: Float32Array };
       if (levelWatchers && pk) {
@@ -230,12 +257,11 @@ export async function acquireCapture(who: string, deviceId?: string): Promise<vo
       blockSubs.forEach(fn => fn(d, f));
     };
     const sink = c.createGain(); sink.gain.value = 0;
-    srcNode.connect(node); node.connect(sink); sink.connect(c.destination);
-    openDevice = deviceId;
+    src.connect(cap); cap.connect(sink); sink.connect(c.destination);
+    stream = media; srcNode = src; node = cap; sinkNode = sink; openDevice = deviceId;
     capture.set({ on: true, label, error: null, channel: want, channels: 1 });
   } catch (err) {
-    users.delete(who);
-    capture.set({ on: false, error: (err as Error).message || 'Microphone not available' });
+    media?.getTracks().forEach(t => t.stop());
     throw err;
   }
 }
@@ -245,9 +271,10 @@ export function releaseCapture(who: string) {
   if (!users.size) closeStream();
 }
 function closeStream() {
-  try { srcNode?.disconnect(); node?.disconnect(); } catch { /* ignore */ }
+  if (node) { node.port.onmessage = null; node.port.postMessage({ stop: true }); } // lets the processor be freed
+  try { srcNode?.disconnect(); node?.disconnect(); sinkNode?.disconnect(); } catch { /* ignore */ }
   stream?.getTracks().forEach(t => t.stop());
-  stream = null; node = null; srcNode = null; openDevice = undefined;
+  stream = null; node = null; srcNode = null; sinkNode = null; openDevice = undefined;
   if (capture.get().on) capture.set({ on: false });
 }
 /** Copy `n` samples starting at absolute frame `from` out of the ring buffer (last ~4 s only). */
@@ -259,19 +286,24 @@ export function grab(from: number, n: number): Float32Array {
 
 // ---------- tuner ----------
 let tunerRaf = 0, lastPitchAt = 0;
+let tunerRun = 0; // bumped by every start and stop: a start that's no longer the latest does nothing when the mic opens
 const smooth: number[] = [];
 export async function startTuner(deviceId?: string) {
+  if (tuner.get().on) stopTuner(false);
+  const run = ++tunerRun;
   try {
-    if (tuner.get().on) stopTuner(false);
     await acquireCapture('tuner', deviceId);
+    if (run !== tunerRun) return;
     tuner.set({ on: true, error: null, input: routeLabel() });
     tunerRaf = requestAnimationFrame(tunerLoop);
     void updateWakeLock();
   } catch (err) {
+    if (run !== tunerRun) return;
     tuner.set({ on: false, error: (err as Error).message || 'Microphone not available' });
   }
 }
 export function stopTuner(update = true) {
+  tunerRun++;
   cancelAnimationFrame(tunerRaf);
   releaseCapture('tuner'); smooth.length = 0;
   if (update) { tuner.set({ on: false, note: null, level: 0 }); void updateWakeLock(); }
@@ -293,9 +325,14 @@ function tunerLoop(ts: number) {
   tunerRaf = requestAnimationFrame(tunerLoop);
 }
 capture.subscribe(() => { if (tuner.get().on && tuner.get().input !== routeLabel()) tuner.set({ input: routeLabel() }); });
-/** Has the tuner been used since the app was opened? (The attempt runner offers a quick tune if not.) */
+/** Has the tuner been used since the app was opened? (The attempt runner offers a quick tune if not.) Set when a
+ *  tuner that heard a note is turned off, so the quick-tune panel isn't removed (and stopped) mid-tuning. */
 export let tunedThisSession = false;
-tuner.subscribe(t => { if (t.note && !tunedThisSession) { tunedThisSession = true; tunedHook?.(); } });
+let heardNote = false;
+tuner.subscribe(t => {
+  if (t.note && !heardNote) { heardNote = true; tunedHook?.(); }
+  if (heardNote && !t.on) tunedThisSession = true;
+});
 let tunedHook: (() => void) | null = null;
 /** Lets the practice session note when you tuned, without the engine importing it. */
 export function onFirstTune(f: () => void) { tunedHook = f; }

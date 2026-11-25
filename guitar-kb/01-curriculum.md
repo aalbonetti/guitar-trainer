@@ -7,10 +7,10 @@ The machine-readable version of this curriculum is `catalog/lessons.json`. This 
 ```
 F  Foundations (shared) ──┬── A  Acoustic Worship (basic)
                           ├── ER Electric Worship Rhythm ──┐
-                          └── EL Electric Worship Lead  ◄──┘ (EL.04+ needs ER.04)
+                          └── EL Electric Worship Lead  ◄──┘ (EL.04 needs ER.04)
 T  Theory & Ear (shared, runs alongside every track)
 ```
-A student picks acoustic, electric, or both after Foundations. Theory lessons chain on their own prerequisites, and some track lessons require them (A.08 needs T.04, ER.03 needs T.07, ER.11 needs T.03).
+A student picks acoustic, electric, or both after Foundations. Theory lessons chain on their own prerequisites, and some track lessons require them (A.08 needs T.04, ER.03 needs T.07, ER.11 needs T.03, EL.09 needs T.02).
 
 ## Pass criterion types (what the app measures)
 | Type | Measured by | Example |
@@ -45,7 +45,7 @@ A student picks acoustic, electric, or both after Foundations. Theory lessons ch
 | A.05 | Eighth-note strum with accents on 2 & 4 | timing: 80 BPM |
 | A.06 | Worship pattern: D – D U – U D U | timing: 90 BPM, 8 bars |
 | A.07 | Hymn meters: 3/4 waltz strum and 6/8 feel | timing: 3/4 at 90 BPM |
-| A.08 | Capo and keys: play any key from G, C, D, E, A shapes | quiz (T.04) + chord_accuracy |
+| A.08 | Capo and keys: play any key from G, C, D, E, A shapes | chord_accuracy: 90% (needs T.04) |
 | A.09 | Dynamics: single "whole-note" strums for verses, full strumming for choruses, percussive chunk | self_check |
 | A.10 | Simple arpeggio picking for intros and quiet verses | timing: 70 BPM |
 | A.11 | First hymns: Amazing Grace and the 3-chord hymn set | chord_accuracy 90% at tempo |
@@ -58,14 +58,14 @@ A student picks acoustic, electric, or both after Foundations. Theory lessons ch
 | ER.01 | Electric basics: clean tone, pick attack, muting with the fret hand and palm | self_check |
 | ER.02 | Root-6 and root-5 power chords, with a palm-muted eighth-note chug | timing: 90 BPM |
 | ER.03 | Eighth-note root pulse plus a **dotted-eighth delay**, including delay-time math | timing: 100 BPM, 16 bars |
-| ER.04 | Major and minor triads on strings 3-2-1 (three inversions) | chord_accuracy + changes_per_min 20 |
+| ER.04 | Major and minor triads on strings 3-2-1 (three inversions) | changes_per_min: 20 |
 | ER.05 | Triads on strings 4-3-2 | chord_accuracy |
 | ER.06 | Drone voicings: key-of-E and key-of-D sets with ringing open strings | changes_per_min: 25 |
 | ER.07 | Swells and pads: volume knob or pedal swells with reverb | self_check |
 | ER.08 | Song dynamics map: what electric plays in the intro, verse, chorus, bridge, and tag | self_check |
 | ER.09 | Full barre chords (E and A shapes) for big choruses | chord_accuracy 90% |
 | ER.10 | Sixteenth-note muted groove locked to the kick drum and hi-hat | timing: 90 BPM, ≤ 30 ms |
-| ER.11 | Playing from Nashville-number charts in any key | quiz + chord_accuracy |
+| ER.11 | Playing from Nashville-number charts in any key | chord_accuracy: 90% |
 | **Milestone** | Play a full song arrangement to the click, switching parts by section | |
 
 ## EL — Electric Worship Lead
@@ -73,13 +73,13 @@ A student picks acoustic, electric, or both after Foundations. Theory lessons ch
 |---|---|---|
 | EL.01 | Major pentatonic scale, position 1 (worship is mostly in major keys) | timing: 80 BPM eighths |
 | EL.02 | Relative minor pentatonic, plus positions 2 and 5 | timing: 80 BPM |
-| EL.03 | Hammer-ons, pull-offs, slides | self_check + timing |
+| EL.03 | Hammer-ons, pull-offs, slides | timing: 70 BPM |
 | EL.04 | **Octave melodies**: the four octave shapes, muting the middle string | pitch: correct notes 90% |
 | EL.05 | Bends (half and whole step) and vibrato | pitch: ±15 cents |
 | EL.06 | Double stops: 3rds and 6ths over chords | pitch |
-| EL.07 | Playing the hymn melody as a lead line or intro | pitch + timing |
+| EL.07 | Playing the hymn melody as a lead line or intro | pitch: 90% of notes at 80 BPM, any octave |
 | EL.08 | Lead lines with dotted-eighth delay | timing |
-| EL.09 | Major scale in one position, plus targeting chord tones | quiz + pitch |
+| EL.09 | Major scale in one position, plus targeting chord tones | quiz: 90% |
 | EL.10 | Writing intro, turnaround, and tag hooks: motif, repeat, vary | self_check |
 | EL.11 | Ambient lead: natural harmonics, swelled melody notes | pitch |
 | **Milestone** | Intro hook plus an 8-bar instrumental over I–V–vi–IV in 3 keys | |
@@ -95,13 +95,16 @@ A student picks acoustic, electric, or both after Foundations. Theory lessons ch
 | T.06 | Ear: hearing I, IV, V, and vi movement | T.03, T.05 |
 | T.07 | Tempo, subdivisions, and delay time | F.06 (ER.03 needs it) |
 
-## Practice routines (suggested)
-| Length | Acoustic | Electric |
-|---|---|---|
-| 15 min | 3 spider · 5 chord changes · 7 song with click | 3 spider · 5 current part · 7 song section with click |
-| 30 min | 5 warm-up · 8 changes · 7 strum/picking · 8 song · 2 ear quiz | 5 warm-up · 8 rhythm part · 8 lead skill · 7 song · 2 ear quiz |
+## Practice routines (built by the app)
+Today builds the queue in this order: spider warm-up (F.05, once unlocked), reviews due, current lessons, then an ear quiz (20 min only).
+
+| Routine | Warm-up | Reviews | Current lessons | Ear quiz |
+|---|---|---|---|---|
+| 10 min | 2 min | up to 1, 2 min | 1, gets the remaining time | none |
+| 20 min | 3 min | up to 2, 2 min each | up to 2, share the remaining time | 2 min, once unlocked |
+| Free | no timer | up to 3 | one per visible track | none |
 
 ## Progress logic
-- A lesson passes when its target is met in 2 separate sessions.
-- Review at 1, 3, 7, 14, and 30 days after passing.
-- Tempo ladder: start at 60–70% of the target BPM and raise it 4 BPM after 3 clean passes. If 2 passes in a row are sloppy, drop back 8 BPM.
+- A first pass opens the lessons that depend on it. A pass on a second day completes the lesson.
+- Reviews fall 1, 3, 7, 14, and 30 days after completion.
+- Tempo ladder: start at 65% of the target BPM and raise it 4 BPM after 3 clean runs in a row. A great run (average error ≤ half the target, ≥ 97% right) jumps 8 at once. After 2 sloppy runs in a row, drop 8 BPM (never below 50% of the target).

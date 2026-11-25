@@ -268,9 +268,16 @@ export const noteTolerance = (beatS: number) => Math.min(0.45, Math.max(0.15, 0.
  *  the calibrated latency). Score = matched / expected. */
 export function gradeNotes(segs: Segment[], exp: Expected[], o: { target: number; timed: boolean; anyOctave?: boolean; tolS?: number; offsetS?: number }): NotesGrade {
   const E = exp.length, S = segs.length, tol = o.tolS ?? 0.3, off = o.offsetS ?? 0;
-  const V = exp.map(e => segs.map(s => verifySegment(s, e, o.anyOctave)));
+  // Each (expected notes, segment) pair is verified only when needed, and once: with a click, pairs outside the
+  // timing window are never looked at, and repeated notes in an exercise share the answer.
+  const keys = exp.map(e => e.midis.join()), memo = new Map<string, Verify[]>();
+  const V = (i: number, j: number): Verify => {
+    let row = memo.get(keys[i]);
+    if (!row) memo.set(keys[i], row = []);
+    return row[j] ?? (row[j] = verifySegment(segs[j], exp[i], o.anyOctave));
+  };
   const dt = (i: number, j: number) => segs[j].t0 - off - exp[i].t;
-  const w = (i: number, j: number) => (!V[i][j].ok ? 0 : !o.timed ? 1 : Math.abs(dt(i, j)) > tol ? 0 : 1 + 0.01 * (1 - Math.abs(dt(i, j)) / tol));
+  const w = (i: number, j: number) => (o.timed && Math.abs(dt(i, j)) > tol ? 0 : !V(i, j).ok ? 0 : !o.timed ? 1 : 1 + 0.01 * (1 - Math.abs(dt(i, j)) / tol));
   const dp = Array.from({ length: E + 1 }, () => new Float64Array(S + 1));
   for (let i = 1; i <= E; i++) for (let j = 1; j <= S; j++) {
     const m = w(i - 1, j - 1);
@@ -286,7 +293,7 @@ export function gradeNotes(segs: Segment[], exp: Expected[], o: { target: number
   const used = new Set(pair.filter(j => j >= 0));
   const notes: NoteResult[] = exp.map((e, i) => {
     const j = pair[i];
-    if (j >= 0) return { label: e.label, where: e.where, t: e.t, ok: true, heard: V[i][j].heard, cents: V[i][j].cents, offMs: o.timed ? dt(i, j) * 1000 : null };
+    if (j >= 0) return { label: e.label, where: e.where, t: e.t, ok: true, heard: V(i, j).heard, cents: V(i, j).cents, offMs: o.timed ? dt(i, j) * 1000 : null };
     // what was heard instead: the unmatched note nearest in time (timed) or in the gap between its neighbours (free)
     const prev = Math.max(-1, ...pair.slice(0, i).filter(x => x >= 0)), nextList = pair.slice(i + 1).filter(x => x >= 0), next = nextList.length ? nextList[0] : S;
     let cand = -1;
@@ -295,7 +302,7 @@ export function gradeNotes(segs: Segment[], exp: Expected[], o: { target: number
       if (o.timed ? Math.abs(dt(i, k)) <= tol * 1.5 && (cand < 0 || Math.abs(dt(i, k)) < Math.abs(dt(i, cand))) : cand < 0) cand = k;
     }
     if (cand >= 0) used.add(cand);
-    return { label: e.label, where: e.where, t: e.t, ok: false, heard: cand >= 0 ? V[i][cand].heard : null, cents: cand >= 0 ? V[i][cand].cents : null, offMs: null, why: cand >= 0 ? V[i][cand].why : 'silent' };
+    return { label: e.label, where: e.where, t: e.t, ok: false, heard: cand >= 0 ? V(i, cand).heard : null, cents: cand >= 0 ? V(i, cand).cents : null, offMs: null, why: cand >= 0 ? V(i, cand).why : 'silent' };
   });
   const matched = notes.filter(n => n.ok).length;
   const extras = segs.filter((s, j) => !used.has(j) && s.t1 - s.t0 >= 0.08 && s.voiced >= 0.5).length; // `used` has matched and heard-instead notes

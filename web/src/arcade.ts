@@ -5,7 +5,7 @@ import { addXp } from './xp';
 import { XP, xpForScore, stars as starsFor } from './games/core';
 import { progress, recordAttempt, addServiceDay } from './progressStore';
 import { isReviewDue, dayOf } from './progress';
-import { session, touch, songPool } from './practice';
+import { session, touch, songPool, expireIdle } from './practice';
 import { getSetList } from './setlist';
 import { streakInfo } from './progressStore';
 import { checkBadges } from './badges';
@@ -43,8 +43,6 @@ export function modeFor(g: Game): Mode {
   return m && g.modes.includes(m) ? m : (g.modes[0] as Mode) || 'tap';
 }
 export function setModeFor(g: Game, m: Mode) { if (g.modes.includes(m)) modePref.set({ ...modePref.get(), [g.id]: m }); }
-/** Lesson that teaches this game's skill (shown as a tip, not a lock). */
-export const lessonFor = (g: Game, l?: GameLevel) => l?.unlock_lesson || g.unlock_lesson;
 
 export interface RunResult {
   score: number; correct: number; total: number; maxCombo: number; finished: boolean; durationS: number; misses: string[]; ghost: [number, number][];
@@ -76,6 +74,7 @@ export async function finishRun(cat: Catalog, g: Game, l: GameLevel, r: RunResul
     }
   }
   try {
+    void expireIdle(); // a stale session must not claim this run
     await db.add('game_run', { session_id: session.get().s?.id ?? null, game_id: g.id, level_id: l.id, mode, score: r.score, accuracy, max_combo: r.maxCombo, max_streak: r.maxStreak ?? null, stars, duration_s: Math.round(r.durationS), misses_json: JSON.stringify(r.misses.slice(0, 20)), extra_json: r.extra ? JSON.stringify(r.extra) : null, grader_mode: r.graderMode ?? null, counted_review_for: reviewed.join(',') || null, at: Date.now() });
     if (pb || (prev && stars > prev.best_stars)) {
       const row: Best = { key, game_id: g.id, level_id: l.id, mode, best_score: Math.max(r.score, prev?.best_score || 0), best_stars: Math.max(stars, prev?.best_stars || 0), ghost: pb ? r.ghost : prev!.ghost, at: Date.now() };
@@ -94,4 +93,3 @@ export async function finishRun(cat: Catalog, g: Game, l: GameLevel, r: RunResul
 
 // ---------- "Played a service today" keeps the streak ----------
 export async function markService(day = dayOf()) { await addServiceDay(day); }
-export async function serviceDays(): Promise<string[]> { try { return (await db.getAll<{ day: string }>('service_day')).map(r => r.day); } catch { return []; } }

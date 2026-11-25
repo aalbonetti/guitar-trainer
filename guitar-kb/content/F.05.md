@@ -23,4 +23,4 @@ The button below always clicks at your current ladder tempo.
 > Clean beats fast. If a note buzzes or dies, the tempo is too high.
 
 ### Goal
-The pattern at 60 BPM eighths, every note clean and on the click.
+4 bars of the pattern in eighth notes at 60 BPM, average error ≤ 50 ms.

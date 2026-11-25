@@ -18,6 +18,8 @@ The secret of melodic lead lines: on every chord change, **land on a note from t
 Notice **B → C** and **F# → G**: the half-step moves between chords are what make lines sound "composed".
 
 ### Practice
+Steps 1 and 2 are for your own ear; the app grades only the quiz.
+
 1. Loop G – C – D – G (one bar each). Play anything in the scale, but **land on a chord tone on beat 1** of every bar.
 2. Then land on the **3rd** of each chord (B, E, F#, B): it's the most singable target.
 
@@ -28,4 +30,4 @@ Notice **B → C** and **F# → G**: the half-step moves between chords are what
 {{quiz:Q_diatonic}}
 
 ### Goal
-Target notes land on the right chord tones, and the diatonic quiz at 90%.
+Score 90% or better on the diatonic chords quiz.

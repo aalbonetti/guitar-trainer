@@ -13,10 +13,11 @@ Pick a note and slide the same finger to the target fret while keeping pressure.
 ### Practice
 - **Trills**: hammer and pull between two frets for 30 seconds, every note equally loud.
 - **Phrase**: string 3 fret 2 / 4 (slide), string 2 fret 3 h 5, pull back off 5 to 3, land on string 3 fret 4. Play it in time.
+- **Graded run:** 4 bars of continuous eighth notes to the click, one note on every eighth, no rests. Mix picked notes, slurs and slides, and keep the slurred notes loud so the mic can hear them.
 
 {{tool:metronome:bpm=70,beats=4,sub=2}}
 
 > The hammered and pulled notes should be as loud as the picked ones. If they disappear, the hammer is too soft or the pull-off isn't plucking.
 
 ### Goal
-Smooth legato phrases at 70 BPM, in time, with even volume.
+4 bars of legato eighth notes at 70 BPM, average error ≤ 50 ms.

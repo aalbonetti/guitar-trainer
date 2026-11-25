@@ -22,4 +22,4 @@ p i m a m i fits a 3/4 bar perfectly. Try it on Amazing Grace in A.11.
 > No fingernails? Fine. The pad of the finger gives a softer, warmer tone that suits quiet verses.
 
 ### Goal
-4 bars of even PIMA at 70 BPM eighths.
+4 bars of PIMA in eighth notes at 70 BPM, average error ≤ 50 ms.

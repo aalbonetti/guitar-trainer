@@ -1,6 +1,6 @@
 // Daily Challenge screens (07-games.md §4): the banner (Arcade home and Today) and the challenge page. The mix is
 // built once a day from your weak spots (daily.ts) and stays the same all day.
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import type { Catalog, Game, GameLevel } from '../catalog';
 import { useStore } from '../store';
 import * as db from '../db';
@@ -8,7 +8,7 @@ import { daily, loadDaily, refreshDaily, buildDaily, DAILY_MINUTES, type DailyIt
 import { progress } from '../progressStore';
 import { computeStates, isReviewDue, dayOf } from '../progress';
 import { bests, bestStars, loadBests, modeFor, unlocked } from '../arcade';
-import { loadHeat, hardSpots } from '../heat';
+import { heatCells, hardSpots, type HeatRow } from '../heat';
 import type { Pos } from '../games/core';
 
 /** Build (first open of the day) or load today's challenge. `visible`: the tracks shown for your instrument. */
@@ -18,7 +18,7 @@ export async function ensureDaily(cat: Catalog, visible: (track: string) => bool
   if (!bests.get().ready) await loadBests();
   await loadDaily(day, async () => {
     const lp = progress.get().lp, states = computeStates(cat.lessons, cat.tracks, lp);
-    let quiz: { quiz_id: string; item_key: string; seen: number; correct: number }[] = [], atts: { lesson_id: string; criterion_type: string; metrics_json: string }[] = [], runs: { game_id: string; extra_json?: string | null }[] = [];
+    let quiz: HeatRow[] = [], atts: { lesson_id: string; criterion_type: string; metrics_json: string }[] = [], runs: { game_id: string; extra_json?: string | null }[] = [];
     try { quiz = await db.getAll('quiz_item_stats'); atts = await db.getAll('attempt'); runs = await db.getAll('game_run'); } catch { /* storage unavailable */ }
     // chord changes: one-minute lesson attempts (perMin per pair) and Change Sprint rounds, best rate ÷ goal per pair
     const best = new Map<string, { refs: string[]; ratio: number }>();
@@ -35,7 +35,7 @@ export async function ensureDaily(cat: Catalog, visible: (track: string) => bool
       open: (g, l) => unlocked(cat, g, l), modeOf: g => modeFor(g), lessonOpen: id => states[id] !== 'locked',
       quizMisses: quiz.filter(q => q.quiz_id.startsWith('Q_')),
       due: cat.lessons.filter(l => visible(l.track) && isReviewDue(lp[l.id], day)).sort((a, b) => (lp[a.id].next_review_day! < lp[b.id].next_review_day! ? -1 : 1)).map(l => l.id),
-      hard: hardSpots(await loadHeat()).map(c => ({ string: c.string, fret: c.fret })),
+      hard: hardSpots(heatCells(quiz)).map(c => ({ string: c.string, fret: c.fret })),
       changes: [...best.values()], stars,
     });
   });
@@ -46,10 +46,24 @@ export function dailyFocus(g: Game, l: GameLevel): Pos[] {
 }
 const href = (i: DailyItem) => (i.kind === 'game' ? `#/arcade/${i.game}/${i.level}/daily` : `#/lesson/${i.lesson}`);
 
+/** Today's challenge, kept current: loaded when progress is ready, when the date changes with the screen still
+ *  open, and rechecked when the app comes back to the screen. Returns today's date. */
+function useDaily(cat: Catalog, visible: (track: string) => boolean): string {
+  const ready = useStore(progress).ready;
+  const [now, setNow] = useState(() => ({ day: dayOf(), resumed: 0 }));
+  useEffect(() => {
+    const resume = () => { if (document.visibilityState === 'visible') setNow(n => ({ day: dayOf(), resumed: n.resumed + 1 })); };
+    const timer = setInterval(() => setNow(n => (n.day === dayOf() ? n : { ...n, day: dayOf() })), 30_000);
+    document.addEventListener('visibilitychange', resume);
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', resume); };
+  }, []);
+  useEffect(() => { if (ready) void ensureDaily(cat, visible); }, [ready, now.day, now.resumed]);
+  return now.day;
+}
+
 export function DailyBanner({ cat, visible }: { cat: Catalog; visible: (track: string) => boolean }) {
-  const d = useStore(daily); useStore(progress);
-  useEffect(() => { if (progress.get().ready) void ensureDaily(cat, visible); }, [progress.get().ready]);
-  if (!d.day || !d.items.length) return null;
+  const d = useStore(daily), today = useDaily(cat, visible);
+  if (d.day < today || !d.items.length) return null;
   const n = d.done.filter(Boolean).length;
   return (
     <a class="card tap-card dailybanner" href="#/daily" aria-label="Daily Challenge">
@@ -61,14 +75,13 @@ export function DailyBanner({ cat, visible }: { cat: Catalog; visible: (track: s
 }
 
 export function DailyPage({ cat, visible }: { cat: Catalog; visible: (track: string) => boolean }) {
-  const d = useStore(daily); useStore(progress);
-  useEffect(() => { if (progress.get().ready) void ensureDaily(cat, visible); }, [progress.get().ready]);
+  const d = useStore(daily), today = useDaily(cat, visible);
   const name = (i: DailyItem) => i.kind === 'game' ? cat.games.find(g => g.id === i.game)?.name : cat.lessonById[i.lesson!]?.title;
   return (
     <div class="page">
       <div class="crumbs"><a href="#/arcade">Arcade</a> › Daily Challenge</div>
       <h1>🎯 Daily Challenge</h1>
-      {!d.day ? <p class="muted">Building today’s mix…</p> : (
+      {d.day < today ? <p class="muted">Building today’s mix…</p> : (
         <section class="card">
           <p class="muted">{d.items.length} rounds, about {DAILY_MINUTES} minutes, picked from your weak spots: misses in quizzes and games, hard spots on the neck, your slowest chord changes and reviews due. It stays the same all day. Finish them all for +30 XP.</p>
           {d.completed ? <p class="note">✓ Done for today. +30 XP{d.justCompleted ? ' just added' : ''}.</p> : null}

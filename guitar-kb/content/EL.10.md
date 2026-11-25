@@ -13,7 +13,7 @@ Many songs' recorded guitar hooks are copyrighted, so it's better (and more fun)
 - Fit it to 1–5–6m–4: each repetition starts on a new chord.
 
 ### Practice
-Write one hook for a song from this month. Record it on your phone. Play it the next day: still good? Keep it.
+Write one hook for any song in Songs. Record it on your phone. Play it the next day: still good? Keep it.
 
 {{tool:metronome:bpm=74,beats=4,sub=2}}
 

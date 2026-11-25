@@ -10,7 +10,7 @@ The key of C, and the chords you'll need when you capo up to play C-shape songs.
 - **G**: 3- or 4-finger, your choice.
 
 ### Changes to practice
-Focus on **C ↔ Am** (one finger) and **C ↔ Fmaj7** (two fingers slide across together). These two are the graded pairs:
+Focus on **C ↔ Am** (one finger) and **C ↔ Fmaj7** (two fingers slide across together). All three pairs below are graded, including **G ↔ C**:
 
 {{exercise:EX_changes_cfamily}}
 

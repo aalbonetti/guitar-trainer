@@ -5,9 +5,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import fs from 'node:fs';
 import { reseed, strumsOf, type StrumSpec } from './synth';
 import { verifyChord, chordTarget } from '../src/grading/chord';
-import { familyOf, familyFrets, familyTarget, numberFamily, keyTargets, triadPlacements, triadQ, triadTargets, triadFrets, isTriad, judgeSprint,
-  songChords, songBoxes, songPlan, songTargets, gradeSong, boxVerdict, SPRINT_FAST_MS, SPRINT_SLOW_MS } from '../src/games/chords';
-import { rng, scoreRun, comboMult, stars, speedBonus, pointsWith } from '../src/games/core';
+import { familyOf, familyFrets, numberFamily, keyTargets, triadPlacements, triadQ, triadTargets, triadFrets, isTriad, judgeSprint,
+  songChords, songBoxes, songPlan, songTargets, gradeSong, boxVerdict, callTargets, SPRINT_FAST_MS, SPRINT_SLOW_MS } from '../src/games/chords';
+import { rng, scoreRun, comboMult, stars, speedBonus, pointsWith, songCallsOf, songCallQ } from '../src/games/core';
 import { bests, bestKey, unlocked } from '../src/arcade';
 import { buildDaily, dailyDone, itemMinutes, DAILY_MINUTES, type DailyInput } from '../src/daily';
 import { heatCells, hardSpots, band, HEAT_ID } from '../src/heat';
@@ -133,6 +133,26 @@ describe('Call the Number, play mode (synthetic strums)', () => {
     const shapes = [[3, 2, 0, 0, 0, 3], [-1, 3, 2, 0, 1, 0], [-1, -1, 0, 2, 3, 2], [0, 2, 2, 0, 0, 0]];
     const capo = verifyAll(shapes.map((frets, i) => ({ frets, capo: 3, expected: `${fams[i].pc}${fams[i].minor ? 'm' : ''}` })), tg);
     expect(capo.filter(x => x.ok).length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('Call the Number, songs mode', () => {
+  it('every outline: each call offers its answer, and play mode checks it against every other chord family', () => {
+    expect(outlines.length).toBeGreaterThan(0);
+    for (const o of outlines) {
+      const s = songCallsOf(o);
+      expect(s.prompts.length, o.id).toBe(o.sections.reduce((a: number, x: any) => a + x.chords_in_chart_key.length, 0));
+      expect(new Set(s.choices).size, o.id).toBe(s.choices.length);
+      const families = new Set(s.prompts.map(p => { const f = familyOf(p.chord); expect(f, `${o.id} ${p.chord}`).toBeTruthy(); return `${f!.pc}${f!.minor ? 'm' : ''}`; }));
+      s.prompts.forEach((p, i) => {
+        const q = songCallQ(s, i);
+        expect(p.num, `${o.id} call ${i}`).toBeTruthy();
+        expect(q.prompt).toBe(p.num); expect(q.answer).toBe(p.chord); expect(q.choices, `${o.id} ${p.chord}`).toContain(q.answer);
+        const t = callTargets(q, open), ids = t.others.map(x => x.id);
+        expect(ids, `${o.id} ${p.chord}`).toContain(t.expected.id);
+        expect(new Set(ids), o.id).toEqual(families);
+      });
+    }
   });
 });
 

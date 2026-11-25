@@ -44,11 +44,10 @@ def to_number(chord, key):
         out += '/' + (str(DEG[biv]) if biv in DEG else spelled_degree(bass, key))
     return out
 
-MAJOR_STEPS = [0, 2, 4, 5, 7, 9, 11]
 def spelled_degree(note, key):
     """Degree of a non-diatonic note, spelled from its letter name: F# in C -> #4, A# in D -> #5, Bb in C -> b7."""
     deg = ('CDEFGAB'.index(note[0]) - 'CDEFGAB'.index(key[0])) % 7 + 1
-    diff = ((PC[note] - PC[key]) - MAJOR_STEPS[deg - 1] + 6) % 12 - 6
+    diff = ((PC[note] - PC[key]) - MAJOR[deg - 1] + 6) % 12 - 6
     return ('#' * diff if diff > 0 else 'b' * -diff) + str(deg)
 
 def song(id, title, artist, ccli, key, bpm, meter, chart_key, sections, practice_for,
@@ -223,7 +222,7 @@ SONGS += [
          ['A.03', 'ER.02', 'ER.10'],
          {'meta': MT + 'Passion/Worthy-of-Your-Name/Glorious-Day/overview/',
           'chords': 'https://tabs.ultimate-guitar.com/tab/passion/glorious-day-chords-1928417'},
-         notes='Intro/verse often played as single notes on low E (10-7-3 = D-Bm-G roots): a good ER.02 riff exercise.',
+         notes='The verse roots (D, B, G) make a good ER.02 power-chord exercise.',
          chords_verified='partial'),
     song('MS_holy_is_the_lord', 'Holy Is the Lord', 'Chris Tomlin', 4158039, 'A', 84, '4/4', 'A',
          [('Verse', ['A', 'D2', 'Esus', 'A/C#', 'D2', 'Esus']),
@@ -484,7 +483,7 @@ SONGS += [
           ('Chorus', ['G', 'D', 'G', 'C', 'Am', 'G', 'Dsus', 'D'])],
          ['A.02', 'A.06'],
          {'meta': WC + 'shine-jesus-shine-chords/', 'chords': WC + 'pdf/shine-jesus-shine-chords-key-g-50649.pdf'},
-         notes='1987. F = borrowed bVII in the "shine on me" build.'),
+         notes='1987. F = borrowed bVII in the pre-chorus build.'),
     song('MS_the_potters_hand', "The Potter's Hand", 'Darlene Zschech (Hillsong)', None, 'G', None, None, 'G',
          [('Verse', ['G', 'D/F#', 'C', 'Cm6', 'Eb', 'Em7', 'Asus', 'A/C#', 'Am7', 'D'])],
          ['A.02', 'EL.09', 'T.05'],
@@ -537,9 +536,6 @@ for s in SONGS:
         if l not in lessons: errors.append(f"{s['id']}: unknown lesson {l}")
     if s['original_key'] not in PC: errors.append(f"{s['id']}: bad key")
 if len({s['id'] for s in SONGS}) != len(SONGS): errors.append('duplicate ids')
-if errors:
-    print('ERRORS'); print('\n'.join(errors)); sys.exit(1)
-json.dump(SONGS, open(os.path.join(OUT, 'song_outlines.json'), 'w'), indent=1)
 
 # ---------------- Song Run levels (07-games.md §2, G3) ----------------
 # One level per outline, written into games.json (build_catalog.py leaves G_song_run's levels empty for this
@@ -566,33 +562,37 @@ games_path = os.path.join(OUT, 'games.json')
 games = json.load(open(games_path))
 sr = next((g for g in games if g['id'] == 'G_song_run'), None)
 if not sr: errors.append('games.json has no G_song_run (run build_catalog.py first)')
-else:
-    levels = []
-    for s in SONGS:
-        chords = [c for sec in s['sections'] for c in sec['chords_in_chart_key']]
-        fams = [family(c) for c in chords]
-        if None in fams: errors.append(f"Song Run {s['id']}: a chord doesn't parse"); continue
-        if len(set(fams)) < 2: errors.append(f"Song Run {s['id']}: needs at least two different chords"); continue
-        meter = s['meter'] or '4/4'
-        if meter not in PULSES: errors.append(f"Song Run {s['id']}: meter {meter} not supported"); continue
-        bpm = s['bpm'] or 72
-        if not 40 <= bpm <= 200: errors.append(f"Song Run {s['id']}: bpm {bpm}"); continue
-        bar_s = PULSES[meter] * 60 / bpm
-        one = len(chords) * bar_s
-        passes = int(max(1, min(4, -(-MIN_ROUND_S // one)))) if one < MIN_ROUND_S else 1
-        n = len(chords) * passes
-        opts = [o for o, k in (('0.5', 0.5), ('1', 1), ('2', 2)) if n * k * bar_s <= MAX_ROUND_S or o == '1']
-        if n * bar_s > MAX_ROUND_S: errors.append(f"Song Run {s['id']}: {round(n * bar_s)} s at one bar per chord (rounds are 3 minutes at most)")
-        # a box is at most a bar: ½ bar per chord = one box per chord; 2 bars per chord = two boxes per chord
-        targets = {o: run_score(n * (2 if o == '2' else 1), SONG_BONUS, 0.95) // 50 * 50 for o in opts}
-        levels.append(dict(id=s['id'], name=s['title'], params=dict(outline=s['id'], bpm=bpm, bpm_known=s['bpm'] is not None,
-                           meter=meter, meter_known=s['meter'] is not None, passes=int(passes), bars_per_chord=opts, targets=targets),
-                           target_score=targets['1']))
-    sr['levels'] = levels
-    if errors:
-        print('ERRORS'); print('\n'.join(errors)); sys.exit(1)
-    json.dump(games, open(games_path, 'w'), indent=1)
-    print('Song Run:', len(levels), 'levels')
+levels = []
+for s in SONGS:
+    chords = [c for sec in s['sections'] for c in sec['chords_in_chart_key']]
+    fams = [family(c) for c in chords]
+    if None in fams: errors.append(f"Song Run {s['id']}: a chord doesn't parse"); continue
+    if len(set(fams)) < 2: errors.append(f"Song Run {s['id']}: needs at least two different chords"); continue
+    meter = s['meter'] or '4/4'
+    if meter not in PULSES: errors.append(f"Song Run {s['id']}: meter {meter} not supported"); continue
+    bpm = s['bpm'] or 72
+    if not 40 <= bpm <= 200: errors.append(f"Song Run {s['id']}: bpm {bpm}"); continue
+    bar_s = PULSES[meter] * 60 / bpm
+    one = len(chords) * bar_s
+    passes = int(max(1, min(4, -(-MIN_ROUND_S // one)))) if one < MIN_ROUND_S else 1
+    n = len(chords) * passes
+    opts = [o for o, k in (('0.5', 0.5), ('1', 1), ('2', 2)) if n * k * bar_s <= MAX_ROUND_S or o == '1']
+    if n * bar_s > MAX_ROUND_S: errors.append(f"Song Run {s['id']}: {round(n * bar_s)} s at one bar per chord (rounds are 3 minutes at most)")
+    # a box is at most a bar: ½ bar per chord = one box per chord; 2 bars per chord = two boxes per chord
+    targets = {o: run_score(n * (2 if o == '2' else 1), SONG_BONUS, 0.95) // 50 * 50 for o in opts}
+    levels.append(dict(id=s['id'], name=s['title'], params=dict(outline=s['id'], bpm=bpm, bpm_known=s['bpm'] is not None,
+                       meter=meter, meter_known=s['meter'] is not None, passes=int(passes), bars_per_chord=opts, targets=targets),
+                       target_score=targets['1']))
+
+# nothing is written unless every check above passed
+if errors:
+    print('ERRORS'); print('\n'.join(errors)); sys.exit(1)
+sr['levels'] = levels
+with open(os.path.join(OUT, 'song_outlines.json'), 'w') as fh:
+    json.dump(SONGS, fh, indent=1)
+with open(games_path, 'w') as fh:
+    json.dump(games, fh, indent=1)
+print('Song Run:', len(levels), 'levels')
 print('OK', len(SONGS), 'songs')
 print('Non-diatonic / borrowed flags:'); print('\n'.join(sorted(set(warnings))) or ' none')
 for s in SONGS:

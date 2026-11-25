@@ -22,4 +22,4 @@ When you're perfectly in time, your strum covers the click and it seems to vanis
 3. Try the first beat of each bar a little louder (accent), the way a drummer hits the kick.
 
 ### Goal
-8 bars of downstrums at 70 BPM, landing on the click.
+8 bars of quarter-note downstrums at 70 BPM, average error ≤ 50 ms.

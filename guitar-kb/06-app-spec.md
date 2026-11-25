@@ -16,25 +16,27 @@ This is the build brief. The **content** is defined in `catalog/` (see `catalog/
 | Language | TypeScript | |
 | UI | **Preact** + Vite (small, fast, React-style components) | Light enough for a phone; no heavy framework |
 | App shell | Web app manifest + hand-written service worker (`web/scripts/postbuild.mjs`) | Home-screen install, full-screen, works offline |
-| Storage | **IndexedDB** (a small hand-written wrapper in `web/src/db.ts`), plus `navigator.storage.persist()` so Chrome won't evict it; settings in IndexedDB too | Replaces Room/DataStore. Same tables (`catalog/SCHEMA.md`) |
-| Catalog | JSON fetched from `/catalog/*.json`, served cache-first by the service worker with the app (one versioned cache; new versions wait for an "Update ready" tap) | Never waits on church Wi-Fi; never mixes versions |
+| Storage | **IndexedDB** (a small hand-written wrapper in `web/src/db.ts`) for progress, plus `navigator.storage.persist()` so Chrome won't evict it; small settings in localStorage (`gt_*` keys) | Tables in `catalog/SCHEMA.md` |
+| Catalog | Minified copies of the JSON in `public/catalog/`, fetched by relative path and served cache-first by the service worker with the app (one versioned cache; new versions wait for an "Update ready" tap) | Never waits on church Wi-Fi; never mixes versions |
 | Audio | **Web Audio API**: clicks scheduled on the `AudioContext` clock; input captured by an `AudioWorklet` that stamps every block with its context frame | Sample-accurate click; timing measured on one clock |
-| DSP | `dsp.ts` (YIN pitch, spectral-flux onsets, peak-based chroma + chord verify), proven in M0; runs on the main thread or a Worker | Shared by graders, tuner and games |
+| DSP | `dsp.js` (YIN pitch, spectral-flux onsets, peak-based chroma + chord verify), proven in M0 and kept identical to `m0/src/dsp.js` (a test checks); runs on the main thread | Shared by graders, tuner and games |
 | Markdown | Custom renderer (`web/src/ui/Content.tsx`) | `content/{lesson}.md` with embed tokens (§8) |
-| Deploy | GitHub Actions: build, then publish to GitHub Pages on every push to `main` | |
+| Deploy | GitHub Actions: catalog drift check, typecheck, tests, build, then publish to GitHub Pages on a push to `main` that touches `web/`, `m0/`, `guitar-kb/catalog/`, `guitar-kb/content/` or the workflows (or started by hand) | |
 
 **Project layout:**
 ```
 guitar-trainer/                 (GitHub repo, public)
   guitar-kb/                    ← knowledge base + catalog build scripts (source of truth)
   web/
-    public/catalog/             ← JSON copied from guitar-kb/catalog by the build
-    src/audio/                  ← engine.ts (context, click scheduler), capture-worklet.ts, calibration.ts
-    src/dsp/                    ← dsp.ts (+ Node unit tests with synthetic guitar audio)
+    public/catalog/             ← minified JSON written from guitar-kb/catalog by the build
+    src/audio/                  ← engine.ts (context, click scheduler, capture worklet), meter.ts
+    src/dsp/                    ← dsp.js (+ dsp.d.ts types)
     src/db.ts                   ← IndexedDB wrapper and schema
-    src/grading/                ← one grader per pass_criteria type
-    src/progress/               ← unlock rules, pass logic, reviews, tempo ladder
-    src/ui/<feature>/           ← screens
+    src/grading/                ← timing, pitch and chord graders, runner, grading modes
+    src/games/                  ← Arcade logic and listening
+    src/progress.ts             ← unlock rules, pass logic, reviews (progressStore.ts saves them)
+    src/ui/                     ← screens
+    test/                       ← Vitest tests + Python Playwright end-to-end suites
   m0/                           ← the audio test page (kept for re-testing)
   .github/workflows/pages.yml
 ```
@@ -42,16 +44,16 @@ guitar-trainer/                 (GitHub repo, public)
 ## 3. Screens
 | Screen | What it does |
 |---|---|
-| **Today** (home) | Builds today's queue: warm-up → reviews due → current lesson(s) (→ ear quiz). 10 / 20 min / free routines. One "Start practice" button. A separate Song of the week box (random from the church list, new every Monday 12:01 am Central) opens the song in the capo spot that fits the chords you know. Backup reminder after 14 days |
+| **Today** (home) | Builds today's queue: warm-up → reviews due → current lesson(s) (→ ear quiz). 10 / 20 min / free routines. One "Start practice" button. A separate Song of the week box (random from the church list, new every Monday 12:01 am Central) opens the song in the capo spot that fits the chords you know. A storage warning shows if Chrome won't mark the data permanent. No backup reminder (there is no backup) |
 | **Path** | Track map (F → A / ER / EL, T alongside). Lesson nodes show locked / available / in progress / passed / review due |
 | **Lesson** | Renders the lesson markdown with embedded chord diagrams, tab, strum grids and tool launchers. Shows the pass target and "Attempt" button. **Tuner and metronome always available** (§3b) |
 | **Attempt runner** | Count-in → play → live feedback → result card (score vs target, tempo used, retry/next). One layout per grader type |
 | **Tools** | Tuner · Metronome (meter, subdivision, accents, tap tempo) · Capo/transpose calculator · Chord library (curated + full chords-db) · Scale viewer |
-| **Songs** | Song list (all outlines). No "This week/This month" tab (removed). Search by title/CCLI |
-| **Song view** | Sections with chords in a chosen key **or** Nashville numbers; key and capo remembered per song, defaulting to the capo spot that uses the chords you've learned; play-along (current chord lit on the click); click at chart BPM (tap tempo when BPM is null); linked lessons from `practice_for`; SongSelect link-out; "drill this song's changes" builds a chord-change exercise from its progressions |
+| **Songs** | Song list (all outlines), search by title, artist or CCLI. No "This week" / "This month" tab: the weekly song is the Song of the week box on Today |
+| **Song view** | Sections with chords in a chosen key **or** Nashville numbers; key and capo remembered per song, defaulting to the capo spot that uses the chords you've learned; play-along (current chord lit on the click); click at chart BPM (tap tempo when BPM is null); linked lessons from `practice_for`; SongSelect link-out; link to the Song Run game. "Drill this song's changes" (a chord-change exercise built from its progressions) is not built |
 | **Arcade** | The game section: short skill games, XP, streak, Daily Challenge and badges. Full design in `07-games.md` |
 | **Progress** | Streak, minutes per week, lessons passed per track, tempo ladder per exercise, attempt history charts |
-| **Settings** | Instrument (acoustic / electric / both), audio input route, latency calibration, click sound/volume, handedness (diagram mirroring), storage status ("Saving" card) |
+| **Settings** | Appearance theme (Light, default / Dark / Match phone), instrument (acoustic / electric / both), audio input and channel, timing calibration, grading mode, phone audio check, storage status ("Saving" card), About with open-source licences. A set list saved by an earlier version can be removed here. Click volume is in the metronome. Handedness (diagram mirroring) is not built |
 
 ## 3a. Foldable layouts (OnePlus Open)
 Use CSS breakpoints on window width (cover screen < 600 px, inner screen ≥ 600 px) and, where Chrome exposes them, the Device Posture API and viewport-segment media queries for tabletop. Never hard-code a screen size.
@@ -84,16 +86,20 @@ Every Lesson screen (and the Song view) has a **tool bar** with two buttons: **T
 - **Tabletop posture:** tuner needle or metronome beat light on the top half, controls on the bottom half.
 
 ## 4. Session flow
-1. **Today** assembles the queue: up to 3 due reviews, then the newest available lesson in each active track, then 1 song.
-2. Each item opens its **Attempt runner**. An attempt = one measured run against the lesson's `pass_criteria`.
-3. The result is written to `attempt`, then `progress/` updates the lesson state, tempo ladder and review schedule.
-4. A **practice session** groups attempts from one sitting. It closes after 30 minutes of inactivity or when the app is backgrounded for 30 minutes.
+1. **Today** builds the queue (`buildQueue` in `web/src/practice.ts`): warm-up (F.05, once unlocked) → due reviews, oldest first (1 in 10 min, up to 2 in 20 min, up to 3 in free) → current lesson per visible track, passed-once first (at most 1 / 2 / all) → an ear quiz in 20 min when unlocked. Songs are not queue steps; the song of the week has its own box and changes on Monday.
+2. Each item opens its lesson, where the **Attempt runner** runs. An attempt = one measured run against the lesson's `pass_criteria`.
+3. The result is written to `attempt` and the lesson state and review schedule are updated in the same transaction; the tempo ladder is saved by the runner.
+4. A **practice session** groups the attempts of one sitting. It closes after 30 minutes without activity, including time in the background; this is checked when the app starts or comes back, and before anything uses the session.
 
 ## 5. Progress rules (exact)
 **Lesson states:** `locked → available → in_progress → passed`. "Review due" is a flag on a passed lesson, not a state.
 - **Unlock:** every `prereqs[]` lesson is passed **or passed once** (decided 2026-11-21: waiting a day after a first pass stalled day one). Tracks A/ER/EL unlock once every F lesson is passed at least once. The second-day pass still completes a lesson and starts its reviews. Lessons passed once *today* drop out of today's queue. Track choice in Settings hides the tracks you didn't pick (they stay unlockable). T lessons follow their own `prereqs`.
-- **Pass:** the criterion is met **at target tempo** in **2 practice sessions on different calendar days**. The first success sets `first_pass_at`; the second sets `passed_at`.
-- **Reviews:** scheduled at `passed_at + review_days[i]` (1, 3, 7, 14, 30). Passing a review advances to the next interval. Failing a review restarts the schedule at 1 day. The lesson stays passed and dependents stay unlocked. After the 30-day review the lesson is "mastered" and has no more reviews.
+- **Pass:** the criterion is met **at target tempo** on **2 different calendar days**. The first success sets `first_pass_day`; the second sets `passed_day`.
+- **Reviews** (as the code does it, `applyAttempt` in `web/src/progress.ts`; `review_days` = 1, 3, 7, 14, 30):
+  - Passing the lesson schedules the first review 1 day later.
+  - A review passed on a due day schedules the next one `review_days[i] − review_days[i−1]` days after **that day** (+2, +4, +7, +16). So with every review done on time they fall 1, 3, 7, 14 and 30 days after the pass; a late review pushes the later ones back by the same amount. (Note: this is not "`passed_day` + `review_days[i]`", as this spec used to say.)
+  - A missed attempt on a due day restarts the schedule: next review tomorrow, then the same gaps again. The lesson stays passed and dependents stay unlocked.
+  - After the last review (the 30-day step) the lesson is "mastered" and has no more reviews.
 - **Tempo ladder** (for `timing`, and for `pitch` exercises that have a tempo):
   - Start at `round(0.65 × target_bpm)`. Graded attempts always run at the ladder tempo (no skip-to-goal); reviews and practice after passing run at the target.
   - **Clean** = criterion met at the current tempo. After 3 clean attempts in a row, add 4 BPM (capped at target).
@@ -101,7 +107,7 @@ Every Lesson screen (and the Song view) has a **tool bar** with two buttons: **T
   - **Sloppy** = mean error > 1.5 × `max_err_ms`, or detection rate < 80%. After 2 sloppy attempts in a row, subtract 8 BPM (floor: 50% of target).
   - Anything between clean and sloppy leaves the tempo unchanged.
   - Attempts below target tempo build the ladder but never count toward a pass.
-- **Self-check lessons** pass when you mark them done in 2 sessions on different days. The app offers a recording to listen back to first.
+- **Self-check lessons** pass when you mark them done on 2 different days. (Offering a recording to listen back to first is not built.)
 
 ## 6. Grading (one `Grader` per `pass_criteria.type`)
 **Key design choice:** the app always knows what you're *supposed* to play. Every audio grader **verifies against an expected target** instead of trying to recognize anything open-ended. This is far more reliable on a phone mic.
@@ -111,11 +117,11 @@ Every Lesson screen (and the Song view) has a **tool bar** with two buttons: **T
 | `quiz` | Generated from `quizzes.json` templates; ear quizzes play synthesized audio (§9) | correct ratio ≥ `score`, and mean answer time ≤ `max_s` if set |
 | `pitch` | YIN pitch tracker on the input; compare to the expected note from the exercise or the tuner target | `cents`: held pitch within ±cents for ≥ 0.5 s · `note_accuracy`: ratio of expected notes matched in order |
 | `timing` | Spectral-flux onset detector; each onset matched to the nearest expected grid slot (`subdivision`) within half a slot; offsets corrected by the calibrated latency | mean absolute error ≤ `max_err_ms` **and** ≥ 90% of expected slots hit |
-| `chord_accuracy` | Chroma vector per strum (12 pitch classes, 300 ms after each onset), cosine similarity against the **expected** chord's template vs. the other chords in the exercise | ratio of strums whose expected chord scores highest ≥ `ratio` |
+| `chord_accuracy` | Chroma vector per strum (12 pitch classes, averaged over 60–450 ms after each onset, cut short at the next strum), cosine similarity against the **expected** chord's template vs. the other chords and decoys in the exercise | ratio of **bars** (timed) or strums (own pace) heard right ≥ `ratio` |
 | `changes_per_min` | Same chord verifier; counts correct strums that follow a strum of the *other* chord in the pair during a 60 s window | count ≥ `target`. No `pair` → run each pair from the lesson's `chord_changes` exercise, and all must pass |
 | `self_check` | None. Optional recording + playback | user confirms |
 
-**Fallback flag:** each audio grader has a mode — `auto` (default), `assisted` (shows the detection, then you confirm or override), or `self`. If the audio test (§10) shows chord verification isn't reliable on your phone, set `chord_accuracy` and `changes_per_min` to `assisted`. Lessons still work; the app just asks you to confirm.
+**Fallback flag:** each audio grader except timing has a mode (Settings → Grading mode): `auto`, `assisted` (shows the detection, then you confirm or override), or `self`. Defaults (`web/src/grading/modes.ts`): pitch `auto`; octave shapes, double stops and both chord graders `assisted` until the audio check (§10) has been done on the phone. Lessons still work; assisted just asks you to confirm.
 
 **Input routes:** phone mic · wired headset mic · USB audio interface (class-compliant; it appears in Chrome's input list). The mic is opened with echo cancellation, noise suppression and auto-gain **off**. Each route is calibrated separately (§7). **Bluetooth headphones are blocked for timing attempts**, because their 150–300 ms latency makes timing grades meaningless. The app shows a warning when Bluetooth output is active.
 
@@ -128,9 +134,9 @@ Every Lesson screen (and the Song view) has a **tool bar** with two buttons: **T
   - **Onsets:** spectral flux at frame 1024 / hop 256. It ignores 1800–3200 Hz, so the click's speaker bleed isn't heard as a strum. During the count-in it learns the bleed level and applies that floor only around predicted click arrivals.
   - **Chroma:** spectral peaks from an 8192-point FFT, averaged over 60–450 ms after a strum, matched by cosine similarity against templates built from the actual voicing.
 - **Latency:**
-  - **Loopback:** speaker → mic, 16 clicks. Gives the round-trip delay and predicts when click bleed arrives.
-  - **Strum calibration:** 16 muted strums on the click. Gives the offset subtracted from every timing grade.
-  - Both are stored per input route and per posture.
+  - **Strum calibration** (in the app): a 4-click count-in, then 16 muted strums on the click. Gives the offset subtracted from every timing grade; stored per input route and per posture.
+  - **Click bleed:** each click-timed attempt learns the bleed level and arrival time during its count-in. Pitch and chord attempts without a strum calibration use that measured arrival as the offset; timing attempts require the calibration.
+  - **Loopback** (speaker → mic, 16 clicks, round-trip delay) is a test on the M0 audio page only. The app does not run or store it.
 - **The engine API** exposes the subscribe/unsubscribe streams for blocks, pitch and onsets, plus start/stop for the click and capture. Graders only consume these.
 
 ## 8. Lesson content format (`content/{lesson}.md`)
@@ -143,12 +149,13 @@ Plain markdown plus embed tokens that the renderer swaps for live components:
 | `{{triad:tri_321_G_root}}` | Triad diagram |
 | `{{scale:Am_pent_pos1}}` | Fretboard scale diagram |
 | `{{rhythm:S3_worship}}` | Strum grid with a play button |
-| `{{exercise:EX_spider}}` | Tab view with tempo control and "Attempt" button |
-| `{{song:MS_goodness_of_god}}` | Song card linking to Song view |
+| `{{exercise:EX_spider}}` | Exercise card: tab (with its tempo ladder), chord pairs or chord progression |
+| `{{song:ID}}` | A public-domain song from `songs.json` (chords and lyrics) |
+| `{{outline:MS_goodness_of_god}}` | Link to the Song view of a song outline |
 | `{{tool:tuner}}` / `{{tool:metronome:bpm=80}}` | Inline tool launcher |
 | `{{quiz:Q_note_names}}` | Inline quiz |
 
-The catalog build script will check that every token references an existing ID, just as it already checks lesson assets.
+The web test suite (`web/test/progress.test.ts`, parser in `web/src/tokens.ts`) checks that every token references an existing ID. The catalog build script checks lesson assets.
 
 ## 9. Sound sources (no recordings)
 - **Click:** synthesized (short sine burst or filtered noise); accent = higher pitch.

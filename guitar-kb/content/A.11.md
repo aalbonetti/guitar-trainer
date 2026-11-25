@@ -25,4 +25,4 @@ Strum the waltz pattern through the chords to the click, one bar per chord. With
 {{exercise:EX_amazing_grace_chords}}
 
 ### Goal
-The whole hymn at tempo, chords changing on time.
+90% of bars on the right chord through the whole hymn at 80 BPM (the tempo ladder starts slower).

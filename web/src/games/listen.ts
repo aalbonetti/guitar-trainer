@@ -78,7 +78,6 @@ export function closeEars() {
   releaseCapture(WHO);
   if (ears.get().on || ears.get().opening) ears.set({ on: false, opening: false, hearing: null, cents: null });
 }
-export const earsOpen = () => !!S;
 export const now = () => ctxNow();
 /** Notes heard since context time `t`, plus ~0.4 s before it: the note before the question gives context (a
  *  ringing note split by a stray onset is told apart from a new pick by comparing with it). */
@@ -104,6 +103,7 @@ export async function startTimed(plan: TimedPlan, sig: { cancelled: boolean }): 
   const s = S; if (!s) return null;
   const sr = sampleRate();
   const cal = await getCalibration(routeName());
+  if (sig.cancelled || s !== S) return null; // quit or paused meanwhile: no listener, no click
   if (metro.get().running) stopMetronome();
   const band = new BandOnsetDetector(sr, 1800, 3200), clickOn: number[] = [];
   const off = onBlock((d, f) => { if (ctxNow() < plan.start) band.push(d, f).forEach(x => clickOn.push(x / sr)); });

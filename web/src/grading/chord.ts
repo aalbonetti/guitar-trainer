@@ -305,10 +305,10 @@ function summarize(res: StrumResult[], boxes: { ref: string; label: string }[], 
   const tally = (idx: number[]) => unit === 'bars'
     ? { correct: idx.filter(i => boxOk(br[i])).length, graded: idx.length }
     : { correct: idx.reduce((a, i) => a + br[i].ok, 0), graded: idx.reduce((a, i) => a + br[i].strums + owed(i), 0) };
-  const counted = br.map((b, i) => i).filter(i => !focus?.length || focus.includes(br[i].ref));
+  const counted = br.map((_, i) => i).filter(i => !focus?.length || focus.includes(br[i].ref));
   const { correct, graded } = tally(counted);
   const ratio = graded ? correct / graded : 0;
-  const fr: FocusResult[] = (focus || []).map(f => { const t = tally(br.map((b, i) => i).filter(i => br[i].ref === f)); const rr = t.graded ? t.correct / t.graded : 0; return { ref: f, ...t, ratio: rr, met: rr >= target - 1e-9 }; });
+  const fr: FocusResult[] = (focus || []).map(f => { const t = tally(br.map((_, i) => i).filter(i => br[i].ref === f)); const rr = t.graded ? t.correct / t.graded : 0; return { ref: f, ...t, ratio: rr, met: rr >= target - 1e-9 }; });
   const met = correct > 0 && ratio >= target - 1e-9 && fr.every(x => x.met);
   const missedBoxes = owedBy ? 0 : br.filter(b => b.strums === 0).length;
   const owedTotal = owedBy ? counted.reduce((a, i) => a + owed(i), 0) : 0;

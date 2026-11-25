@@ -69,11 +69,13 @@ export async function loadBadges() {
 /** Check every badge; save the newly earned ones and return them. */
 export async function checkBadges(cat: Pick<Catalog, 'badges'>, d: Omit<BadgeData, 'runs'> & { runs?: RunRow[] }): Promise<BadgeDef[]> {
   if (!badges.get().ready) await loadBadges();
+  const todo = (cat.badges || []).filter(b => !badges.get().earned[b.id]);
+  if (!todo.length) return []; // all earned: no need to read every run
   let runs = d.runs;
   if (!runs) try { runs = await db.getAll<RunRow>('game_run'); } catch { runs = []; }
   const fresh: BadgeDef[] = [];
-  for (const b of cat.badges || []) {
-    if (badges.get().earned[b.id]) continue;
+  for (const b of todo) {
+    if (badges.get().earned[b.id]) continue; // another check may have saved it meanwhile
     if (badgeProgress(b, { ...d, runs }).earned) {
       const at = Date.now();
       try { await db.put('badge', { badge_id: b.id, earned_at: at }); } catch { /* storage unavailable */ }

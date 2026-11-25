@@ -9,6 +9,7 @@ The full chord library (828 chords, 3,283 voicings) comes from **chords-db** (MI
 | C | x 3 2 0 1 0 | – 3 2 – 1 – | |
 | A | x 0 2 2 2 0 | – – 1 2 3 – | |
 | G | 3 2 0 0 0 3 | 2 1 – – – 3 | 4-finger alt: 3 2 0 0 3 3 |
+| G (4-finger) | 3 2 0 0 3 3 | 2 1 – – 3 4 | G-family voicing |
 | E | 0 2 2 1 0 0 | – 2 3 1 – – | |
 | D | x x 0 2 3 2 | – – – 1 3 2 | |
 | Am | x 0 2 2 1 0 | – – 2 3 1 – | |
@@ -24,10 +25,23 @@ The full chord library (828 chords, 3,283 voicings) comes from **chords-db** (MI
 | Fmaj7 | x x 3 2 1 0 | – – 3 2 1 – | |
 | Am7 | x 0 2 0 1 0 | – – 2 – 1 – | |
 | Em7 | 0 2 2 0 3 3 | – 1 2 – 3 4 | G-family voicing (ring + pinky anchored). Simpler: 0 2 0 0 0 0 |
-| Dsus2 | x x 0 2 3 0 | | |
-| Dsus4 | x x 0 2 3 3 | | |
-| Asus4 | x 0 2 2 3 0 | | |
+| Em7 (simple) | 0 2 0 0 0 0 | – 2 – – – – | Beginner version of Em7 |
+| Dsus2 | x x 0 2 3 0 | – – – 1 2 – | |
+| Dsus4 | x x 0 2 3 3 | – – – 1 3 4 | |
+| Asus4 | x 0 2 2 3 0 | – – 1 2 3 – | |
+| Asus2 | x 0 2 4 0 0 | – – 1 3 – – | Open B and high E drone |
+| A7sus4 | x 0 2 0 3 0 | – – 2 – 3 – | |
 | Cadd9 | x 3 2 0 3 3 | – 2 1 – 3 4 | G-family voicing (ring + pinky anchored) |
+
+## Worship drone, slash and barre chords
+| Chord | Frets (6→1) | Fingers | Notes |
+|---|---|---|---|
+| Bsus4 (drone) | x 2 4 4 0 0 | – 1 3 4 – – | Open B and high E ring |
+| C#m7 (drone) | x 4 6 4 0 0 | – 1 3 2 – – | Open B and high E ring |
+| G/B | x 2 0 0 3 3 | – 1 – – 3 4 | B in the bass |
+| F (barre) | 1 3 3 2 1 1 | 1 3 4 2 1 1 | Index barres strings 6–1 at fret 1 |
+| Bm (barre) | x 2 4 4 3 2 | – 1 3 4 2 1 | Index barres strings 5–1 at fret 2 |
+| Bm (partial) | x x 4 4 3 2 | – – 3 4 2 1 | F# in the bass; beginner version |
 
 ## Movable shapes
 | Shape | Frets (6→1), root at fret *n* | Root string |

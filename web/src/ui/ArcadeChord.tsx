@@ -5,16 +5,15 @@
 // Change Sprint counts changes for 60 s; Song Run is click-timed, scored per bar like the M8 timed grader.
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Catalog, GameLevel } from '../catalog';
-import { callNumberQ, pretty, speedBonus, type ChoiceQ, type Rng, type Pos } from '../games/core';
-import { familyOf, familyFrets, familyTarget, familyName, familyKey, triadQ, triadTargets, triadFrets, isTriad, judgeSprint, SPRINT_FAST_MS, SPRINT_SLOW_MS,
+import { pretty, speedBonus, type ChoiceQ, type Rng, type Pos } from '../games/core';
+import { familyFrets, familyKey, callTargets, triadQ, triadTargets, triadFrets, isTriad, judgeSprint, SPRINT_FAST_MS, SPRINT_SLOW_MS,
   songChords, songBoxes, songPlan, songTargets, boxVerdict, gradeSong, type TriadQ, type BarsPerChord, type SongChord } from '../games/chords';
 import { chordTarget, type ChordTarget } from '../grading/chord';
 import { openEars, closeEars, startTimed, strumsSince, flushStrums, now, ears, simAuto, publishPlan } from '../games/listen';
-import { audioContext } from '../audio/engine';
-import { keyUsesFlats, shapeFor } from '../music';
+import { shapeFor } from '../music';
 import { useStore } from '../store';
-import { Fretboard, useChordEars, useStrumHeard, HeardChord, OverrideButton, askNow, type Round } from './GameKit';
-import { songCalls } from './ArcadeGames';
+import { Fretboard, useChordEars, useStrumHeard, useTick, lagS, shortRound, shortBars, HeardChord, OverrideButton, askNow, type Round } from './GameKit';
+import { useCallNumber } from './ArcadeGames';
 import { Beats } from './Timing';
 import { ChordDiagram } from './Diagrams';
 
@@ -24,8 +23,6 @@ export function openLookup(cat: Pick<Catalog, 'chords'>) {
   return (name: string) => m.get(name) ?? null;
 }
 const shapeOf = (name: string) => shapeFor(name)?.frets ?? null;
-const useTick = (on: boolean, ms: number) => { const [, set] = useState(0); useEffect(() => { if (!on) return; const t = setInterval(() => set(x => x + 1), ms); return () => clearInterval(t); }, [on]); };
-const lagS = () => { const c = audioContext(); return c.outputLatency || c.baseLatency || 0; };
 
 // ---------- Call the Number (play) ----------
 // A key and a number; strum that chord, any voicing (open, barre or capo'd shape). The chord's family counts
@@ -33,30 +30,16 @@ const lagS = () => { const c = audioContext(); return c.outputLatency || c.baseL
 const CN_TIMEOUT_MS = 12000;
 export function CallNumberPlay({ cat, l, round, r, assisted }: { cat: Catalog; l: GameLevel; round: Round; r: Rng; assisted: boolean }) {
   const p = l.params, open = useMemo(() => openLookup(cat), []);
-  const song = useRef<ReturnType<typeof songCalls> | null>(null), idx = useRef(0), ids = useRef(0);
-  const gen = (prev?: ChoiceQ): ChoiceQ & { id: number; since: number; start: number } => {
-    let q: ChoiceQ;
-    if (p.songs) {
-      if (!song.current || idx.current >= song.current.prompts.length) { song.current = songCalls(cat, r); idx.current = 0; }
-      const s = song.current, c = s.prompts[idx.current++];
-      q = { prompt: c.num, sub: `${s.title} · key of ${pretty(s.key)}`, choices: s.choices, answer: c.chord, key: s.key, miss: `${c.num} in ${s.key} (${s.title}) is ${c.chord}` };
-    } else q = callNumberQ(r, p.keys, p.numbers, prev);
-    return { ...q, id: ++ids.current, since: askNow(), start: round.now() };
-  };
+  const ids = useRef(0), calls = useCallNumber(cat, p, r, round);
+  const gen = (prev?: ChoiceQ): ChoiceQ & { id: number; since: number; start: number } => ({ ...calls.gen(prev), id: ++ids.current, since: askNow(), start: round.now() });
   const [q, setQ] = useState(() => gen());
   const [said, setSaid] = useState<string | null>(null);
   const timedOut = useRef(0);
   const ear = useChordEars(!round.paused);
   // targets: the expected chord's family against the other choices' families
-  const tg = useMemo(() => {
-    const flats = keyUsesFlats(q.key || 'C');
-    const fams = [...new Map(q.choices.map(c => familyOf(c)).filter(Boolean).map(f => [familyKey(f!), f!])).values()];
-    const all = Object.fromEntries(fams.map(f => [familyKey(f), familyTarget(f, familyName(f, flats), open)]));
-    const ef = familyOf(q.answer)!;
-    return { expected: all[familyKey(ef)] ?? familyTarget(ef, q.answer, open), others: Object.values(all), ef, fams };
-  }, [q.id]);
+  const tg = useMemo(() => callTargets(q, open), [q.id]);
   const lastKey = useRef('?');
-  const tally = (ok: boolean) => { const k = q.key || '?'; lastKey.current = k; const t = (round.extra.current.keys ||= {}) as Record<string, [number, number]>; t[k] = [(t[k]?.[0] || 0) + (ok ? 1 : 0), (t[k]?.[1] || 0) + 1]; };
+  const tally = (ok: boolean) => { lastKey.current = q.key || '?'; calls.tally(lastKey.current, ok); };
   const next = (cur: typeof q) => { setQ(gen(cur)); round.askedAt.current = round.now(); };
   useTick(!round.paused, 300);
   useEffect(() => { if (!round.paused && timedOut.current !== q.id && round.now() - q.start > CN_TIMEOUT_MS) { timedOut.current = q.id; tally(false); setSaid(`Too slow: ${q.prompt} is ${q.answer}`); round.answer(false, q.miss); next(q); } });
@@ -67,21 +50,21 @@ export function CallNumberPlay({ cat, l, round, r, assisted }: { cat: Catalog; l
     return { since: qRef.current.since, expected: t.expected, others: t.others, sim: { right: familyFrets(t.ef, open)[0], wrong: wrongs } };
   }, h => {
     const cur = qRef.current, name = (id: string | null) => tgRef.current.others.find(o => o.id === id)?.name ?? id;
-    tally(h.ok);
+    lastKey.current = cur.key || '?'; calls.tally(lastKey.current, h.ok);
     if (h.ok) { setSaid(`✓ ${cur.answer}`); round.answer(true, undefined, 2000, 7000); }
     else { setSaid(`✗ heard ${name(h.heard)}: ${cur.prompt} is ${cur.answer}`); round.answer(false, `${cur.miss} (heard ${name(h.heard)})`); }
     next(cur);
   });
-  const override = () => { if (round.overrideLast()) { const t = round.extra.current.keys as Record<string, [number, number]>; const k = lastKey.current; if (t[k]) t[k][0]++; setSaid('Counted as right'); } };
+  const overridden = () => { calls.tally(lastKey.current, true, true); setSaid('Counted as right'); };
   return (
     <>
       <div class="gside">
         <div class="target"><b class="num">{q.prompt}</b>{q.sub ? <span>{q.sub}</span> : null}</div>
         <HeardChord e={ear} last={said} />
-        {assisted && round.canOverride ? <button class="small override" onClick={override}>✓ I played it right</button> : null}
+        <OverrideButton round={round} assisted={assisted} onOverride={overridden} />
         <p class="muted small center">Strum the chord: open, barre or with a capo, any voicing. The app checks it against the other chords of the key.</p>
       </div>
-      <div class="gboard"><div class="choices hint">{q.choices.slice(0, 7).map(c => <span>{pretty(c)}</span>)}</div></div>
+      <div class="gboard"><div class="choices hint">{q.choices.map(c => <span>{pretty(c)}</span>)}</div></div>
     </>
   );
 }
@@ -157,7 +140,7 @@ export function ChangeSprint({ l, round }: { l: GameLevel; round: Round }) {
   const [phase, setPhase] = useState<SPhase>('opening');
   const [view, setView] = useState({ left: 0, count: 3, cur: -1, changes: 0, last: null as string | null });
   const sig = useRef({ cancelled: false });
-  const windowS = ((globalThis as any).__gtGameShortS as number | undefined) ?? 60;
+  const windowS = shortRound(60)!;
   useEffect(() => {
     const g = sig.current;
     void (async () => {
@@ -235,7 +218,7 @@ export function SongRun({ cat, l, round, setup }: { cat: Catalog; l: GameLevel; 
     void (async () => {
       if (!(await openEars([], { chords: true }))) { if (!g.cancelled) setPhase('error'); return; }
       if (g.cancelled) return;
-      const short = (globalThis as any).__gtGameShortBars as number | undefined;
+      const short = shortBars();
       const bx = short ? boxes.slice(0, short) : boxes;
       const plan = songPlan(bx, l.params.bpm, beats, setup.per, now() + 0.6);
       const pub = { kind: 'song', beat: plan.beat, capo: setup.capo, boxes: plan.boxes.map(b => ({ t0: b.t0, t1: b.t1, frets: tg.targets[b.ref].frets[0].map(f => (f < 0 ? -1 : f - setup.capo)) })) };

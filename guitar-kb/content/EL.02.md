@@ -12,11 +12,11 @@ Notes A C D E G. This exact box is also **C major pentatonic**: same frets, just
 {{scale:Am_pent_pos5}}
 
 - **Position 2** sits just above position 1 and overlaps it. Slide between them on string 3 or 2.
-- **Position 5** is position 1's neighbor below (it's the open-position shape, an octave up).
+- **Position 5** connects to the bottom of position 1. The diagram shows it an octave higher (frets 14–17); play it at frets 2–5 to sit just below position 1.
 - Moving between boxes is how you climb the neck during a solo.
 
 ### Use it in a major key
-Over a song in **C**, play the A minor boxes and target **C**. Over a song in **G**, slide everything down 2 frets (E minor pentatonic) and target **G**.
+Over a song in **C**, play the A minor boxes and target **C**. Over a song in **G**, slide everything up 7 frets, or down 5 where there's room, to E minor pentatonic and target **G**.
 
 ### Practice
 1. Each box up and down at 80 BPM eighths.
@@ -25,4 +25,4 @@ Over a song in **C**, play the A minor boxes and target **C**. Over a song in **
 {{tool:metronome:bpm=80,beats=4,sub=2}}
 
 ### Goal
-Each box clean at 80 BPM eighths.
+4 bars of eighth notes at 80 BPM, average error ≤ 40 ms. Practice every box to that standard.

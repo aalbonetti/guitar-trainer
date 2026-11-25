@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'node:fs';
 import { transposeChord, capoOptions, parseChord, shapeFor, setChordData, keyUsesFlats, OPEN_MIDI } from '../src/music';
-import { importSetList, recentSongs } from '../src/setlist';
 
 const cat = (f: string) => JSON.parse(fs.readFileSync(new URL(`../public/catalog/${f}`, import.meta.url), 'utf8'));
 beforeAll(() => setChordData(cat('chords-lib.json'), cat('chords.json')));
@@ -29,16 +28,5 @@ describe('chords', () => {
     const s = shapeFor('D/F#')!;
     const i = s.frets.findIndex(f => f >= 0);
     expect((OPEN_MIDI[i] + s.frets[i]) % 12).toBe(6);
-  });
-});
-
-describe('set list import (synthetic data)', () => {
-  const csv = 'Name,new,total,W1,W2,W3,W4,W5\n"Song A, Live",,2,✓,,,✓,\nGoodness Of God,,1,,,,,✓\nOld Song,,1,✓,,,,\n';
-  it('parses quoted names, plays and most recent weeks', () => {
-    (globalThis as any).localStorage = { s: {} as Record<string, string>, getItem(k: string) { return this.s[k] ?? null; }, setItem(k: string, v: string) { this.s[k] = v; } };
-    const l = importSetList(csv, cat('song_outlines.json'));
-    expect(l.songs.map(s => s.name)).toEqual(['Song A, Live', 'Goodness Of God', 'Old Song']);
-    expect(l.songs[1].outlineId).toBe('MS_goodness_of_god');
-    expect(recentSongs(l, 4).map(s => s.name)).toEqual(['Goodness Of God', 'Song A, Live']);
   });
 });

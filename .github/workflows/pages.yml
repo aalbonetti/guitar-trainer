@@ -2,6 +2,12 @@ name: Deploy site
 on:
   push:
     branches: [main]
+    paths:
+      - 'web/**'
+      - 'm0/**'
+      - 'guitar-kb/catalog/**'
+      - 'guitar-kb/content/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,7 +26,17 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: web/package-lock.json
+      # the committed catalog JSON must be exactly what the build scripts generate
+      - name: Catalog drift check
+        run: |
+          python3 build_catalog.py .
+          python3 build_song_outlines.py .
+          git diff --exit-code -- .
+          test -z "$(git status --porcelain -- .)"
+        working-directory: guitar-kb/catalog
       - run: npm ci
+        working-directory: web
+      - run: npm run typecheck
         working-directory: web
       - run: npm test
         working-directory: web

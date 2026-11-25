@@ -1,7 +1,7 @@
 // Timing attempt runner (count-in → play → result card) and strum calibration UI.
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { Catalog, Lesson } from '../catalog';
-import { useStore } from '../store';
+import { useStore, useSelect } from '../store';
 import { attempt, runCalibration, runTimingAttempt, cancelAttempt, getCalibration, getLadder, allCalibrations, posture, routeName, type Calibration } from '../grading/runner';
 import { lessonFeel, coachLine, type TimingCriteria, type TimingResult } from '../grading/timing';
 import type { Ladder } from '../grading/timing';
@@ -17,11 +17,11 @@ const dev = () => inputPref.get() || undefined;
 /** The tempo a timing lesson is practiced at right now: the tempo-ladder BPM, or the goal once passed or when a review is due.
  *  Null for lessons without a tempo ladder. Used by the lesson tool bar and the lesson's click buttons, so every number agrees. */
 export function usePracticeTempo(l: Lesson): { bpm: number; goal: number; atGoal: boolean } | null {
-  const a = useStore(attempt); const pr = useStore(progress);
+  const phase = useSelect(attempt, a => a.phase); const pr = useStore(progress);
   const [ladder, setLadder] = useState<Ladder | null>(null);
   // timing lessons, and pitch/chord lessons played to a click (they have a bpm and a tempo ladder)
   const timing = l.pass_criteria.type === 'timing' || ((l.pass_criteria.type === 'pitch' || l.pass_criteria.type === 'chord_accuracy') && !!l.pass_criteria.bpm);
-  useEffect(() => { if (timing) void getLadder(l).then(setLadder); }, [l.id, a.phase]);
+  useEffect(() => { if (timing) void getLadder(l).then(setLadder); }, [l.id, phase]);
   if (!timing) return null;
   const goal = (l.pass_criteria as unknown as TimingCriteria).bpm;
   const p = pr.lp[l.id];
@@ -34,18 +34,28 @@ export function Beats({ n, on, count }: { n: number; on: number; count: boolean 
   return <div class={`attbeats ${count ? 'count' : ''}`}>{Array.from({ length: n }, (_, i) => <i class={`${on === i ? 'on' : ''} ${i === 0 ? 'one' : ''}`} />)}</div>;
 }
 
+/** Opening the mic, count-in or playing. */
+const underWay = (p: string) => p === 'starting' || p === 'countin' || p === 'playing';
+let calCards = 0;
+
 /** Shown in Settings and inside a lesson when this input + posture has no calibration yet. */
 export function CalibrationCard({ compact = false, onDone }: { compact?: boolean; onDone?: () => void }) {
   const a = useStore(attempt);
   const [list, setList] = useState<Calibration[]>([]);
   const refresh = () => void allCalibrations().then(setList);
   useEffect(refresh, [a.phase]);
+  // Leaving the page cancels a running calibration. The check waits a tick because TimingPanel swaps one card
+  // for another when calibration starts, and that mustn't cancel it.
+  useLayoutEffect(() => {
+    calCards++;
+    return () => { calCards--; setTimeout(() => { const s = attempt.get(); if (!calCards && s.kind === 'calibration' && underWay(s.phase)) cancelAttempt(); }, 0); };
+  }, []);
   // Only a calibration that finished after this card appeared counts: an old result left in the shared attempt
   // store (another input, the other fold posture) must not look like "calibrated" here.
   const stale = useRef(a.kind === 'calibration' && a.phase === 'result' ? a.calAt : undefined);
   useEffect(() => { if (a.kind === 'calibration' && a.phase === 'result' && a.calAt !== stale.current) onDone?.(); }, [a.phase, a.calAt]);
   const mine = a.kind === 'calibration';
-  const busy = mine && (a.phase === 'starting' || a.phase === 'countin' || a.phase === 'playing');
+  const busy = mine && underWay(a.phase);
   return (
     <div class="calib">
       {!compact ? <p class="muted">Every phone and input hears your guitar a little late. Calibration measures that delay so timing grades are fair. Do it once per input (phone mic, USB interface…) and per posture (folded or unfolded).</p> : null}
@@ -104,7 +114,7 @@ export function TimingPanel({ cat, l, reviewDue, passed }: { cat: Catalog; l: Le
   useEffect(() => { void getLadder(l).then(setLadder); }, [l.id, a.phase]);
   useEffect(() => { void getCalibration(routeName()).then(c => setHasCal(cap.label ? !!c : null)); }, [cap.label, a.phase]);
   useEffect(() => { void bluetoothOutputLikely().then(setBt); }, []);
-  useEffect(() => () => { if (attempt.get().phase === 'countin' || attempt.get().phase === 'playing') cancelAttempt(); }, []);
+  useEffect(() => () => { const s = attempt.get(); if ((s.kind === 'timing' || s.kind === 'calibration') && underWay(s.phase)) cancelAttempt(); }, []);
   const goalOnly = reviewDue || passed; // reviews and practice after passing run at goal tempo
   const ladderBpm = goalOnly ? crit.bpm : ladder?.bpm ?? Math.round(crit.bpm * 0.65);
   const busy = (a.phase === 'starting' || a.phase === 'countin' || a.phase === 'playing') && a.kind !== null;

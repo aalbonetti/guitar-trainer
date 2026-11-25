@@ -6,6 +6,7 @@
 // the mic actually listened in between is added (hiddenCredit in streak.ts).
 import { addActive, progress } from './progressStore';
 import { metro, capture, audioProgress } from './audio/engine';
+import { touch } from './practice';
 
 import { counts, hiddenCredit, TICK_S, type AudioMark } from './streak';
 
@@ -23,6 +24,8 @@ export function startActivityClock() {
   timer = window.setInterval(() => {
     if (!progress.get().ready) return;
     const audio = metro.get().running || capture.get().on;
-    if (counts({ visible: document.visibilityState === 'visible', sinceInputMs: Date.now() - lastInput, audio })) void addActive(TICK_S);
+    if (!counts({ visible: document.visibilityState === 'visible', sinceInputMs: Date.now() - lastInput, audio })) return;
+    void addActive(TICK_S);
+    touch(); // time that counts as practice also keeps the practice session open
   }, TICK_S * 1000);
 }

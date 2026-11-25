@@ -23,7 +23,7 @@ Six eighth notes per bar, felt as **two** beats: **1** 2 3 **4** 5 6. Accent 1 a
 3. Play **Amazing Grace** (3/4) in A.11 with this strum.
 
 ### Goal
-8 bars of 3/4 at 90 BPM.
+8 bars of the 3/4 waltz in eighth notes at 90 BPM, average error ≤ 40 ms.
 
 ### Songs in 3 and 6
 {{outline:MS_in_christ_alone}}

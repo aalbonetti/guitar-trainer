@@ -246,7 +246,7 @@ function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
 }
 
 // ---------- Songs ----------
-export function Songs({ cat, selected }: { cat: Catalog; selected?: string; initialTab?: string }) {
+export function Songs({ cat, selected }: { cat: Catalog; selected?: string }) {
   const [q, setQ] = useState('');
   const list = cat.outlines.filter(o => !q || (o.title + ' ' + o.artist + ' ' + (o.ccli || '')).toLowerCase().includes(q.toLowerCase())).map(o => ({ id: o.id, title: o.title, sub: `${o.chart_key}${o.bpm ? ' · ' + o.bpm : ''}` }));
   return (
@@ -334,7 +334,7 @@ function Appearance() {
     </section>
   );
 }
-export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void }) {
+export function Settings({ onChange }: { onChange: () => void }) {
   const [msg, setMsg] = useState('');
   const [inst, setInst] = useState(instrumentPref.get());
   const [keepOk, setKeepOk] = useState<boolean | null>(null);
@@ -355,7 +355,7 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
       <GradingModes />
       {sl ? <section class="card">
         <h2>Church set list</h2>
-        <p>{sl.songs.length} songs saved on this phone from an earlier import; they pick the song of the week. <button class="small" onClick={() => { clearSetList(); setMsg('Set list removed.'); onChange(); }}>Remove</button></p>
+        <p>{sl.songs.length} songs saved on this phone from an earlier import. While saved, this list drives the song of the week, Set Ready and Call the Number’s songs mode. <button class="small" onClick={() => { clearSetList(); setMsg('Set list removed.'); onChange(); }}>Remove</button></p>
         {msg ? <p class="note">{msg}</p> : null}
       </section> : null}
       <section class="card">
@@ -364,7 +364,7 @@ export function Settings({ cat, onChange }: { cat: Catalog; onChange: () => void
       </section>
       <section class="card">
         <h2>About</h2>
-        <p class="muted">Guitar Trainer v{__APP_VERSION__} · personal use. Song outlines are facts only (keys, chords, numbers); no lyrics. Chord library: chords-db, MIT License, Copyright (c) 2016 David Rubert.</p>
+        <p class="muted">Guitar Trainer v{__APP_VERSION__} · personal use. Song outlines are facts only (keys, chords, numbers); no lyrics. Chord library: chords-db, MIT License, Copyright (c) 2016 David Rubert. <a href="./licenses.txt" target="_blank" rel="noopener">Open-source licences</a></p>
       </section>
     </div>
   );
