@@ -1077,6 +1077,9 @@
   "assets": {
    "scales": [
     "G_major_pos2"
+   ],
+   "quizzes": [
+    "Q_diatonic"
    ]
   },
   "content": "content/EL.09.md",

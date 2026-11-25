@@ -4,7 +4,7 @@
 // screens are in Daily.tsx; badges and Set Ready progress are on the home screen.
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Catalog, Game, GameLevel } from '../catalog';
-import { useStore } from '../store';
+import { useStore, useSelect } from '../store';
 import { progress, streakInfo } from '../progressStore';
 import { xp } from '../xp';
 import { bests, bestKey, bestStars, loadBests, unlocked, finishRun, markService, modeFor, setModeFor, churchSongs, checkAllBadges, type RunOutcome, type RunResult, type Mode } from '../arcade';
@@ -24,15 +24,13 @@ import { dayOf, computeStates } from '../progress';
 import { metro, tuner, stopMetronome, stopTuner, bluetoothOutputLikely, acquireCapture, releaseCapture, capture, routeLabel } from '../audio/engine';
 import { getCalibration, routeName, posture, attempt } from '../grading/runner';
 import { patternFeel } from '../grading/timing';
-import { closeEars } from '../games/listen';
+import { closeEars, ears } from '../games/listen';
 import { inputPref, TunerPanel, MetronomePanel } from './Tools';
 import { CalibrationCard } from './Timing';
 import { useRound, Stars } from './GameKit';
 import { NoteDrop, FretFinder, OctaveJump, ChoiceGame, DelayMath } from './ArcadeGames';
 import { BoxRunner, InThePocket } from './ArcadeTimed';
 
-/** Games built so far (G1–G3: all twelve); anything else would fold into "Coming later". */
-const BUILT = new Set(['G_note_drop', 'G_fret_finder', 'G_call_the_number', 'G_hear_the_change', 'G_capo_quick', 'G_delay_math', 'G_octave_jump', 'G_box_runner', 'G_in_the_pocket', 'G_triad_hunt', 'G_change_sprint', 'G_song_run']);
 /** Click-timed games: the round can't pause mid-click (pause stops it), Bluetooth output blocks them, points per beat. */
 const TIMED = new Set(['G_box_runner', 'G_in_the_pocket', 'G_song_run']);
 /** Rounds that can't resume after a pause (the click or the minute keeps going): pause stops them. */
@@ -56,6 +54,7 @@ export function ArcadeHome({ cat }: { cat: Catalog }) {
   const sk = streakInfo(today);
   const sunday = new Date().getDay() === 0;
   const mins = Math.floor(sk.todayS / 60);
+  const states = computeStates(cat.lessons, cat.tracks, pr.lp);
   return (
     <div class="page arcade">
       <h1>Arcade</h1>
@@ -69,10 +68,10 @@ export function ArcadeHome({ cat }: { cat: Catalog }) {
       </section>
       <DailyBanner cat={cat} visible={visible} />
       <div class="tiles">
-        {cat.games.filter(g => BUILT.has(g.id)).map(g => {
+        {cat.games.map(g => {
           if (g.id === 'G_song_run') return <SongRunTile cat={cat} g={g} />;
           const lesson = cat.lessonById[g.unlock_lesson];
-          const st = computeStates(cat.lessons, cat.tracks, pr.lp)[g.unlock_lesson];
+          const st = states[g.unlock_lesson];
           const m = modeFor(g);
           return (
             <section class="card tile">
@@ -88,11 +87,6 @@ export function ArcadeHome({ cat }: { cat: Catalog }) {
           );
         })}
       </div>
-      {(() => { const later = cat.games.filter(g => !BUILT.has(g.id)); return later.length ? (
-        <details class="card later">
-          <summary><b>Coming later</b> <span class="muted small">{later.length} more games</span></summary>
-          <ul class="list">{later.map(g => <li><span><span class="gicon">{ICON[g.id]}</span> <b>{g.name}</b><small class="muted"> · {g.blurb}</small></span></li>)}</ul>
-        </details>) : null; })()}
       <BadgesCard cat={cat} />
     </div>
   );
@@ -146,11 +140,19 @@ function ModeToggle({ g, mode, set }: { g: Game; mode: Mode; set: (m: Mode) => v
   );
 }
 const dev = () => inputPref.get() || undefined;
+// The input's name changes while a round runs (capture opens and closes), so only these ready-card lines subscribe.
+function ListenNote({ chords, timed }: { chords: boolean; timed: boolean }) {
+  const c = useStore(capture);
+  return <p class="muted small">Prop the phone near the guitar or amp. The app listens {c.label ? `with ${routeLabel()}` : 'with the input chosen in Settings'} and checks each {chords ? 'strum against the chord' : 'note against the answer'} it expects.{timed ? ' One bar of count-in; the game runs the click.' : ''} Tap and play scores are kept apart. <a href="#/settings">Input</a></p>;
+}
+function CalNeeded({ onDone }: { onDone: () => void }) {
+  const c = useStore(capture);
+  return <div><p><b>First, a 30-second strum calibration</b> for {c.label || 'this input'} ({posture()}), so strums are graded fairly.</p><CalibrationCard compact onDone={onDone} /></div>;
+}
 
 export function GameScreen({ cat, gameId, levelId, fromDaily = false }: { cat: Catalog; gameId: string; levelId: string; fromDaily?: boolean }) {
   const g = cat.games.find(x => x.id === gameId), l = g?.levels.find(x => x.id === levelId);
   useStore(progress); const b = useStore(bests); const dd = useStore(daily);
-  useStore(capture);
   useEffect(() => { if (!b.ready) void loadBests(); }, []);
   useEffect(() => { if (fromDaily) void ensureDaily(cat, trackVisibleFor(cat)); }, [fromDaily]);
   const [runId, setRunId] = useState(0);
@@ -176,7 +178,6 @@ export function GameScreen({ cat, gameId, levelId, fromDaily = false }: { cat: C
   useEffect(() => { if (timed) void bluetoothOutputLikely().then(setBt); }, [gameId]);
   useEffect(() => () => closeEars(), []);
   if (!g || !l) return <div class="page"><p>Game not found. <a href="#/arcade">Arcade</a></p></div>;
-  if (!BUILT.has(g.id)) return <div class="page"><p>This game isn't ready yet. <a href="#/arcade">Back to the Arcade</a></p></div>;
   if (!unlocked(cat, g, l)) return <div class="page"><p>Get ★★ on the previous level to open this one. <a href="#/arcade">Back to the Arcade</a></p></div>;
   const best = b.map[bestKey(g.id, l.id, mode)];
   const next = g.id === 'G_song_run' ? undefined : g.levels[g.levels.indexOf(l) + 1];
@@ -188,14 +189,22 @@ export function GameScreen({ cat, gameId, levelId, fromDaily = false }: { cat: C
     if (starting.current) return; // a double tap on Start / Replay
     starting.current = true;
     try {
-      if (mode === 'play' && g.id === 'G_in_the_pocket') {
-        // strums are graded against the click, so this input + posture needs a strum calibration first
-        setChecking(true);
-        try { await acquireCapture('game-check', dev()); const c = await getCalibration(routeName()); releaseCapture('game-check'); setChecking(false); if (!c) { setCalMsg(''); setNeedCal(true); return; } }
-        catch { releaseCapture('game-check'); setChecking(false); }
+      if (timed && mode === 'play') {
+        // Checked on every Start, Replay and Restart: headphones can be connected between rounds, and calibration is
+        // per input and posture. The ready card shows while checking, with any blocker.
+        setPhase('ready'); setChecking(true); setNeedCal(false);
+        const blocked = await bluetoothOutputLikely();
+        setBt(blocked);
+        if (blocked) return;
+        if (g.id === 'G_in_the_pocket') {
+          // strums are graded against the click, so this input + posture needs a strum calibration first
+          try { await acquireCapture('game-check', dev()); const c = await getCalibration(routeName()); if (!c) { setCalMsg(''); setNeedCal(true); return; } }
+          catch { /* the round reports the mic error */ }
+          finally { releaseCapture('game-check'); }
+        }
       }
       setNeedCal(false); setPending(null); setRunId(x => x + 1); setPhase('play');
-    } finally { setTimeout(() => { starting.current = false; }, 400); }
+    } finally { setChecking(false); setTimeout(() => { starting.current = false; }, 400); }
   };
   const save = async (res: RunResult) => { const o = await finishRun(cat, g, lv, res, mode); setOutcome({ ...o, score: res.score, misses: res.misses, mode }); setPhase('done'); };
   const btBlock = timed && mode === 'play' && bt;
@@ -206,7 +215,7 @@ export function GameScreen({ cat, gameId, levelId, fromDaily = false }: { cat: C
         : g.id === 'G_song_run' ? `The whole song${l.params.passes > 1 ? ` ${l.params.passes} times through` : ''} at ${l.params.bpm} BPM${l.params.bpm_known ? '' : ' (the outline has no tempo, so 72)'}, one bar of count-in.` : '';
   const dItem = fromDaily && dd.day ? dd.items.find(i => i.game === g.id && i.level === l.id) : undefined;
   const dIdx = dItem ? dd.items.indexOf(dItem) : -1;
-  const dNext = dIdx >= 0 ? dd.items.find((it, i) => i !== dIdx && !dd.done[i]) : undefined;
+  const dNext = dIdx >= 0 ? dd.items.find((_, i) => i !== dIdx && !dd.done[i]) : undefined;
   const ready = (
     <section class="card">
       {dItem ? <p class="note small">🎯 Daily Challenge: {dItem.why}</p> : null}
@@ -214,12 +223,12 @@ export function GameScreen({ cat, gameId, levelId, fromDaily = false }: { cat: C
       <ModeToggle g={g} mode={mode} set={pick} />
       {g.id === 'G_song_run' ? <SongRunSetup cat={cat} l={l} setup={song} set={v => { setSong(v); const all = { ...songViewPref.get() }; all[l.id] = { key: v.key, capo: v.capo }; songViewPref.set(all); }} /> : null}
       <p class="muted">{roundText} {timed ? 'Closer to the beat scores more' : g.id === 'G_change_sprint' ? 'Faster changes score more' : 'Faster answers score more'}; 8 in a row raises the combo. ★★ = 85% right, ★★★ = 95% right and {lv.target_score} points.{best ? ` Your best (${mode}): ${best.best_score}.` : ''}</p>
-      {mode === 'play' ? <p class="muted small">Prop the phone near the guitar or amp. The app listens {capture.get().label ? `with ${routeLabel()}` : 'with the input chosen in Settings'} and checks each {CHORD_GRADER[g.id] ? 'strum against the chord' : 'note against the answer'} it expects.{timed ? ' One bar of count-in; the game runs the click.' : ''} Tap and play scores are kept apart. <a href="#/settings">Input</a></p> : null}
+      {mode === 'play' ? <ListenNote chords={!!CHORD_GRADER[g.id]} timed={timed} /> : null}
       {assisted ? <p class="muted small">Chord checking is in <b>assisted</b> mode (Settings → Grading mode) until the phone audio check is done: {CONFIRM_AT_END.has(g.id) ? 'at the end you decide whether the round counts.' : 'if a right chord is marked wrong, tap “I played it right”.'}</p> : null}
       {(l.review_for || []).length ? <p class="muted small">★★ here counts as the review for {l.review_for!.join(', ')} when it's due.</p> : null}
       {btBlock ? <><p class="error">Bluetooth audio looks active. Its delay (150–300 ms) puts the click out of step with your playing, so click-timed games are off.</p>
         <p class="muted">Switch to the phone speaker or wired headphones, then <button class="small" onClick={() => void bluetoothOutputLikely().then(setBt)}>check again</button>.</p></> : null}
-      {needCal ? <div><p><b>First, a 30-second strum calibration</b> for {capture.get().label || 'this input'} ({posture()}), so strums are graded fairly.</p><CalibrationCard compact onDone={calibrated} /></div> : null}
+      {needCal ? <CalNeeded onDone={calibrated} /> : null}
       {calMsg && !needCal ? <p class="okText">{calMsg}</p> : null}
       {!needCal ? <button class="primary big" disabled={btBlock || checking} onClick={() => void go()}>{checking ? 'Checking the input…' : '▶ Start'}</button> : null}
     </section>
@@ -232,7 +241,7 @@ export function GameScreen({ cat, gameId, levelId, fromDaily = false }: { cat: C
         <Play key={runId} cat={cat} g={g} l={lv} mode={mode} ghost={best?.ghost || []} assisted={assisted} song={song} focus={fromDaily ? dailyFocus(g, l) : []}
           onDone={async res => { res.graderMode = CHORD_GRADER[g.id] && mode === 'play' ? (assisted ? 'assisted' : 'auto') : undefined;
             if (assisted && CONFIRM_AT_END.has(g.id)) { setPending(res); setPhase('confirm'); } else await save(res); }}
-          onQuit={() => setPhase('ready')} onRestart={() => setRunId(x => x + 1)} />
+          onQuit={() => setPhase('ready')} onRestart={() => void go()} />
       ) : phase === 'confirm' && pending ? (
         <section class="card result">
           <h3>Check this round</h3>
@@ -260,7 +269,6 @@ export function GameScreen({ cat, gameId, levelId, fromDaily = false }: { cat: C
               : next && unlocked(cat, g, next) ? <a class="btn" href={`#/arcade/${g.id}/${next.id}`}>Next level ›</a> : null}
             <a class="btn" href={fromDaily ? '#/daily' : '#/arcade'}>{fromDaily ? 'Daily Challenge' : 'Arcade'}</a>
           </div>
-          {needCal ? <div><p><b>First, a strum calibration</b> for this input.</p><CalibrationCard compact onDone={calibrated} /></div> : null}
         </section>
       ) : <p class="muted">Saving…</p>}
     </div>
@@ -290,6 +298,16 @@ function Play({ cat, g, l, mode, ghost, assisted, song, focus, onDone, onQuit, o
   const timed = NO_RESUME.has(g.id);
   // Change Sprint keeps its own minute (after a 3-2-1), so the shared timer doesn't run for it
   const lr = useMemo(() => (g.id === 'G_change_sprint' ? { ...l, round_s: undefined } : l), [l]);
+  // Play mode: the round and question clocks wait for the mic. If it can't be opened the round stops here, with
+  // nothing saved and no misses recorded. (The game below clears any old error as it asks for the mic.)
+  const earsOn = useSelect(ears, e => e.on);
+  const [micError, setMicError] = useState<string | null>(null);
+  useEffect(() => {
+    if (mode !== 'play') return;
+    const check = (e: { error: string | null }) => { if (e.error) setMicError(e.error); };
+    const off = ears.subscribe(check); check(ears.get());
+    return off;
+  }, []);
   // heatmap answers are written when the round ends (or is left)
   useEffect(() => () => { void flushHeat(); }, []);
   // click-timed games score 100 per beat, so an eighth note is worth 50 and a sixteenth 25
@@ -298,13 +316,21 @@ function Play({ cat, g, l, mode, ghost, assisted, song, focus, onDone, onQuit, o
   const { round, ghost: gh, durationS, stRef, roundS, extra } = useRound(lr, mode, base, paused, finished => {
     const s = stRef.current;
     onDone({ score: s.score, correct: s.correct, total: s.total, maxCombo: s.maxCombo, finished, durationS: durationS(), misses: s.misses, ghost: gh.current, maxStreak: s.bestStreak, extra: Object.keys(extra.current).length ? extra.current : undefined });
-  }, finishedRule);
+  }, finishedRule, mode === 'play' && !earsOn);
   // The game owns the click while a round runs: no metronome or tuner from the sheets once you resume.
   useEffect(() => { if (!paused) { setSheet(null); if (metro.get().running) stopMetronome(); if (tuner.get().on) stopTuner(); } }, [paused]);
   // Locking the phone or switching apps pauses the round (and closes the mic).
   useEffect(() => { const f = () => { if (document.visibilityState === 'hidden') setPaused(true); }; document.addEventListener('visibilitychange', f); return () => document.removeEventListener('visibilitychange', f); }, []);
   const ghostScore = (() => { let v = 0; for (const [t, sc] of ghost) if (t <= round.elapsed) v = sc; return v; })();
   const ghostMax = Math.max(1, ghost.length ? ghost[ghost.length - 1][1] : 0, round.score);
+  if (micError) return (
+    <section class="card micerror" role="alert">
+      <h3>The microphone could not be opened</h3>
+      <p class="error">{micError}</p>
+      <p class="muted small">The round stopped. Nothing was saved and nothing counts as a miss.</p>
+      <div class="row"><button class="primary" onClick={onRestart}>↻ Try again</button><button onClick={onQuit}>✕ Quit</button></div>
+    </section>
+  );
   return (
     <div class={`playarea ${timed ? 'timed' : ''} mode-${mode} flash-${round.flash || 'none'}`}>
       <div class="ghud">

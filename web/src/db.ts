@@ -50,7 +50,21 @@ export async function get<T>(store: string, key: IDBValidKey): Promise<T | undef
 export async function put(store: string, value: unknown): Promise<void> { const d = await open(); await req(d.transaction(store, 'readwrite').objectStore(store).put(value)); }
 /** Insert into an auto-increment table (no id given). */
 export async function add(store: string, value: unknown): Promise<void> { const d = await open(); await req(d.transaction(store, 'readwrite').objectStore(store).add(value)); }
-export async function del(store: string, key: IDBValidKey): Promise<void> { const d = await open(); await req(d.transaction(store, 'readwrite').objectStore(store).delete(key)); }
+/** Rows of a store with a [first, second] key whose first part is `first` (one quiz's rows in quiz_item_stats). */
+export async function getByFirstKey<T>(store: string, first: string): Promise<T[]> {
+  const d = await open(); // arrays sort after strings and numbers, so [first, []] is past every [first, x]
+  return req(d.transaction(store).objectStore(store).getAll(IDBKeyRange.bound([first], [first, []]))) as Promise<T[]>;
+}
+/** One readwrite transaction: everything `run` writes is saved together or not at all. `run` may only await
+ *  `request()` on this transaction's own requests (awaiting anything else lets the transaction close early). */
+export async function transact<T>(stores: string[], run: (t: IDBTransaction) => Promise<T>): Promise<T> {
+  const d = await open(), t = d.transaction(stores, 'readwrite');
+  const committed = new Promise<void>((res, rej) => { t.oncomplete = () => res(); t.onabort = () => rej(t.error || new Error('Save was cancelled')); });
+  committed.catch(() => { /* reported below */ });
+  try { const out = await run(t); await committed; return out; }
+  catch (e) { try { t.abort(); } catch { /* already finished */ } throw e; }
+}
+export { req as request };
 export async function clear(store: string): Promise<void> { const d = await open(); await req(d.transaction(store, 'readwrite').objectStore(store).clear()); }
 
 /** Backup: every table, plus the small settings kept in localStorage (gt_* keys: set list, input, prefs). */
@@ -67,31 +81,4 @@ export async function importAll(data: Record<string, unknown>) {
   for (const s of STORES) { const rows = data[s]; if (!Array.isArray(rows)) continue; await clear(s); for (const row of rows) await put(s, row); }
   const local = data._local as Record<string, string> | undefined;
   if (local) try { for (const [k, v] of Object.entries(local)) if (k.startsWith('gt_')) localStorage.setItem(k, v); } catch { /* ignore */ }
-}
-function backupFile(data: unknown): File {
-  const n = new Date(), name = `guitar-trainer-backup-${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}.json`;
-  return new File([JSON.stringify(data)], name, { type: 'application/json' });
-}
-const stamp = () => { try { localStorage.setItem('gt_last_backup', JSON.stringify(Date.now())); } catch { /* ignore */ } };
-/** Save the backup as a .json file (Downloads on the phone). */
-export async function downloadBackup(): Promise<string> {
-  const f = backupFile(await exportAll());
-  const url = URL.createObjectURL(f);
-  const a = document.createElement('a'); a.href = url; a.download = f.name; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
-  stamp();
-  return f.name;
-}
-/** Can this phone hand a file to the share sheet (Drive, Gmail…)? */
-export function canShareBackup(): boolean {
-  try { return !!navigator.canShare && navigator.canShare({ files: [new File(['{}'], 'x.json', { type: 'application/json' })] }); } catch { return false; }
-}
-/** Open the share sheet with the backup file (pick Drive to keep it safe). Falls back to a download. */
-export async function shareBackup(): Promise<{ name: string; how: 'shared' | 'downloaded' | 'cancelled' }> {
-  const f = backupFile(await exportAll());
-  if (canShareBackup()) {
-    try { await navigator.share({ files: [f], title: 'Guitar Trainer backup' }); stamp(); return { name: f.name, how: 'shared' }; }
-    catch (e) { if ((e as Error).name === 'AbortError') return { name: f.name, how: 'cancelled' }; }
-  }
-  return { name: await downloadBackup(), how: 'downloaded' };
 }

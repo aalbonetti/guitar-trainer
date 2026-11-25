@@ -20,4 +20,4 @@ Drummers hit the snare on beats 2 and 4. Strum those two beats a little harder a
 4. Push to 80 BPM.
 
 ### Goal
-8 bars of even eighths at 80 BPM, in time with the click.
+8 bars of eighth notes at 80 BPM, average error ≤ 40 ms.

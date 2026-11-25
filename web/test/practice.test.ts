@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
-import { buildQueue, totalMinutes, sessionRow, normRoutine, songWeekStart, songOfWeek, songPool, type QueueInput } from '../src/practice';
+import { buildQueue, totalMinutes, sessionRow, normRoutine, songWeekStart, songOfWeek, songPool, dateKey, type QueueInput } from '../src/practice';
 import { computeStates, type LessonProgress } from '../src/progress';
 
 const j = (f: string) => JSON.parse(fs.readFileSync(new URL(`../public/catalog/${f}`, import.meta.url), 'utf8'));
@@ -8,7 +8,7 @@ const lessons = j('lessons.json'), tracks = j('tracks.json'), outlines = j('song
 const cat = { lessons, tracks, outlines };
 const passed = (id: string, extra: Partial<LessonProgress> = {}): LessonProgress => ({ lesson_id: id, state: 'passed', first_pass_day: '2026-11-01', passed_day: '2026-11-02', review_index: 0, next_review_day: '2026-12-31', mastered: false, updated_at: 0, ...extra });
 const input = (lp: Record<string, LessonProgress>, over: Partial<QueueInput> = {}): QueueInput =>
-  ({ cat, lp, states: computeStates(lessons, tracks, lp), day: '2026-11-21', visibleTrack: () => true, setlist: null, songLast: {}, ...over });
+  ({ cat, lp, states: computeStates(lessons, tracks, lp), day: '2026-11-21', visibleTrack: () => true, setlist: null, ...over });
 const allF = Object.fromEntries(lessons.filter((l: any) => l.track === 'F').map((l: any) => [l.id, passed(l.id)]));
 
 describe('practice queue', () => {
@@ -16,7 +16,7 @@ describe('practice queue', () => {
     const q = buildQueue(input({}), 10);
     expect(q.find(i => i.kind === 'warmup')).toBeUndefined();
     expect(q.filter(i => i.kind === 'lesson').map(i => i.lessonId)).toEqual(['F.01']);
-    expect(q.some(i => i.kind === 'song')).toBe(false);
+    expect(q.every(i => !!i.lessonId)).toBe(true);
     expect(q[0].minutes).toBe(10);
   });
   it('after passing F.01 today the plan moves on to the next lesson, not F.01 again', () => {
@@ -79,6 +79,15 @@ describe('practice queue', () => {
     expect(songWeekStart(new Date('2026-03-09T05:01:00Z'))).toBe('2026-03-09'); // CDT: 12:01 am = 05:01 UTC
     expect(songWeekStart(new Date('2026-03-09T04:59:00Z'))).toBe('2026-03-02');
   });
+  it('week start across the fall-back weekend: Monday 12:01 am CST is 06:01 UTC', () => {
+    expect(songWeekStart(new Date('2026-11-02T06:00:59Z'))).toBe('2026-10-26');
+    expect(songWeekStart(new Date('2026-11-02T06:01:00Z'))).toBe('2026-11-02');
+  });
+  it('date key changes at the song rollover and at local midnight, not within a day', () => {
+    expect(dateKey(new Date('2026-11-02T06:00:59Z'))).not.toBe(dateKey(new Date('2026-11-02T06:01:00Z')));
+    expect(dateKey(new Date(2026, 10, 24, 23, 59))).not.toBe(dateKey(new Date(2026, 10, 25, 0, 0)));
+    expect(dateKey(new Date(2026, 10, 25, 12, 0))).toBe(dateKey(new Date(2026, 10, 25, 12, 1)));
+  });
   it('picks vary across weeks and never repeat back to back', () => {
     const pool = outlines.slice(0, 50).map((o: any) => o.id);
     const picks: string[] = []; for (let w = 0; w < 52; w++) picks.push(songOfWeek(pool, new Date(Date.UTC(2026, 0, 6 + 7 * w, 18)))!);
@@ -91,7 +100,7 @@ describe('practice queue', () => {
   });
   it('old 15/30 routine choices map to 10/20', () => { expect(normRoutine(15)).toBe(10); expect(normRoutine(30)).toBe(20); expect(normRoutine('free')).toBe('free'); });
   it('session length runs from start to last activity', () => {
-    const r = sessionRow({ id: 's1', startedAt: 0, lastActive: 900_000, routine: 15, items: [], idx: 0, itemStart: 0, done: [], attempts: 3, passes: 1 }, '2026-11-21');
+    const r = sessionRow({ id: 's1', startedAt: 0, lastActive: 900_000, routine: 10, items: [], idx: 0, itemStart: 0, done: [], attempts: 3, passes: 1 }, '2026-11-21');
     expect(r.total_s).toBe(900);
   });
 });

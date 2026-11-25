@@ -27,6 +27,9 @@ def check_chord(cid, root, quality, frets, bass=None):
     required = {PC[root] % 12} | {(PC[root] + s) % 12 for s in FORMULAS[quality][1:2]}  # root + 3rd/sus
     if quality in ('7', 'maj7', 'm7', 'm7b5', '7sus4'):
         required.add((PC[root] + FORMULAS[quality][3]) % 12)
+    # the note that names the chord: the 9th of an add9, the b5 of an m7b5
+    if quality in ('add9', 'm7b5'):
+        required.add((PC[root] + {'add9': 2, 'm7b5': 6}[quality]) % 12)
     if not required <= got:
         errors.append(f"{cid}: missing {[NOTES[p] for p in required - got]}")
     low = next(OPEN[i] + f for i, f in enumerate(frets) if f >= 0) % 12
@@ -146,7 +149,7 @@ for lo, hi, d in OCTAVES:
 SCALE_FORMULAS = {'minor_pentatonic': [0,3,5,7,10], 'major_pentatonic': [0,2,4,7,9],
                   'blues': [0,3,5,6,7,10], 'major': [0,2,4,5,7,9,11]}
 SCALES = []
-def scale(sid, name, root, kind, position, frets_by_string, root_string_fret=None):
+def scale(sid, name, root, kind, position, frets_by_string):
     exp = {(PC[root] + s) % 12 for s in SCALE_FORMULAS[kind]}
     got = set()
     for i, fl in enumerate(frets_by_string):
@@ -271,8 +274,6 @@ for shape, (root, q) in zip([[7,8,7],[7,7,5],[9,8,7],[9,8,8]], [('G','major'),('
 gmaj = {(PC['G']+s)%12 for s in SCALE_FORMULAS['major']}
 for f in [5,7,9,10,12,14,16,17]:
     if (OPEN[2]+f) % 12 not in gmaj: errors.append(f"octave ex fret {f} not in G major")
-for s, f in [(4,5),(5,5),(4,2),(5,3)]:
-    pass
 if [NOTES[(OPEN[6-s]+f)%12] for s, f in [(4,5),(5,5),(4,2),(5,3)]] != ['G','D','E','C']:
     errors.append('root pulse roots wrong')
 # pitch exercises: the notes the grader expects must be the music the lesson teaches
@@ -489,7 +490,7 @@ TRACKS = [
     dict(id='EL', name='Electric Worship Lead', instrument='electric', order=3, requires=['F']),
     dict(id='T', name='Theory & Ear', instrument='both', order=4),
 ]
-def L(id, title, prereqs, pass_, assets=None, instrument=None):
+def L(id, title, prereqs, pass_, assets=None):
     track = id.split('.')[0]
     d = dict(id=id, track=track, title=title, prereqs=prereqs, pass_criteria=pass_,
              assets=assets or {}, content=f'content/{id}.md', review_days=[1,3,7,14,30])
@@ -534,7 +535,7 @@ LESSONS = [
     L('EL.06','Double stops: 3rds & 6ths',['EL.04'],P('pitch',note_accuracy=0.9),{'exercises':['EX_sixths_G_major']}),
     L('EL.07','Hymn melody as a lead line',['EL.04'],P('pitch',note_accuracy=0.9,bpm=80,any_octave=True),{'songs':['SONG_amazing_grace'],'exercises':['EX_amazing_grace_lines12']}),
     L('EL.08','Lead lines with dotted-eighth delay',['EL.07','ER.03'],P('timing',bpm=100,subdivision=8,max_err_ms=30,bars=8)),
-    L('EL.09','Major scale + chord-tone targeting',['EL.02','T.02'],P('quiz',score=0.9),{'scales':['G_major_pos2']}),
+    L('EL.09','Major scale + chord-tone targeting',['EL.02','T.02'],P('quiz',score=0.9),{'scales':['G_major_pos2'],'quizzes':['Q_diatonic']}),
     L('EL.10','Writing intro & tag hooks',['EL.07'],P('self_check')),
     L('EL.11','Ambient lead: harmonics & swells',['ER.07','EL.05'],P('pitch',note_accuracy=0.9),{'exercises':['EX_harmonics_swells']}),
     L('T.01','Intervals & the fretboard',['F.07'],P('quiz',score=0.9),{'quizzes':['Q_intervals']}),
@@ -702,6 +703,10 @@ for l in LESSONS:
         t = EX_BY_ID.get(x, {}).get('tempo')
         if t and (t['target'] != pc['bpm'] or t['start'] != round(0.65 * pc['bpm'])):
             errors.append(f"{l['id']}: exercise {x} tempo {t['start']}->{t['target']} should be {round(0.65 * pc['bpm'])}->{pc['bpm']} (the lesson's tempo ladder)")
+# A quiz lesson is graded by the quizzes in its assets, so it needs at least one.
+for l in LESSONS:
+    if l['pass_criteria']['type'] == 'quiz' and not l['assets'].get('quizzes'):
+        errors.append(f"{l['id']}: a quiz lesson needs a quiz asset")
 # Every pitch lesson needs something to verify against (the grader never guesses): all six strings,
 # or an exercise with notes. Cents lessons hold notes (bends); timed ones (bpm) need an exercise tempo.
 for l in LESSONS:
@@ -720,8 +725,6 @@ for l in LESSONS:
 for e in EXERCISES:
     for pair in e.get('pairs', []):
         if len(pair) != 2: errors.append(f"{e['id']}: a pair needs two chords")
-        for c in pair:
-            if resolve(c) is None: errors.append(f"{e['id']}: unknown chord {c}")
     # every chord the grader verifies against has a resolved voicing
     if e['type'] in ('chord_changes', 'chord_progression'):
         refs = [r for p in e.get('pairs', []) for r in p] + [r for v in e.get('variants', []) for r in v['chords']] + list(e.get('decoys', []))

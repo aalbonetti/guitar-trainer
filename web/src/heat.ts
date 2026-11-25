@@ -50,13 +50,16 @@ export function noteSpot(p: Pos, ok: boolean, ms = 0) {
 export async function flushHeat() {
   if (!pending.size) return;
   const items = [...pending.entries()]; pending.clear();
-  for (const [k, x] of items) {
-    try {
-      const row = (await db.get<HeatRow>('quiz_item_stats', [HEAT_ID, k])) || { quiz_id: HEAT_ID, item_key: k, seen: 0, correct: 0, ms_sum: 0 };
-      await db.put('quiz_item_stats', { ...row, seen: row.seen + x.seen, correct: row.correct + x.correct, ms_sum: (row.ms_sum || 0) + x.ms, last_seen_at: Date.now() });
-    } catch { /* storage unavailable */ }
-  }
+  try {
+    await db.transact(['quiz_item_stats'], async t => {
+      const s = t.objectStore('quiz_item_stats');
+      for (const [k, x] of items) {
+        const row = (await db.request<HeatRow | undefined>(s.get([HEAT_ID, k]))) || { quiz_id: HEAT_ID, item_key: k, seen: 0, correct: 0, ms_sum: 0 };
+        s.put({ ...row, seen: row.seen + x.seen, correct: row.correct + x.correct, ms_sum: (row.ms_sum || 0) + x.ms, last_seen_at: Date.now() });
+      }
+    });
+  } catch { /* storage unavailable */ }
 }
 export async function loadHeat(): Promise<Record<string, HeatCell>> {
-  try { return heatCells(await db.getAll<HeatRow>('quiz_item_stats')); } catch { return {}; }
+  try { return heatCells(await db.getByFirstKey<HeatRow>('quiz_item_stats', HEAT_ID)); } catch { return {}; }
 }

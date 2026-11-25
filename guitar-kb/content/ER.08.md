@@ -16,7 +16,7 @@ Great worship electric parts come from planning **what** to play in **each secti
 Clean with long reverb for verses; edge of breakup with delay for pre-choruses; light overdrive in choruses; more drive for the bridge peak. Set up presets (on the Kemper, a rig per section or a performance) so changes are one tap.
 
 ### Practice
-1. Pick a song from this month. Write its sections down.
+1. Pick any song in Songs. Write its sections down.
 2. Assign one part from ER.01–ER.07 to each section.
 3. Play through with the click, changing parts **exactly** at the section change.
 

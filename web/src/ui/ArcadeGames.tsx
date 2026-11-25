@@ -3,12 +3,12 @@
 // shared frame in Arcade.tsx lays them out for the cover screen, the inner screen and tabletop.
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Catalog, Game, GameLevel } from '../catalog';
-import { pick, positionsOf, pcAt, noteLabel, pretty, callNumberQ, capoQ, hearQ, delayQ, DELAY_NOTES, zoneMidis, zoneRange, midiAt, octaveQ, type Pos, type ChoiceQ, type DelayQ, type Rng, type OctaveQ } from '../games/core';
+import { pick, positionsOf, pcAt, noteLabel, pretty, callNumberQ, songCallsOf, songCallQ, type SongCalls, capoQ, hearQ, delayQ, DELAY_NOTES, zoneMidis, zoneRange, midiAt, octaveQ, type Pos, type ChoiceQ, type DelayQ, type Rng, type OctaveQ } from '../games/core';
 import { midiName } from '../grading/pitch';
 import { playChords } from '../audio/engine';
 import { getSetList } from '../setlist';
 import { songPool } from '../practice';
-import { Fretboard, zoneOf, posText, useEars, useHeard, Hearing, askNow, type Round } from './GameKit';
+import { Fretboard, zoneOf, posText, useEars, useHeard, useTick, Hearing, askNow, type Round } from './GameKit';
 import type { Heard } from '../games/judge';
 import { noteSpot } from '../heat';
 
@@ -18,7 +18,6 @@ const focusPc = (r: Rng, focus: Pos[], pcs: number[]): number | null => { const 
 /** Play mode is slower than tapping (find it on the neck, then the app hears it), so its speed-bonus windows are wider. */
 const WINDOWS = { note_drop: { tap: [900, 0], play: [1500, 0] }, fret_finder: { tap: [1200, 5000], play: [2000, 7000] }, octave_jump: { tap: [1200, 5000], play: [2000, 8000] } } as const;
 const fmtPlaces = (ps: Pos[]) => ps.map(posText).join(' or ');
-const useTick = (on: boolean, ms: number) => { const [, set] = useState(0); useEffect(() => { if (!on) return; const t = setInterval(() => set(x => x + 1), ms); return () => clearInterval(t); }, [on]); };
 
 // ---------- Note Drop ----------
 // Play mode: a note name falls; play that note somewhere in the highlighted zone. Any octave the zone holds is
@@ -173,24 +172,26 @@ export function OctaveJump({ l, round, r }: { l: GameLevel; round: Round; r: Rng
 }
 
 // ---------- choice games: Call the Number, Capo Quick, Hear the Change ----------
-export function songCalls(cat: Catalog, r: Rng): { prompts: { num: string; chord: string }[]; title: string; key: string; choices: string[] } {
-  const pool = songPool({ cat, setlist: getSetList() }).ids;
-  const o = cat.outlineById[pick(r, pool)];
-  const prompts = o.sections.flatMap(s => s.chords_in_chart_key.map((c, i) => ({ num: s.numbers[i], chord: c })));
-  return { prompts, title: o.title, key: o.chart_key, choices: [...new Set(prompts.map(p => p.chord))].slice(0, 9) };
+/** Call the Number's questions (tap and play). Songs mode walks the chart of a random song from the weekly pool,
+ *  then picks another; `tally` counts calls per key for the All Twelve badge. */
+export function useCallNumber(cat: Catalog, p: Record<string, any>, r: Rng, round: Round) {
+  const song = useRef<SongCalls | null>(null), idx = useRef(0);
+  const gen = (prev?: ChoiceQ): ChoiceQ => {
+    if (!p.songs) return callNumberQ(r, p.keys, p.numbers, prev);
+    if (!song.current || idx.current >= song.current.prompts.length) { song.current = songCallsOf(cat.outlineById[pick(r, songPool({ cat, setlist: getSetList() }).ids)]); idx.current = 0; }
+    return songCallQ(song.current, idx.current++);
+  };
+  /** One call in `key`: counted, and counted right when `ok`. `again` only turns a counted miss into a right one. */
+  const tally = (key: string, ok: boolean, again = false) => { const t = (round.extra.current.keys ||= {}) as Record<string, [number, number]>; t[key] = [(t[key]?.[0] || 0) + (ok ? 1 : 0), (t[key]?.[1] || 0) + (again ? 0 : 1)]; };
+  return { gen, tally };
 }
 export function ChoiceGame({ cat, g, l, round, r }: { cat: Catalog; g: Game; l: GameLevel; round: Round; r: Rng }) {
   const p = l.params;
-  const song = useRef<ReturnType<typeof songCalls> | null>(null), idx = useRef(0);
+  const calls = useCallNumber(cat, p, r, round);
   const gen = (prev?: ChoiceQ): ChoiceQ => {
     if (g.id === 'G_capo_quick') return capoQ(r, p.ask, p.keys, p.shapes);
     if (g.id === 'G_hear_the_change') return hearQ(r, p.numbers);
-    if (p.songs) {
-      if (!song.current || idx.current >= song.current.prompts.length) { song.current = songCalls(cat, r); idx.current = 0; }
-      const s = song.current, c = s.prompts[idx.current++];
-      return { prompt: c.num, sub: `${s.title} · key of ${pretty(s.key)}`, choices: s.choices, answer: c.chord, key: s.key, miss: `${c.num} in ${s.key} (${s.title}) is ${c.chord}` };
-    }
-    return callNumberQ(r, p.keys, p.numbers, prev);
+    return calls.gen(prev);
   };
   const [q, setQ] = useState<ChoiceQ>(() => gen());
   const [picked, setPicked] = useState<string | null>(null);
@@ -198,7 +199,7 @@ export function ChoiceGame({ cat, g, l, round, r }: { cat: Catalog; g: Game; l: 
   const choose = (c: string) => {
     if (picked || round.paused) return;
     const ok = c === q.answer; setPicked(c);
-    if (g.id === 'G_call_the_number' && q.key) { const t = (round.extra.current.keys ||= {}) as Record<string, [number, number]>; t[q.key] = [(t[q.key]?.[0] || 0) + (ok ? 1 : 0), (t[q.key]?.[1] || 0) + 1]; }
+    if (g.id === 'G_call_the_number' && q.key) calls.tally(q.key, ok);
     round.answer(ok, ok ? undefined : q.miss, g.id === 'G_hear_the_change' ? 2200 : 1200, g.id === 'G_hear_the_change' ? 7000 : 5000);
     setTimeout(() => { setPicked(null); setQ(gen(q)); round.askedAt.current = round.now(); }, ok ? 220 : 900);
   };

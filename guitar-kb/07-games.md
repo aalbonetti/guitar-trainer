@@ -5,7 +5,7 @@ A **game** section that turns the curriculum's skills into short replayable roun
 **What makes it ours:**
 1. **Play mode.** Games can be answered on the real guitar, with the app listening (pitch and chord verification from `06-app-spec.md` §6), not just by tapping the screen.
 2. **Worship-specific games.** Nashville numbers, capo math, dotted-eighth delay, and progressions taken from your church's actual set list.
-3. **Connected to the curriculum.** Games unlock with lessons, count toward reviews, and feed the weak-spot data back into Today's queue.
+3. **Connected to the curriculum.** Games point to the lesson that teaches each skill (they never lock on it), count toward reviews, and feed weak-spot data into the Daily Challenge (shown on Today and the Arcade home).
 
 ## 1. Input modes
 | Mode | How you answer | Available |
@@ -14,6 +14,8 @@ A **game** section that turns the curriculum's skills into short replayable roun
 | **Play** | Play the note or chord; the app hears it | Single notes from M7 (pitch grader). Chords from M8 (chord verifier), with `assisted` fallback |
 
 Each game remembers the mode you last used. Play-mode scores are kept apart from tap scores, because they're different skills.
+
+**The mic comes first:** in play mode the round and question clocks stay still until the mic is open (at the start and after a resume). If it can't be opened, the round stops with a message (Try again / Quit): no run is saved and the wait records no misses. (A mic that drops out after it opened isn't detected.)
 
 **Play mode rules (G2, 2026-11-22; proposed, to confirm):**
 - The app checks each played note against the answer it expects (exact octave), never open-ended. A note is a wrong answer only when it was clearly picked; a scrape, or the last note still ringing, never costs a life.
@@ -40,18 +42,20 @@ Every game's **first level is open from the start**; each next level opens with 
 |---|---|---|---|
 | `G_note_drop` | **Note Drop** | Note names fall toward the fretboard. Play or tap the note in the highlighted zone before it lands. Speed rises every 10 notes; 3 misses end the round | Note names · F.07 |
 | `G_fret_finder` | **Fret Finder** | One note name, 20 seconds: find **every** place it appears in the zone | Fretboard map · T.01 |
-| `G_call_the_number` | **Call the Number** | A key is set. A "band leader" calls numbers ("4", "6m", "5/7") at the click tempo, and you play or tap the chord in that key. Songs mode uses real progressions from `song_outlines` (the weekly pool) | Nashville numbers · T.03 |
-| `G_hear_the_change` | **Hear the Change** | The app plays 1 and then another chord (synthesized, §9 of the spec), and you name the number. Starts with 1/4/5/6m, then adds 2m, 3m and slash chords | Ear: I–IV–V–vi · T.06 (T.05 for the major/minor-only level) |
+| `G_call_the_number` | **Call the Number** | A key is set. A "band leader" calls numbers ("4", "6m") at your pace for the length of the round (no click), and you play or tap the chord in that key. Songs mode walks the chart of a random song (the set list saved on the phone, else the weekly pool), numbers as the chart writes them ("5/7" included); every chord of that song is offered, so the answer is always among the choices. Calls on the click are not built (Song Run is the click-timed game) | Nashville numbers · T.03 |
+| `G_hear_the_change` | **Hear the Change** | The app plays 1 and then another chord (synthesized, §9 of the spec), and you name the number. Levels: major or minor, then 1/4/5/6m, then adds 2m and 3m. Slash chords: not built | Ear: I–IV–V–vi · T.06 (T.05 for the major/minor-only level) |
 | `G_capo_quick` | **Capo Quick** | "Song in Bb. You want G shapes. Capo?" and the reverse: "Capo 3, playing C shapes. Real key?" | Capo math · T.04 |
 | `G_triad_hunt` | **Triad Hunt** | A chord name and a string set (3-2-1 or 4-3-2): tap or play the triad in a set fret window, any inversion | Triads · ER.04 (4-3-2 level: ER.05) |
 | `G_octave_jump` | **Octave Jump** | A note on string 6 or 5: play its octave with the right shape, against the clock | Octaves · EL.04 |
 | `G_box_runner` | **Box Runner** | The pentatonic box is shown; play the path (up, down, or a 3-note sequence) in time with the click. Graded by timing + pitch | Pentatonic · EL.01 (minor/positions: EL.02) |
 | `G_in_the_pocket` | **In the Pocket** | Strum or chug to the click; a meter shows how far ahead of or behind the beat you are. **Gap Click** level: the click drops out for 1, 2 and then 4 bars, and you have to land on beat when it returns | Timing · A.05 (16ths level: ER.10) |
-| `G_delay_math` | **Delay Math** | A BPM is shown: tap the dotted-eighth delay time in ms (within ±10 ms), or tap the delay "ghost" note in time | Delay time · T.07 |
+| `G_delay_math` | **Delay Math** | A BPM is shown: type the delay time in ms on the keypad (dotted eighth; the last level mixes quarter and eighth), within ±10 ms. Tapping the delay "ghost" note in time: not built | Delay time · T.07 |
 | `G_change_sprint` | **Change Sprint** | 60 seconds of chord changes from a pair or family. Race your own ghost (best run so far) | Chord changes · A.01 |
 | `G_song_run` | **Song Run** | **The boss level for each song.** A set-list song's sections scroll at chart BPM in your chosen key and capo, and you play each chord on its bar. Scored per bar. A 3-star Song Run on every song in the church list earns **Set Ready** | Song practice · every song open; its `practice_for` lessons are pointers (G3, proposed; was: unlocks when they're available) |
 
-**Levels inside each game** come from parameters, not new code: fretboard zone (strings 6–5, frets 0–5 → whole neck), speed, key set (G/D/C/E/A → all 12), number vocabulary, and tap vs play.
+**Levels inside each game** come from parameters, not new code: fretboard zone (strings 6–5, frets 0–5 → whole neck), speed, key set (G/D/C/E/A → all 12), number vocabulary, string sets, box positions and tempo. Tap or play is a toggle, not a level.
+
+**Finishing a round:** a timed round finishes when its time is up; Note Drop finishes once you have 20 right (it runs on until the third miss); click-timed rounds and Change Sprint finish when played to the end.
 
 ## 3. Scoring
 - **Points per correct answer** = 100 × speed bonus (1.0–2.0, by response time) × combo.
@@ -68,17 +72,17 @@ Every game's **first level is open from the start**; each next level opens with 
   - Review passed +20.
   - Daily Challenge finished +30.
   - New personal best +10.
-- **Player level:** level *n* needs 100 + 25·(n−1) XP to reach the next one. Levels are cosmetic: they unlock fretboard themes and click sounds, never lessons. The curriculum decides what unlocks.
+- **Player level:** level *n* needs 100 + 25·(n−1) XP to reach the next one. Levels are cosmetic and never unlock lessons; the curriculum decides that. Fretboard themes and click sounds as level rewards: not built.
 - **Streak:** any day with ≥ 5 minutes of practice, games included.
   - **Sunday counts:** a "Played a service today" button keeps the streak on days you play at church without opening the app.
   - One **streak freeze** is earned per 7-day streak, holding at most 2.
-  - *How it's counted (G2):* practice minutes come from an activity clock (app on screen and touched in the last minute, or the click, tuner or mic running; with the screen off, the time the click actually played or the mic actually listened is added when the app is seen again). A day counts as practiced only when it meets the rule, so opening the app isn't a practice day. Days logged before the clock existed still count. A freeze covers a missed day automatically; the frozen day doesn't add to the streak. Everything is recomputed from the day rows, so there's no streak row to drift.
+  - *How it's counted (G2):* practice minutes come from an activity clock (app on screen and touched in the last minute, or the click, tuner or mic running; with the screen off, the time the click actually played or the mic actually listened is added when the app is seen again). A day counts as practiced only when it meets the rule, so opening the app isn't a practice day. Days logged before the clock existed still count. A freeze covers a missed day automatically; the frozen day doesn't add to the streak. There is no streak store: everything is recomputed from the `practice_day` and `service_day` rows, so there's nothing to drift.
 - **Daily Challenge:** a 10-minute mix built from your weak spots: misses in `quiz_item_stats`, your slowest chord changes, and lessons whose reviews are due. It's the same every time it's opened that day.
   - *How it's built (G3, proposed):* up to 4 rounds adding up to 10 minutes, in this order: (1) fretboard hard spots (heatmap + note-name quiz misses) → Note Drop, else Fret Finder, on an open level whose zone holds them, with those notes asked about half the time; (2) quiz misses → the game whose level reviews that lesson; (3) the slowest chord changes (best rate ÷ goal, from one-minute lesson attempts and Change Sprint) → the Change Sprint level with those chords; (4) reviews due → a game round for quiz lessons (★★ counts), else the lesson; (5) open levels below ★★★, fewest stars first. Song Run is never in the mix. An item is done when a round of that level (or an attempt at that lesson) is finished after the challenge was made. Stored in `daily_challenge` the first time it's opened that day.
 - **Fretboard heatmap** (Progress screen): your own accuracy and speed for each string and fret, from Note Drop and Fret Finder. Hard spots get weighted into the Daily Challenge.
   - *Data (G3):* every Note Drop / Fret Finder answer (tap and play) at a position, in `quiz_item_stats` under `quiz_id = 'arcade:fretboard'`, `item_key = 's5f7'`, plus `ms_sum` (time to right answers). A wrong tap counts against the tapped spot; a note that wasn't found counts against its spots. Hard spot = seen ≥ 3 times and under 75 % right, or right but slower than 1.5× your median time.
 
-**Connection to reviews:** for `quiz` lessons only, a ★★ or better round of the matching game counts as that lesson's due review (Fret Finder → T.01, Capo Quick → T.04, Hear the Change → T.05/T.06, Delay Math → T.07). Note Drop on the strings-6-and-5 zone counts for F.07, and Call the Number counts for T.03. Games never count as the *initial* pass of a lesson; the lesson's own pass rules (§5 of the spec) decide that.
+**Connection to reviews:** for `quiz` lessons only, and only when the review is due, a ★★ or better round of a level that lists the lesson in `review_for` counts as that review (Fret Finder → T.01, Capo Quick → T.04, Hear the Change → T.05/T.06, Delay Math → T.07). Note Drop on the strings-6-and-5 zone counts for F.07, and Call the Number counts for T.03. Games never count as the *initial* pass of a lesson; the lesson's own pass rules (§5 of the spec) decide that.
 
 ## 5. Badges (examples)
 | Badge | Earned by |
@@ -94,11 +98,12 @@ Every game's **first level is open from the start**; each next level opens with 
 *G3 (proposed):* badges are catalog data (`badges.json`, checked by `build_catalog.py`) and are never taken away. All Twelve: a key counts once a ★★-or-better round had ≥ 3 calls in it with ≥ 85 % right. Five Boxes: a ★★ Box Runner round in each position number 1–5 (major or minor box; level `br6` adds minor boxes 3 and 4). In the Pocket: the last 5 Gap Click (pk3) rounds in a row landed within 20 ms after the 4-bar gap. Set Ready: the church list is the set list saved on the phone (songs with outlines), else the song library (as for the song of the week). Faithful: longest streak ≥ 30.
 
 ## 6. Screens
-- **Arcade home:** game tiles (locked tiles show the lesson that unlocks them), Daily Challenge banner, streak, level/XP bar.
-- **Game screen:** shared frame with score, combo, ghost bar, timer, mode toggle and pause. The fretboard sits on the bottom half.
+- **Arcade home:** level/XP bar, streak, Daily Challenge banner, a tile per game, badges. Tiles are never locked: a tile shows "Taught in …" until that lesson is passed once or started, and a locked level says which level needs ★★. Song Run lists every song (church songs first, with Set Ready progress).
+- **Game screen:** the mode toggle is on the ready and results cards; during a round the shared frame shows score, combo, ghost bar, timer / lives / count and pause. Folded, the target is on top and the fretboard or answer pad below.
   - Unfolded: the game board on the left, with the target, combo and live pitch/chord read-out on the right.
   - Tabletop: board on top, answer pad on the bottom.
-- **Results:** stars, score versus best, XP gained, misses to review ("you missed G on string 5, fret 10 twice"), and Replay / Next level.
+- **Results:** stars, score versus best, XP gained, misses to review (each named, with a count when repeated), and Replay / Next level.
+- **Bluetooth:** output that looks like Bluetooth blocks click-timed rounds; it is checked on opening the game and again on every Start, Replay and Restart (In the Pocket's calibration too).
 - The tuner and metronome sheets (spec §3b) are available from the pause menu. The game owns the click while a round is running.
 
 ## 7. Data
@@ -107,6 +112,7 @@ Every game's **first level is open from the start**; each next level opens with 
 {id, name, unlock_lesson, review_for[] (lesson ids), modes[] (tap|play),
  levels[] {id, name, unlock_lesson?, params{zone{strings[],frets[]}?, keys[]?, numbers[]?,
                                             bpm?, speed?, gap_bars?, string_sets[]?, positions[]?,
+                                            G1: songs? (Call the Number), ask/shapes (Capo Quick), notes (Delay Math),
                                             G2: show_fret? (Octave Jump), scale/path/sub/passes (Box Runner),
                                             pattern/window_ms/click_bars (In the Pocket; bars is generated),
                                             G3: string_sets/qualities/window (Triad Hunt), cycle/target_per_min/voicings (Change Sprint;
@@ -120,13 +126,15 @@ The build checks that every `unlock_lesson` and `review_for` ID exists in `lesso
 | Table | Columns |
 |---|---|
 | `game_run` | `id PK, session_id FK, game_id, level_id, mode (tap\|play), score, accuracy, max_combo, max_streak? (G3), stars, duration_s, misses_json, extra_json? (G3: keys called, box position, Gap Click landings, Change Sprint rate, Song Run key/capo), grader_mode? (G3 chord games), counted_review_for?, at` |
-| `game_best` | PK `(game_id, level_id, mode)`, `best_score, best_stars, ghost_json, at` |
+| `game_best` | `key PK` (`game_id\|level_id\|mode`), `game_id, level_id, mode, best_score, best_stars, ghost` (`[[second, score], …]` of the best-score run), `at` |
 | `xp_ledger` | `id PK, at, source (game\|lesson_pass\|review\|daily\|pb), ref_id, xp` |
-| `streak` | `id=1, current, longest, last_day, freezes` + `service_day(day PK)` for "Played a service" |
+| `service_day` | `day PK` ("Played a service today"); the streak is computed from this and `practice_day`, with no streak table |
 | `badge` | `badge_id PK, earned_at` |
 | `daily_challenge` | `day PK, items_json, created_at, completed_at?` |
 
 ## 8. Build order
+G1–G3 are built (first cut; the phone checks are still to do). Items marked "not built" above are open ideas.
+
 | # | Milestone | Done when |
 |---|---|---|
 | G1 | After M5: Arcade home, shared game frame, scoring/XP/streak, **tap mode** for Note Drop, Fret Finder, Capo Quick, Delay Math, Hear the Change, Call the Number | Six games playable by tapping; XP and streak update |

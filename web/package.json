@@ -7,7 +7,9 @@
     "catalog": "node scripts/copy-catalog.mjs",
     "dev": "npm run catalog && vite",
     "build": "npm run catalog && tsc --noEmit && vite build && node scripts/postbuild.mjs",
-    "test": "npm run catalog && vitest run"
+    "test": "npm run catalog && vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json",
+    "test:e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
     "preact": "^11.2.0"
@@ -15,6 +17,7 @@
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",
     "@tombatossals/chords-db": "^0.5.1",
+    "@types/node": "^22.20.7",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
     "vitest": "^5.1.1"

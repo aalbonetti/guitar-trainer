@@ -19,7 +19,7 @@ The hand still moves down-up on every eighth note. On the "&" of 1 and on beat 3
 > The missed strum on beat 3 is what makes it feel like it "skips". If it sounds stiff, you're probably stopping your hand there instead of swinging past the strings.
 
 ### Goal
-8 bars at 90 BPM, steady.
+8 bars of the pattern in eighth notes at 90 BPM, average error ≤ 40 ms.
 
 ### Songs to try it on
 {{outline:MS_goodness_of_god}}

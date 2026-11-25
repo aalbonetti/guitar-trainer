@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import { OnsetDetector } from '../src/dsp/dsp.js';
 import { PitchTracker, segmentNotes, trackerRange, type PitchFrame } from '../src/grading/pitch';
 import {
-  pointsWith, points, timingBonus, scoreRun, comboMult, octaveQ, octaveShape, midiAt, zoneMidis, rng, boxFrets, boxNotes, boxPath, boxWindowS,
+  pointsWith, points, timingBonus, scoreRun, scoreStep, newTally, comboMult, octaveQ, octaveShape, midiAt, zoneMidis, rng, boxFrets, boxNotes, boxPath, boxWindowS,
   pocketLayout, pocketVerdicts, stars, xpForScore, XP, type Pos, type Verdict,
 } from '../src/games/core';
 import { judgeAnswer, gradeTimedNote } from '../src/games/judge';
@@ -64,6 +64,22 @@ describe('scoring (07 §3)', () => {
     expect(r.score).toBe(1100); expect(r.correct).toBe(10); expect(r.total).toBe(11); expect(r.misses).toEqual(['x']); expect(r.streak).toBe(1);
     expect(scoreRun(ok(8), 50).score).toBe(400);
     expect(comboMult(scoreRun(ok(16)).streak)).toBe(3);
+  });
+  it('scoreStep (the live HUD step): combo, reset on a miss, best streak kept, extra fields carried', () => {
+    let s = { ...newTally(), lives: 3 };
+    for (let i = 0; i < 9; i++) s = scoreStep(s, true, k => pointsWith(1, k));
+    expect(s).toMatchObject({ score: 1000, correct: 9, total: 9, streak: 9, maxCombo: 2, bestStreak: 9, lives: 3 });
+    const before = s;
+    s = scoreStep(s, false, () => 999, 'late');
+    expect(s).toMatchObject({ score: 1000, correct: 9, total: 10, streak: 0, maxCombo: 2, bestStreak: 9, misses: ['late'] });
+    expect(scoreStep(s, false, () => 0).misses).toEqual(['late']);       // a miss without a label isn't listed
+    // assisted override: the same answer scored as right from the state before it
+    expect(scoreStep(before, true, k => pointsWith(1, k))).toMatchObject({ score: 1200, correct: 10, total: 10, streak: 10, misses: [] });
+    expect(scoreStep(s, true, k => pointsWith(1, k)).score).toBe(1100);  // back to ×1 after the miss
+  });
+  it('scoreRun is scoreStep applied in order', () => {
+    const vs: Verdict[] = Array.from({ length: 40 }, (_, i) => ({ ok: i % 11 !== 10, bonus: 1 + (i % 3) / 2, miss: `m${i}` }));
+    expect(scoreRun(vs, 50)).toEqual(vs.reduce((s, v) => scoreStep(s, v.ok, k => pointsWith(v.bonus, k, 50), v.miss), newTally()));
   });
   it('stars: ★ finish, ★★ 85%, ★★★ 95% + target', () => {
     expect(stars(true, 0.85, 0, 1)).toBe(2); expect(stars(true, 0.84, 9e9, 1)).toBe(1); expect(stars(true, 0.95, 100, 100)).toBe(3); expect(stars(true, 0.95, 99, 100)).toBe(2); expect(stars(false, 1, 9e9, 1)).toBe(0);

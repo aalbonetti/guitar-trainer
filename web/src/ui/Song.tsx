@@ -7,7 +7,7 @@ import { ChordDiagram } from './Diagrams';
 import { ToolBar } from './Tools';
 import { persisted, useStore } from '../store';
 import { progress } from '../progressStore';
-import { noteSongOpened } from '../practice';
+import { touch } from '../practice';
 import { knownChords, bestCapo, fitLine, type Fit } from '../songfit';
 import { metro, startMetronome, stopMetronome } from '../audio/engine';
 
@@ -26,7 +26,7 @@ export function songSettings(cat: Catalog, o: Outline, lp: Parameters<typeof kno
 export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
   const pr = useStore(progress);
   const [, bump] = useState(0);
-  useEffect(() => { noteSongOpened(o.id); }, [o.id]);
+  useEffect(() => { touch(); }, [o.id]); // opening a song keeps the practice session open
   const [nash, setNash] = useState(false);
   const st = songSettings(cat, o, pr.lp);
   const { key, capo } = st;

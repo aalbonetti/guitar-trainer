@@ -9,20 +9,18 @@ import { boxSetup, pocketSetup, type PocketSetup } from '../games/rounds';
 import { gradeTimedNote, type NoteVerdict } from '../games/judge';
 import { openEars, closeEars, startTimed, heardSince, onsetsSince, now, ears, simAuto, publishPlan } from '../games/listen';
 import { buildNotePlan, midiName, type NotePlan } from '../grading/pitch';
-import { audioContext } from '../audio/engine';
 import { useStore } from '../store';
-import { Fretboard, posText, Hearing, type Round } from './GameKit';
+import { Fretboard, posText, Hearing, lagS, shortBars, type Round } from './GameKit';
 import { Beats } from './Timing';
 import { StrumGrid } from './Diagrams';
 
 type Phase = 'opening' | 'countin' | 'playing' | 'done' | 'stopped' | 'error';
-const lagS = () => { const c = audioContext(); return c.outputLatency || c.baseLatency || 0; };
 const PHASE_TEXT: Record<Phase, string> = { opening: 'Opening the mic…', countin: 'Count-in: one bar, then play', playing: 'Play!', done: 'Round over', stopped: 'Stopped. Restart the round from the menu.', error: 'The microphone could not be opened.' };
 
 // ---------- Box Runner ----------
 export function BoxRunner({ cat, l, round, r }: { cat: Catalog; l: GameLevel; round: Round; r: Rng }) {
   const p = l.params;
-  const S = useMemo(() => boxSetup(cat, p, r), []);
+  const S = useMemo(() => boxSetup(cat, p, r, shortBars()), []);
   useEffect(() => { round.extra.current = { pos: S.pos, key: S.key, scale: p.scale }; }, []); // Five Boxes badge
   const ear = useStore(ears);
   const [phase, setPhase] = useState<Phase>('opening');
@@ -105,7 +103,7 @@ export function InThePocket({ cat, l, round }: { cat: Catalog; l: GameLevel; rou
     const g = sig.current;
     void (async () => {
       if (!(await openEars([40, 64]))) { if (!g.cancelled) setPhase('error'); return; }
-      const S = pocketSetup(cat, p, now() + 0.6); setupRef.current = S;
+      const S = pocketSetup(cat, p, now() + 0.6, shortBars()); setupRef.current = S;
       const { plan, slots } = S, slotDur = plan.slotDur;
       publishPlan({ kind: 'pocket', slots: slots.map(s => ({ t: s.t, expected: s.expected })), clicks: plan.clicks.map(c => c.t) });
       simAuto('game-pocket', slots.filter(s => s.expected).map(s => s.t));

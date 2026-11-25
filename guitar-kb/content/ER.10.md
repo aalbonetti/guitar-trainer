@@ -20,4 +20,4 @@ A muted sixteenth strum, locked with the drummer's hi-hat and kick, drives up-te
 > Listen for the **kick drum** in recordings: the groove sits on it. With a click only, imagine a drummer playing four on the floor.
 
 ### Goal
-8 bars at 90 BPM, steady and even.
+8 bars of sixteenth notes at 90 BPM, average error ≤ 30 ms.

@@ -24,4 +24,4 @@ Eighth-note downstrokes, palm resting on the saddles:
 > Downstrokes only, all the way. It's tiring at first; keep the wrist loose and the motion small.
 
 ### Goal
-8 bars at 90 BPM, steady and tight.
+8 bars of eighth-note chug at 90 BPM, average error ≤ 40 ms.

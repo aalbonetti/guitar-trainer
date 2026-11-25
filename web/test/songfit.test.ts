@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import { simplify, knownChords, bestCapo, fitLine } from '../src/songfit';
+import type { LessonProgress } from '../src/progress';
 
 const cat = (f: string) => JSON.parse(fs.readFileSync(new URL(`../public/catalog/${f}`, import.meta.url), 'utf8'));
 const lessons = cat('lessons.json'), chords = cat('chords.json'), outlines = cat('song_outlines.json');
 const gog = outlines.find((o: { id: string }) => o.id === 'MS_goodness_of_god');
-const passed = (...ids: string[]) => Object.fromEntries(ids.map(id => [id, { lesson_id: id, state: 'passed', review_index: 0, mastered: false, updated_at: 0 }]));
+const passed = (...ids: string[]) => Object.fromEntries(ids.map(id => [id, { lesson_id: id, state: 'passed', review_index: 0, mastered: false, updated_at: 0 } as LessonProgress]));
 
 describe('song fit', () => {
   it('simplifies chords to what a beginner plays', () => {
@@ -13,7 +14,7 @@ describe('song fit', () => {
       .toEqual(['C', 'D', 'Em', 'D', 'F', 'G', 'Bm', 'C#m']);
   });
   it('collects chords from passed and passed-once lessons only', () => {
-    const lp = { ...passed('A.01'), 'A.02': { lesson_id: 'A.02', state: 'in_progress', first_pass_day: '2026-11-20', review_index: 0, mastered: false, updated_at: 0 } };
+    const lp = { ...passed('A.01'), 'A.02': { lesson_id: 'A.02', state: 'in_progress', first_pass_day: '2026-11-20', review_index: 0, mastered: false, updated_at: 0 } as LessonProgress };
     expect([...knownChords({ lessons, chords }, lp)].sort()).toEqual(['C', 'D', 'Em', 'G']);
     expect(knownChords({ lessons, chords }, {}).size).toBe(0);
   });

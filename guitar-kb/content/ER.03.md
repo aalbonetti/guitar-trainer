@@ -18,4 +18,4 @@ The go-to electric part for pre-choruses and early bridges: **eighth notes on th
 > Without the delay pedal set up, practice it dry first. The timing has to be perfect on its own.
 
 ### Goal
-16 bars at 100 BPM, the pulse locked to the click.
+16 bars of eighth notes at 100 BPM, average error ≤ 30 ms.

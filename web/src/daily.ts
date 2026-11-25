@@ -35,7 +35,7 @@ const base = (r: string) => r.split('|')[0];
 const inZone = (p: Pos, l: GameLevel) => { const z = l.params.zone; return !!z && z.strings.includes(p.string) && p.fret >= z.frets[0] && p.fret <= z.frets[1]; };
 
 /** Rough minutes for one round: its timer plus a minute to get set; lives/click rounds about 2–3. */
-export function itemMinutes(g: Game, l: GameLevel): number {
+export function itemMinutes(_g: Game, l: GameLevel): number {
   if (l.round_s) return Math.ceil(l.round_s / 60) + 1;
   if (l.lives) return 2;
   return 3;
@@ -123,10 +123,14 @@ export interface DailyRow { day: string; items_json: string; created_at: number;
 /** Today's challenge (day '' = not loaded yet). */
 export const daily = new Store<{ day: string; items: DailyItem[]; done: boolean[]; created: number; completed: number | null; justCompleted: boolean }>({ day: '', items: [], done: [], created: 0, completed: null, justCompleted: false });
 /** Load today's challenge, building and saving it on the first open of the day. */
-let loading: Promise<void> | null = null;
+let loading: { day: string; p: Promise<void> } | null = null;
 export function loadDaily(day: string, build: () => Promise<DailyItem[]>): Promise<void> {
-  if (!loading) loading = loadNow(day, build).finally(() => { loading = null; });
-  return loading;
+  if (loading?.day === day) return loading.p;
+  // a load for another day (opened just before midnight) finishes first, so it can't replace this one
+  const before = loading ? loading.p.catch(() => undefined) : Promise.resolve();
+  const p: Promise<void> = before.then(() => loadNow(day, build)).finally(() => { if (loading?.p === p) loading = null; });
+  loading = { day, p };
+  return p;
 }
 async function loadNow(day: string, build: () => Promise<DailyItem[]>) {
   let row: DailyRow | undefined;
@@ -140,21 +144,34 @@ async function loadNow(day: string, build: () => Promise<DailyItem[]>) {
   await refreshDaily();
 }
 /** Recheck which items are done; on the first time all are, mark it complete and add the XP. Calls run one at a
- *  time (the banner and the page can both ask at once), so the XP is added once. */
+ *  time (the banner and the page can both ask at once), so the XP is added once. A call queued for a challenge
+ *  that has since been replaced by another day's is dropped. */
 let chain: Promise<void> = Promise.resolve();
-export function refreshDaily(): Promise<void> { chain = chain.then(refreshNow, refreshNow); return chain; }
-async function refreshNow() {
-  const d = daily.get(); if (!d.day) return;
-  let runs: { game_id: string; level_id: string; at: number }[] = [], atts: { lesson_id: string; at: number }[] = [];
-  try { runs = await db.getAll('game_run'); atts = await db.getAll('attempt'); } catch { /* ignore */ }
-  const done = dailyDone(d.items, d.created, runs, atts);
-  let completed = d.completed, just = false;
+export function refreshDaily(): Promise<void> {
+  const day = daily.get().day, run = () => refreshNow(day);
+  chain = chain.then(run, run);
+  return chain;
+}
+/** The day whose completion and XP are both known to be saved: nothing left to check. */
+let settled = '';
+async function refreshNow(day: string) {
+  const d = daily.get(); if (!day || d.day !== day || (d.completed && settled === day)) return;
+  let row: DailyRow | undefined;
+  try { row = await db.get<DailyRow>('daily_challenge', day); } catch { /* storage unavailable */ }
+  let completed = row?.completed_at || d.completed, just = false, done = d.items.map(() => true);
+  if (!completed) { // a completed challenge needs no scan of every run and attempt
+    let runs: { game_id: string; level_id: string; at: number }[] = [], atts: { lesson_id: string; at: number }[] = [];
+    try { runs = await db.getAll('game_run'); atts = await db.getAll('attempt'); } catch { /* ignore */ }
+    done = dailyDone(d.items, d.created, runs, atts);
+  }
   try {
-    const row = await db.get<DailyRow>('daily_challenge', d.day);
-    if (row?.completed_at) completed = row.completed_at;
-    else if (row && d.items.length && done.every(Boolean)) { completed = Date.now(); just = true; await db.put('daily_challenge', { ...row, completed_at: completed }); }
+    if (!completed && row && d.items.length && done.every(Boolean)) { completed = Date.now(); just = true; await db.put('daily_challenge', { ...row, completed_at: completed }); }
     // the +30 XP goes with completion; if the app was closed between the two writes, it's added on the next check
-    if (completed && !(await db.getAll<{ source: string; ref_id: string }>('xp_ledger')).some(x => x.source === 'daily' && x.ref_id === d.day)) await addXp('daily', d.day, XP.daily);
+    if (completed) {
+      if ((await db.getAll<{ source: string; ref_id: string }>('xp_ledger')).some(x => x.source === 'daily' && x.ref_id === day)) settled = day;
+      else await addXp('daily', day, XP.daily);
+    }
   } catch { /* storage unavailable */ }
+  if (daily.get().day !== day) return;
   daily.set({ ...d, done, completed, justCompleted: just || d.justCompleted });
 }

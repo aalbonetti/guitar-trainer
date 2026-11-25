@@ -3,7 +3,7 @@ import { Store } from './store';
 import * as db from './db';
 import { applyAttempt, dayOf, type AttemptResult, type LessonProgress, type Event } from './progress';
 import type { Lesson } from './catalog';
-import { session, noteAttempt } from './practice';
+import { session, noteAttempt, expireIdle } from './practice';
 import { addXp } from './xp';
 import { XP } from './games/core';
 import { computeStreak, qualifies, type DayRow, type StreakInfo } from './streak';
@@ -27,19 +27,32 @@ export async function loadProgress() {
   } catch (e) { progress.set({ ready: true }); saveStatus.set({ state: 'error', at: Date.now(), msg: `Couldn't open saved progress (${(e as Error)?.message || 'storage unavailable'}).` }); }
 }
 
+/** Save one attempt. The stored lesson row is read and written in the same transaction as the attempt, so a
+ *  failed or unfinished load can't overwrite saved progress. If the save fails, the result is only kept on screen
+ *  (with the red banner) and earns no XP. */
 export async function recordAttempt(lesson: Lesson, r: AttemptResult): Promise<Event> {
-  const day = dayOf();
-  const prev = progress.get().lp[lesson.id];
-  const { lp, event } = applyAttempt(prev, lesson, r, day);
+  void expireIdle(); // a stale session must not claim this attempt
+  const day = dayOf(), session_id = session.get().s?.id ?? null;
+  let result: { lp: LessonProgress; event: Event }, saved = false;
   try {
-    await db.put('lesson_progress', lp);
-    await db.put('attempt', { session_id: session.get().s?.id ?? null, lesson_id: lesson.id, criterion_type: lesson.pass_criteria.type, grader_mode: r.mode, score: r.score, met_target: r.met, at_target_tempo: r.atTarget, metrics_json: JSON.stringify(r.metrics || {}), event, day, at: Date.now() });
+    result = await db.transact(['lesson_progress', 'attempt'], async t => {
+      const rows = t.objectStore('lesson_progress');
+      const out = applyAttempt(await db.request<LessonProgress | undefined>(rows.get(lesson.id)), lesson, r, day);
+      rows.put(out.lp);
+      t.objectStore('attempt').add({ session_id, lesson_id: lesson.id, criterion_type: lesson.pass_criteria.type, grader_mode: r.mode, score: r.score, met_target: r.met, at_target_tempo: r.atTarget, metrics_json: JSON.stringify(r.metrics || {}), event: out.event, day, at: Date.now() });
+      return out;
+    });
+    saved = true;
     saveStatus.set({ state: 'saved', at: Date.now(), msg: '' });
-  } catch (e) { saveStatus.set({ state: 'error', at: Date.now(), msg: `Couldn't save to this phone (${(e as Error)?.message || 'storage unavailable'}). Progress will be lost when you leave. Check that you're not in Incognito and that the phone has free space, then reload the app.` }); }
+  } catch (e) {
+    result = applyAttempt(progress.get().lp[lesson.id], lesson, r, day);
+    saveStatus.set({ state: 'error', at: Date.now(), msg: `Couldn't save to this phone (${(e as Error)?.message || 'storage unavailable'}). Progress will be lost when you leave. Check that you're not in Incognito and that the phone has free space, then reload the app.` });
+  }
+  const { lp, event } = result;
   progress.set({ lp: { ...progress.get().lp, [lesson.id]: lp } });
   noteAttempt(lesson.id, r.met);
-  if (event === 'passed') void addXp('lesson_pass', lesson.id, XP.lessonPass);
-  if (event === 'review_passed' || event === 'mastered') void addXp('review', lesson.id, XP.review);
+  if (saved && event === 'passed') void addXp('lesson_pass', lesson.id, XP.lessonPass);
+  if (saved && (event === 'review_passed' || event === 'mastered')) void addXp('review', lesson.id, XP.review);
   return event;
 }
 
@@ -71,15 +84,7 @@ export async function bumpQuizItem(quiz_id: string, item_key: string, correct: b
 }
 export async function quizWeights(quiz_id: string): Promise<Record<string, number>> {
   try {
-    const rows = (await db.getAll<{ quiz_id: string; item_key: string; seen: number; correct: number }>('quiz_item_stats')).filter(r => r.quiz_id === quiz_id);
+    const rows = await db.getByFirstKey<{ item_key: string; seen: number; correct: number }>('quiz_item_stats', quiz_id);
     return Object.fromEntries(rows.map(r => [r.item_key, Math.max(0, (r.seen - r.correct) * 2 - r.correct * 0.2)]));
   } catch { return {}; }
-}
-
-/** First day with practice on record: minutes logged, a practiced day, or a lesson attempt (the backup reminder
- *  waits 14 days from here before its first nudge). */
-export function firstPracticeDay(): string | null {
-  const pr = progress.get();
-  const ds = [...pr.days, ...Object.keys(pr.active), ...Object.values(pr.lp).flatMap(l => [l.first_pass_day, l.passed_day, l.updated_at ? dayOf(new Date(l.updated_at)) : undefined])].filter((d): d is string => !!d);
-  return ds.length ? ds.sort()[0] : null;
 }

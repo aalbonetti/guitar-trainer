@@ -1,7 +1,6 @@
 // XP ledger (07-games.md §4). Small module so lessons and games can both award XP without import cycles.
 import { Store } from './store';
 import * as db from './db';
-import { levelFor } from './games/core';
 
 export const xp = new Store<{ total: number; last: number }>({ total: 0, last: 0 });
 export async function loadXp() {
@@ -12,4 +11,3 @@ export async function addXp(source: 'game' | 'lesson_pass' | 'review' | 'daily' 
   try { await db.add('xp_ledger', { at: Date.now(), source, ref_id, xp: amount }); } catch { /* ignore */ }
   xp.set({ total: xp.get().total + amount, last: amount });
 }
-export const playerLevel = () => levelFor(xp.get().total);

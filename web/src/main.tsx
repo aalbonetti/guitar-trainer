@@ -3,8 +3,12 @@ import { App } from './app';
 import './styles.css';
 import { registerServiceWorker } from './update';
 import { initTheme } from './theme';
+import { importAll } from './db';
+import { isSim } from './audio/engine';
 
 initTheme();
+// Test-only (`?sim`): lets the e2e suites seed a backup. The app itself has no restore/upload control.
+if (isSim()) (globalThis as any).__gtImport = importAll;
 
 render(<App />, document.getElementById('app')!);
 

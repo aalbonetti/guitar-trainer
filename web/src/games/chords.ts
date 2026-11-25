@@ -56,6 +56,15 @@ export function keyTargets(key: string, numbers: string[], open?: (name: string)
   return out;
 }
 
+/** Targets for one called question: the answer's family against the families of all the question's choices. */
+export function callTargets(q: { key?: string; choices: string[]; answer: string }, open?: (name: string) => number[] | null) {
+  const flats = keyUsesFlats(q.key || 'C');
+  const fams = [...new Map(q.choices.map(c => familyOf(c)).filter(Boolean).map(f => [familyKey(f!), f!])).values()];
+  const all = Object.fromEntries(fams.map(f => [familyKey(f), familyTarget(f, familyName(f, flats), open)]));
+  const ef = familyOf(q.answer)!;
+  return { expected: all[familyKey(ef)] ?? familyTarget(ef, q.answer, open), others: Object.values(all), ef, fams };
+}
+
 // ---------- Triad Hunt ----------
 export interface TriadQ { pc: number; minor: boolean; name: string; strings: number[]; window: [number, number]; placements: number[][]; set: string }
 /** Closed triads (one chord tone per string, all three tones) on `strings` (low → high) inside the fret window. */

@@ -2,15 +2,21 @@
 // pause-aware clock), the tap fretboard, and the play-mode hooks that open the mic and check what you play.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { GameLevel } from '../catalog';
-import { comboMult, points, pointsWith, type Pos, type Zone } from '../games/core';
+import { points, pointsWith, newTally, scoreStep, type Pos, type Zone } from '../games/core';
 import { openEars, closeEars, ears, heardSince, strumsSince, now as ctxNowS, publishExpect, publishChordExpect } from '../games/listen';
 import { verifyChord, type ChordTarget, type ChordVerdict } from '../grading/chord';
 import { judgeAnswer, type AnswerCheck, type Heard } from '../games/judge';
 import { useStore } from '../store';
-import { isSim } from '../audio/engine';
+import { audioContext, isSim } from '../audio/engine';
 import type { Mode } from '../arcade';
 
 export const Stars = ({ n }: { n: number }) => <span class="stars">{[1, 2, 3].map(i => <i class={i <= n ? 'on' : ''}>★</i>)}</span>;
+
+// ---------- small hooks ----------
+/** Re-render every `ms` while `on` (question timeouts). */
+export function useTick(on: boolean, ms: number) { const [, set] = useState(0); useEffect(() => { if (!on) return; const t = setInterval(() => set(x => x + 1), ms); return () => clearInterval(t); }, [on]); }
+/** Output latency: how long after its scheduled time a click is heard (beat lights). */
+export const lagS = () => { const c = audioContext(); return c.outputLatency || c.baseLatency || 0; };
 
 // ---------- the round ----------
 export interface Round {
@@ -21,7 +27,7 @@ export interface Round {
   /** A right/wrong answer with an explicit bonus (click-timed games: how close to the beat). */
   answerWith: (ok: boolean, bonus: number, miss?: string) => void;
   addMisses: (n: number, miss: string) => void;
-  /** Game clock (ms): stops while paused. Question timers use it. */
+  /** Game clock (ms): stops while paused and, in play mode, until the mic is open. Question timers use it. */
   now: () => number;
   askedAt: { current: number };
   /** Click-timed games end the round themselves (finished = played to the end). */
@@ -37,17 +43,21 @@ export interface Round {
 }
 /** Test-only: shorter rounds for headless tests (`__gtGameShortS`). */
 export const shortRound = (s?: number) => { const x = isSim() ? (globalThis as any).__gtGameShortS as number | undefined : undefined; return s && x ? Math.min(s, x) : s; };
+/** Test-only (`?sim`): fewer bars in click-timed rounds (`__gtGameShortBars`). */
+export const shortBars = (): number | undefined => (isSim() ? (globalThis as any).__gtGameShortBars : undefined);
 
-export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean, onEnd: (finished: boolean) => void, finishedRule: (correct: number, timeUp: boolean) => boolean) {
-  const [st, setSt] = useState({ score: 0, streak: 0, maxCombo: 1, correct: 0, total: 0, lives: l.lives || 0, misses: [] as string[], bestStreak: 0 });
+/** `hold`: the round isn't running yet (play mode waiting for the mic), so the clock stands still. */
+export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean, onEnd: (finished: boolean) => void, finishedRule: (correct: number, timeUp: boolean) => boolean, hold = false) {
+  const [st, setSt] = useState(() => ({ ...newTally(), lives: l.lives || 0 }));
   const [flash, setFlash] = useState<'ok' | 'bad' | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const roundS = shortRound(l.round_s);
-  // game clock: wall time minus time spent paused
+  // game clock: wall time minus time spent stopped (paused, or on hold)
+  const stopped = paused || hold;
   const pausedMs = useRef(0), pausedAt = useRef<number | null>(null), t0 = useRef(performance.now());
   const now = () => performance.now() - t0.current - pausedMs.current - (pausedAt.current !== null ? performance.now() - pausedAt.current : 0);
-  if (paused && pausedAt.current === null) pausedAt.current = performance.now();
-  if (!paused && pausedAt.current !== null) { pausedMs.current += performance.now() - pausedAt.current; pausedAt.current = null; }
+  if (stopped && pausedAt.current === null) pausedAt.current = performance.now();
+  if (!stopped && pausedAt.current !== null) { pausedMs.current += performance.now() - pausedAt.current; pausedAt.current = null; }
   const askedAt = useRef(0), ended = useRef(false), ghost = useRef<[number, number][]>([]);
   // The round's numbers live in a ref and change synchronously, so several answers in one tick (notes settling in
   // a click-timed game) each see the combo the one before left; the state copy is just for rendering.
@@ -56,12 +66,13 @@ export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean
   // the state before the last answer and how that answer would have scored if right (assisted override)
   const undo = useRef<{ before: typeof st; pts: (streak: number) => number } | null>(null);
   const [canOverride, setCanOverride] = useState(false);
-  const pausedRef = useRef(paused); pausedRef.current = paused;
+  const stoppedRef = useRef(stopped); stoppedRef.current = stopped;
   const end = (finished: boolean) => { if (ended.current) return; ended.current = true; onEnd(finished); };
   useEffect(() => {
     const t = setInterval(() => {
-      if (pausedRef.current) return;
-      const e = now() / 1000; setElapsed(e);
+      if (stoppedRef.current) return;
+      // whole seconds are all the HUD and ghost show, so the frame re-renders once a second, not ten times
+      const e = now() / 1000; setElapsed(Math.floor(e));
       const sec = Math.floor(e); if (!ghost.current.length || ghost.current[ghost.current.length - 1][0] < sec) ghost.current.push([sec, stRef.current.score]);
       if (roundS && e >= roundS) end(finishedRule(stRef.current.correct, true));
     }, 100);
@@ -70,9 +81,8 @@ export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean
   const flashT = useRef(0);
   const apply = (ok: boolean, pts: (streak: number) => number, miss?: string) => {
     if (ended.current) return;
-    const s = stRef.current, streak = ok ? s.streak + 1 : 0;
-    const n = { ...s, total: s.total + 1, correct: s.correct + (ok ? 1 : 0), streak, maxCombo: Math.max(s.maxCombo, comboMult(streak)), bestStreak: Math.max(s.bestStreak, streak),
-      score: s.score + (ok ? pts(s.streak) : 0), lives: ok || !l.lives ? s.lives : s.lives - 1, misses: ok || !miss ? s.misses : [...s.misses, miss] };
+    const s = stRef.current;
+    const n = { ...scoreStep(s, ok, pts, miss), lives: ok || !l.lives ? s.lives : s.lives - 1 };
     undo.current = ok ? null : { before: s, pts }; setCanOverride(!ok);
     stRef.current = n; setSt(n);
     if (l.lives && n.lives <= 0) setTimeout(() => end(finishedRule(n.correct, false)), 350);
@@ -84,12 +94,11 @@ export function useRound(l: GameLevel, mode: Mode, base: number, paused: boolean
   const overrideLast = () => {
     const u = undo.current; if (!u || ended.current) return false;
     undo.current = null; setCanOverride(false);
-    const s = u.before, streak = s.streak + 1;
-    const n = { ...s, total: s.total + 1, correct: s.correct + 1, streak, maxCombo: Math.max(s.maxCombo, comboMult(streak)), bestStreak: Math.max(s.bestStreak, streak), score: s.score + u.pts(s.streak), lives: s.lives };
+    const n = scoreStep(u.before, true, u.pts); // lives too are as before the miss
     stRef.current = n; setSt(n); setFlash('ok');
     return true;
   };
-  const addMisses = (n: number, miss: string) => { if (n <= 0 || ended.current) return; undo.current = null; setCanOverride(false); const x = { ...stRef.current, total: stRef.current.total + n, streak: 0, misses: [...stRef.current.misses, ...Array(n).fill(miss)] }; stRef.current = x; setSt(x); };
+  const addMisses = (n: number, miss: string) => { if (n <= 0 || ended.current) return; undo.current = null; setCanOverride(false); let x = stRef.current; for (let i = 0; i < n; i++) x = scoreStep(x, false, () => 0, miss); stRef.current = x; setSt(x); };
   const round: Round = { ...st, flash, elapsed, paused, mode, answer, answerWith, addMisses, now, askedAt, finish: end, extra, overrideLast, canOverride };
   return { round, ghost, durationS: () => now() / 1000, stRef, roundS, extra };
 }
@@ -218,7 +227,7 @@ export function HeardChord({ e, last }: { e: { on: boolean; opening: boolean; er
   return <p class="readline">{last ? <b>{last}</b> : <span class="muted">Listening for a strum…</span>}</p>;
 }
 /** Assisted mode: the app marked the last strum wrong; one tap counts it as right (07-games.md §1, proposed). */
-export function OverrideButton({ round, assisted }: { round: Round; assisted: boolean }) {
+export function OverrideButton({ round, assisted, onOverride }: { round: Round; assisted: boolean; onOverride?: () => void }) {
   if (!assisted || !round.canOverride) return null;
-  return <button class="small override" onClick={() => round.overrideLast()}>✓ I played it right</button>;
+  return <button class="small override" onClick={() => { if (round.overrideLast()) onOverride?.(); }}>✓ I played it right</button>;
 }

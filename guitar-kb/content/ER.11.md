@@ -27,4 +27,4 @@ Practice the shapes until you see "1, 4, 5, 6m" as a box of positions, not as le
 {{exercise:EX_number_chart}}
 
 ### Goal
-Play a chorus correctly from a number chart, in a key named on the spot.
+90% of strums on the right chord, reading only numbers, in a key the app names.

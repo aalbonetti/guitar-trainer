@@ -6,16 +6,16 @@ import { useStore } from '../store';
 import { progress } from '../progressStore';
 import { computeStates, dayOf, isReviewDue } from '../progress';
 import { getSetList } from '../setlist';
-import { buildQueue, totalMinutes, itemHref, session, startSession, endSession, goTo, songLastPref, normRoutine, type Routine, type Item } from '../practice';
+import { buildQueue, totalMinutes, itemHref, session, startSession, endSession, goTo, normRoutine, type Routine, type Item } from '../practice';
 import { persisted } from '../store';
 
 const routinePref = persisted<Routine>('gt_routine', 10);
-const KIND_ICON: Record<Item['kind'], string> = { warmup: '🔥', review: '↻', lesson: '🎸', song: '♪', ear: '👂' };
+const KIND_ICON: Record<Item['kind'], string> = { warmup: '🔥', review: '↻', lesson: '🎸', ear: '👂' };
 
 export function useQueue(cat: Catalog, routine: Routine, visibleTrack: (id: string) => boolean) {
   const pr = useStore(progress);
   const states = computeStates(cat.lessons, cat.tracks, pr.lp);
-  return buildQueue({ cat, lp: pr.lp, states, day: dayOf(), today: new Date(), visibleTrack, setlist: getSetList(), songLast: songLastPref.get() }, routine);
+  return buildQueue({ cat, lp: pr.lp, states, day: dayOf(), today: new Date(), visibleTrack, setlist: getSetList() }, routine);
 }
 
 /** Number of reviews due today (for the nav badge). */

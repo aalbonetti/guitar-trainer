@@ -11,9 +11,11 @@ With a **dotted-eighth delay** (T.07, ER.03), a simple melody played in eighths 
 3. The repeats land between your notes. If it sounds messy, the delay time is wrong or your eighths aren't even.
 4. Change one note on each chord change (G, D, Em, C) so the pattern follows the harmony.
 
+The graded run is 8 bars of this: one note on every eighth, no rests.
+
 {{tool:metronome:bpm=100,beats=4,sub=2}}
 
 > Keep the picking hand light and steady. The delay amplifies any unevenness.
 
 ### Goal
-8 bars at 100 BPM, the line and its repeats locked to the click.
+8 bars of eighth notes at 100 BPM, average error ≤ 30 ms.

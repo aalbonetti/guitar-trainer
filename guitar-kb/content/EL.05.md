@@ -6,7 +6,7 @@ Push the string sideways to raise its pitch. A bend is only good if it lands **e
 
 ### How
 1. Play the **target note** first (fret 4 on string 3) and listen.
-2. Fret the starting note (fret 2) with your **ring finger**, with the middle and index behind it on the same string for support.
+2. Fret the starting note (fret 2) with your **ring finger**, with the fingers behind it on the same string for support (at fret 2 only the middle finger fits, on fret 1).
 3. Push the string toward the ceiling using your **wrist**, not just the finger, until it matches the target.
 4. Use the **tuner**: bend and hold, and the needle shows how close you are.
 

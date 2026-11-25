@@ -79,6 +79,17 @@ export function callNumberQ(r: Rng, keys: string[], numbers: string[], prev?: Ch
   const choices = DIATONIC.map(n => chordOf(n, key));
   return { prompt: num, sub: `Key of ${pretty(key)}`, choices, answer: chordOf(num, key), key, miss: `${num} in ${key} is ${chordOf(num, key)}` };
 }
+/** Call the Number, songs mode: a song's chart as calls. `choices` holds every chord the song calls, so each
+ *  question's answer is always among them. */
+export interface SongCalls { prompts: { num: string; chord: string }[]; title: string; key: string; choices: string[] }
+export function songCallsOf(o: { title: string; chart_key: string; sections: { chords_in_chart_key: string[]; numbers: string[] }[] }): SongCalls {
+  const prompts = o.sections.flatMap(s => s.chords_in_chart_key.map((c, i) => ({ num: s.numbers[i], chord: c })));
+  return { prompts, title: o.title, key: o.chart_key, choices: [...new Set(prompts.map(p => p.chord))] };
+}
+export function songCallQ(s: SongCalls, i: number): ChoiceQ {
+  const c = s.prompts[i];
+  return { prompt: c.num, sub: `${s.title} · key of ${pretty(s.key)}`, choices: s.choices, answer: c.chord, key: s.key, miss: `${c.num} in ${s.key} (${s.title}) is ${c.chord}` };
+}
 /** Capo Quick. */
 export function capoQ(r: Rng, ask: string, keys: string[], shapes: string[]): ChoiceQ {
   const a = ask === 'mixed' ? (r() < 0.5 ? 'capo' : 'key') : ask;
@@ -125,15 +136,17 @@ export function timingBonus(errMs: number, fullMs: number, edgeMs: number): numb
   return 2 - Math.max(0, Math.min(1, (Math.abs(errMs) - fullMs) / Math.max(1, edgeMs - fullMs)));
 }
 export interface Verdict { ok: boolean; bonus: number; miss?: string }
-/** Score answers in order. The live HUD and the final result use this same rule. */
-export function scoreRun(vs: Verdict[], base = 100): { score: number; correct: number; total: number; maxCombo: number; streak: number; misses: string[] } {
-  let score = 0, correct = 0, streak = 0, maxCombo = 1; const misses: string[] = [];
-  for (const v of vs) {
-    if (v.ok) { score += pointsWith(v.bonus, streak, base); correct++; streak++; maxCombo = Math.max(maxCombo, comboMult(streak)); }
-    else { streak = 0; if (v.miss) misses.push(v.miss); }
-  }
-  return { score, correct, total: vs.length, maxCombo, streak, misses };
+export interface Tally { score: number; correct: number; total: number; streak: number; maxCombo: number; bestStreak: number; misses: string[] }
+export const newTally = (): Tally => ({ score: 0, correct: 0, total: 0, streak: 0, maxCombo: 1, bestStreak: 0, misses: [] });
+/** The one scoring step: the live HUD (`useRound`) and `scoreRun` both go through it. `pts` gets the streak
+ *  before this answer; a right answer adds those points, a miss resets the streak and records `miss`. */
+export function scoreStep<T extends Tally>(s: T, ok: boolean, pts: (streak: number) => number, miss?: string): T {
+  const streak = ok ? s.streak + 1 : 0;
+  return { ...s, total: s.total + 1, correct: s.correct + (ok ? 1 : 0), streak, maxCombo: Math.max(s.maxCombo, comboMult(streak)), bestStreak: Math.max(s.bestStreak, streak),
+    score: s.score + (ok ? pts(s.streak) : 0), misses: ok || !miss ? s.misses : [...s.misses, miss] };
 }
+/** Score answers in order. */
+export const scoreRun = (vs: Verdict[], base = 100): Tally => vs.reduce((s, v) => scoreStep(s, v.ok, k => pointsWith(v.bonus, k, base), v.miss), newTally());
 
 // ---------- Octave Jump ----------
 /** Octave shapes from catalog shapes.json: low string → high string, frets up. */

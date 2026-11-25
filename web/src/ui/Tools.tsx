@@ -7,8 +7,11 @@ import { useStore, persisted } from '../store';
 const STRINGS = [{ n: 'E2', f: 82.41 }, { n: 'A2', f: 110 }, { n: 'D3', f: 146.83 }, { n: 'G3', f: 196 }, { n: 'B3', f: 246.94 }, { n: 'E4', f: 329.63 }];
 export const inputPref = persisted<string>('gt_input', '');
 
+let tunerPanels = 0; // the tuner runs only while a panel that can show it is mounted
 export function TunerPanel({ compact = false }: { compact?: boolean }) {
   const t = useStore(tuner);
+  // stopTuner also drops a start that's still waiting for the mic
+  useEffect(() => { tunerPanels++; return () => { if (--tunerPanels === 0) stopTuner(); }; }, []);
   const inTune = t.note && Math.abs(t.cents) <= 3;
   const angle = Math.max(-50, Math.min(50, t.cents)) * 0.9;
   return (
@@ -84,7 +87,6 @@ export function MetronomePanel({ compact = false }: { compact?: boolean }) {
 export function ToolBar({ preset, label, goal }: { preset: MetroPreset & { bpm: number }; label?: string; goal?: number }) {
   const [open, setOpen] = useState<'tuner' | 'metro' | null>(null);
   const m = useStore(metro);
-  useEffect(() => () => { if (tuner.get().on) stopTuner(); }, []);
   return (
     <div class="toolbar">
       <div class="row">

@@ -86,6 +86,13 @@ export function cancelAttempt() {
   attempt.set({ phase: 'idle', kind: null, beat: -1, message: '' });
 }
 
+// Cancel can land during any await. After each one, a cancelled run must stop before it registers listeners,
+// plays clicks or touches the store (a newer run may own them by then).
+const CANCELLED = new Error('cancelled');
+function alive(sig: { cancelled: boolean }) { if (sig.cancelled) throw CANCELLED; }
+/** Cancelled, or replaced by a newer run. */
+const stale = (sig: { cancelled: boolean }) => sig.cancelled || sig !== cancelled;
+
 /** Count-in learns the click-bleed level (and when bleed arrives); then collect onsets until `end`. */
 async function listen(plan: { countIn: number[]; clicks: { t: number }[]; end: number }, onOnset: (t: number) => void, sig: { cancelled: boolean }, beatTimes: number[], steps?: { t0: number; dur: number; grid: number }) {
   const sr = sampleRate();
@@ -100,12 +107,14 @@ async function listen(plan: { countIn: number[]; clicks: { t: number }[]; end: n
   // visuals follow what you hear: lag the clock by the output latency
   const lag = (() => { const c = audioContext(); return c.outputLatency || c.baseLatency || 0; })();
   const beatTimer = window.setInterval(() => {
+    if (sig.cancelled) return;
     const now = ctxNow() - lag; let b = -1; beatTimes.forEach((t, i) => { if (t <= now) b = i; });
     const st = steps && now >= steps.t0 && now < plan.end ? Math.floor((now - steps.t0) / steps.dur) % steps.grid : -1;
     if (b !== attempt.get().beat || st !== attempt.get().step) attempt.set({ beat: b, step: st });
   }, 20);
   try {
     await waitUntil(firstPlayed - 0.08, sig);
+    alive(sig);
     counting = false;
     det.learnBleed();
     const arrive = bleedDelay(clickOn, plan.countIn);
@@ -113,6 +122,7 @@ async function listen(plan: { countIn: number[]; clicks: { t: number }[]; end: n
     det.isNearClick = arrive === null ? null : (fr: number) => clickTimes.some(t => Math.abs(fr / sr - (t + arrive)) < 0.03);
     attempt.set({ phase: 'playing' });
     await waitUntil(plan.end + 0.45, sig);
+    alive(sig);
   } finally { clearInterval(beatTimer); }
 }
 
@@ -121,10 +131,12 @@ const simAuto = (kind: string, times: number[]) => (globalThis as any).__gtSimAu
 
 // ---------- strum calibration ----------
 export async function runCalibration(deviceId?: string) {
+  if (running()) return;
   cancelled = { cancelled: false }; const sig = cancelled;
   attempt.set({ phase: 'starting', kind: 'calibration', lessonId: null, heard: 0, expected: 16, beat: -1, bpm: 80, result: null, event: null, cal: null, message: '', calAt: Date.now() });
   try {
     await acquireCapture(WHO, deviceId);
+    alive(sig);
     const beat = 0.75, t0 = ctxNow() + 0.5;
     const countIn = [0, 1, 2, 3].map(i => t0 + i * beat), targets = Array.from({ length: 16 }, (_, i) => t0 + (4 + i) * beat);
     const clicks = [...countIn, ...targets].map((t, i) => ({ t, kind: (i % 4 === 0 ? 0 : 1) as 0 | 1 }));
@@ -133,15 +145,16 @@ export async function runCalibration(deviceId?: string) {
     simAuto('calibration', targets);
     const on: number[] = [];
     await listen({ countIn, clicks, end: targets[15] }, t => { on.push(t); attempt.set({ heard: on.length }); }, sig, [...countIn, ...targets]);
-    if (sig.cancelled) return;
     finish();
     const c = calibrationOffset(on, targets);
     if (!c) { attempt.set({ phase: 'error', message: `Only heard ${on.length} strums. Strum the muted strings a bit harder, close to the phone, and try again.` }); return; }
     const route = routeName();
     await db.put('calibration', { key: calKey(route), input_route: route, posture: posture(), offset_ms: Math.round(c.offsetMs * 10) / 10, spread_ms: Math.round(c.spreadMs * 10) / 10, method: 'strum', measured_at: Date.now() } satisfies Calibration).catch(() => undefined);
+    if (stale(sig)) return;
     attempt.set({ phase: 'result', cal: c, message: c.spreadMs > 25 ? 'That was a bit uneven. It’s saved, but running it again will make grades fairer.' : 'Saved for this input and posture.' });
   } catch (err) {
-    finish(); if (!sig.cancelled) attempt.set({ phase: 'error', message: (err as Error).message || 'Microphone not available' });
+    if (stale(sig)) return; // cancelAttempt already cleaned up
+    finish(); attempt.set({ phase: 'error', message: (err as Error).message || 'Microphone not available' });
   }
 }
 
@@ -152,11 +165,14 @@ export async function runTimingAttempt(l: Lesson, cat: Catalog, opts: { bpm?: nu
   attempt.set({ phase: 'starting', kind: 'timing', lessonId: l.id, result: null, message: '' }); // before any await
   const crit = l.pass_criteria as unknown as TimingCriteria;
   const ladder = await getLadder(l);
+  if (stale(sig)) return;
   const bpm = opts.bpm ?? ladder.bpm;
   attempt.set({ phase: 'starting', kind: 'timing', lessonId: l.id, heard: 0, expected: 0, beat: -1, bpm, result: null, event: null, ladder, cal: null, message: '' });
   try {
     await acquireCapture(WHO, opts.deviceId);
+    alive(sig);
     const cal = await getCalibration(routeName());
+    alive(sig);
     if (!cal) { finish(); attempt.set({ phase: 'error', message: 'needs-calibration' }); return; }
     const feel = lessonFeel(l, cat);
     const accents = feel.patternId ? (cat.strums.find(s => s.id === feel.patternId)?.accents || []) : [];
@@ -168,7 +184,6 @@ export async function runTimingAttempt(l: Lesson, cat: Catalog, opts: { bpm?: nu
     simAuto('timing', plan.slots.filter(s => s.expected).map(s => s.t));
     const on: number[] = [];
     await listen(plan, t => { on.push(t); attempt.set({ heard: on.length }); }, sig, plan.clicks.map(c => c.t), { t0: plan.slots[0].t, dur: plan.slotDur, grid: feel.grid });
-    if (sig.cancelled) return;
     finish();
     const r = gradeTiming(on, plan, cal.offset_ms, crit.max_err_ms);
     const atTarget = bpm >= crit.bpm;
@@ -177,9 +192,11 @@ export async function runTimingAttempt(l: Lesson, cat: Catalog, opts: { bpm?: nu
     await saveLadder(l, next);
     const event = await recordAttempt(l, { met: r.met, atTarget, score: Math.round(r.slotsRight * 100) / 100, mode: 'auto',
       metrics: { bpm, maeMs: +r.maeMs.toFixed(1), biasMs: +r.biasMs.toFixed(1), hitRatio: +r.hitRatio.toFixed(3), extras: r.extras, offsetMs: cal.offset_ms, route: cal.input_route, ch: capture.get().channel, posture: cal.posture } });
+    if (stale(sig)) return;
     attempt.set({ phase: 'result', result: r, event, ladder: next, prevLadderBpm: ladder.bpm, beat: -1, step: -1 });
   } catch (err) {
-    finish(); if (!sig.cancelled) attempt.set({ phase: 'error', message: (err as Error).message || 'Microphone not available' });
+    if (stale(sig)) return; // cancelAttempt already cleaned up
+    finish(); attempt.set({ phase: 'error', message: (err as Error).message || 'Microphone not available' });
   }
 }
 
@@ -202,12 +219,14 @@ export async function runPitchAttempt(l: Lesson, cat: Catalog, opts: { bpm?: num
   const setup = pitchSetup(l, cat), crit = setup.crit, gm: GraderMode = opts.mode ?? 'auto';
   (globalThis as any).__gtLastPitchSetup = setup; // test-only: ?sim plays notes against it
   const ladder = setup.mode === 'timed' ? await getLadder(l) : null;
+  if (stale(sig)) return;
   const bpm = setup.mode === 'timed' ? opts.bpm ?? ladder!.bpm : null;
   const items = setup.mode === 'hold' ? setup.targets.map(t => ({ label: t.label, where: t.where })) : setup.expected.map(e => ({ label: e.label, where: e.where }));
   attempt.set({ phase: 'starting', kind: 'pitch', lessonId: l.id, heard: 0, expected: items.length, beat: -1, step: -1, bpm: bpm ?? 0, result: null, event: null, ladder, cal: null, message: '', pending: false, pitchResult: null,
     pitch: { mode: setup.mode, labels: items.map(i => i.label), wheres: items.map(i => i.where), status: items.map(() => 'todo'), idx: 0, hearing: null, cents: null, progress: 0, ends: null } });
   try {
     await acquireCapture(WHO, opts.deviceId);
+    alive(sig);
     const sr = sampleRate();
     const midis = setup.mode === 'hold' ? setup.targets.flatMap(t => [t.midi, t.from ?? t.midi]) : setup.expected.flatMap(e => e.midis);
     const tracker = new PitchTracker(sr, trackerRange(midis)), det = new OnsetDetector(sr);
@@ -228,9 +247,10 @@ export async function runPitchAttempt(l: Lesson, cat: Catalog, opts: { bpm?: num
     if (setup.mode === 'hold') out = await holdTargets(setup, sig, h => { frameHook = h; }, gm);
     else if (setup.mode === 'timed') out = await timedNotes(setup, bpm!, sig, frames, onsets, tracker, det, gm);
     else out = await freeNotes(setup, sig, frames, onsets, gm);
-    if (sig.cancelled) return;
+    alive(sig);
     finish();
     const route = routeLabel(), cal = await getCalibration(routeName());
+    alive(sig);
     const save = async (accept: boolean) => {
       const met = gm === 'assisted' ? accept : out.met;
       let next = ladder;
@@ -245,12 +265,14 @@ export async function runPitchAttempt(l: Lesson, cat: Catalog, opts: { bpm?: num
         metrics: { mode: setup.mode, bpm, matched: out.matched, total: out.total, detected_met: out.met, route, ch: capture.get().channel, posture: posture(), offsetMs: cal?.offset_ms ?? null,
           ...(g ? { missed: g.notes.filter(n => !n.ok).map(n => `${n.label}${n.heard ? '>' + n.heard : ''}`), meanOffMs: g.meanOffMs === null ? null : Math.round(g.meanOffMs), extras: g.extras } : {}),
           ...(out.held.length ? { cents_dev: out.held.map(h => (h.cents === null ? null : Math.round(h.cents * 10) / 10)) } : {}) } });
+      if (stale(sig)) return;
       attempt.set({ phase: 'result', event, ladder: next, prevLadderBpm: ladder?.bpm, pending: false, pitchResult: { ...out, met } });
     };
     attempt.set({ phase: 'result', pitchResult: out, beat: -1, step: -1, pending: gm === 'assisted', event: null });
     if (gm === 'assisted') pendingConfirm = save; else await save(out.met);
   } catch (err) {
-    finish(); if (!sig.cancelled) attempt.set({ phase: 'error', message: (err as Error).message || 'Microphone not available' });
+    if (stale(sig)) return; // cancelAttempt already cleaned up
+    finish(); attempt.set({ phase: 'error', message: (err as Error).message || 'Microphone not available' });
   }
 }
 let pendingConfirm: ((accept: boolean) => Promise<void>) | null = null;
@@ -264,12 +286,13 @@ async function holdTargets(setup: PitchSetup, sig: { cancelled: boolean }, hook:
   const held: PitchOutcome['held'] = [];
   for (let i = 0; i < setup.targets.length && !sig.cancelled; i++) {
     const tg = setup.targets[i], ht = new HoldTracker(tg, cents);
-    let doneAt: number | null = null, last: number | null = null, start = ctxNow();
+    let doneAt: number | null = null, last: number | null = null, start = ctxNow(), shownAt = 0;
     const devs: number[] = [];
     hook((f, on) => {
       const st = ht.push(f, on);
       if (st.cents !== null && Math.abs(st.cents) <= cents + 25) { devs.push(st.cents); if (devs.length > 30) devs.shift(); }
-      setLive({ progress: st.progress });
+      const now = performance.now(); // the hold bar redraws about every 60 ms; grading sees every frame
+      if (st.done || now - shownAt >= 60) { shownAt = now; setLive({ progress: st.progress }); }
       if (st.done && doneAt === null) { doneAt = f.t; last = devs.length ? devs.reduce((a, b) => a + b, 0) / devs.length : 0; }
     });
     skipFlag = false;
@@ -277,6 +300,7 @@ async function holdTargets(setup: PitchSetup, sig: { cancelled: boolean }, hook:
     simAuto('pitch-hold', [i, start] as unknown as number[]);
     await new Promise<void>(res => { const f = () => (sig.cancelled || doneAt !== null || skipFlag || ctxNow() > start + per ? res() : setTimeout(f, 30)); f(); });
     hook(null);
+    if (sig.cancelled) break;
     const ok = doneAt !== null;
     held.push({ label: tg.label, where: tg.where, ok, cents: ok ? last : null, secs: ok ? doneAt! - start : null });
     const status = [...(attempt.get().pitch?.status || [])]; status[i] = ok ? 'ok' : 'miss';
@@ -294,6 +318,7 @@ function liveGrade(setup: PitchSetup, frames: PitchFrame[], onsets: number[], ex
 async function timedNotes(setup: PitchSetup, bpm: number, sig: { cancelled: boolean }, frames: PitchFrame[], onsets: number[], tracker: PitchTracker, det: InstanceType<typeof OnsetDetector>, gm: GraderMode): Promise<PitchOutcome> {
   const sr = sampleRate();
   const cal = await getCalibration(routeName()); // read first: the click plan starts 0.5 s from now
+  alive(sig);
   const plan = buildNotePlan(setup.expected, bpm, meterInfo(setup.meter).beats, ctxNow() + 0.5);
   (globalThis as any).__gtLastPitchPlan = plan;
   const band = new BandOnsetDetector(sr, 1800, 3200), clickOn: number[] = [];
@@ -307,6 +332,7 @@ async function timedNotes(setup: PitchSetup, bpm: number, sig: { cancelled: bool
   setLive({ cue: 'count', firstBeat: Math.round((firstT - plan.start) / plan.beat) % plan.beatsPerBar + 1 });
   let offsetS = (cal?.offset_ms ?? 0) / 1000, gradedAt = 0;
   const beatTimer = window.setInterval(() => {
+    if (sig.cancelled) return;
     const now = ctxNow() - lag; let b = -1; plan.clicks.forEach((c, i) => { if (c.t <= now) b = i; });
     if (b !== attempt.get().beat) attempt.set({ beat: b });
     let idx = 0; plan.expected.forEach((e, i) => { if (e.t <= now + 0.05) idx = i; });
@@ -322,6 +348,7 @@ async function timedNotes(setup: PitchSetup, bpm: number, sig: { cancelled: bool
   }, 40);
   try {
     await waitUntil(plan.start - 0.08, sig);
+    alive(sig);
     off();
     det.learnBleed();
     const arrive = bleedDelay(clickOn, plan.countIn);
@@ -333,6 +360,7 @@ async function timedNotes(setup: PitchSetup, bpm: number, sig: { cancelled: bool
     }
     attempt.set({ phase: 'playing' });
     await waitUntil(plan.end + 0.6, sig);
+    alive(sig);
   } finally { clearInterval(beatTimer); off(); }
   const fr = frames.filter(f => f.t > plan.start - tol && f.t < plan.end + 0.6);
   const g = liveGrade(setup, fr, onsets.filter(t => t > plan.start - tol), plan.expected, true, tol, offsetS);
@@ -358,6 +386,7 @@ async function freeNotes(setup: PitchSetup, sig: { cancelled: boolean }, frames:
     };
     tick();
   });
+  alive(sig);
   setLive({ status: g.notes.map(n => (n.ok ? 'ok' : 'miss')) });
   return { mode: 'free', met: g.met, score: g.accuracy, matched: g.matched, total: g.expected, grade: g, held: [], graderMode: gm, bpm: null };
 }
@@ -388,6 +417,7 @@ export async function runChordAttempt(l: Lesson, cat: Catalog, opts: { bpm?: num
   const gm: GraderMode = opts.mode ?? 'assisted', names = { ...nameOf(setup), ...(v?.names || {}) };
   const timed = setup.kind === 'accuracy' && setup.ex.pace === 'timed';
   const ladder = setup.kind === 'accuracy' && setup.ladder ? await getLadder(l) : null;
+  if (stale(sig)) return;
   const bpm = timed ? opts.bpm ?? ladder?.bpm ?? (setup as Extract<ChordSetup, { kind: 'accuracy' }>).bpm! : null;
   (globalThis as any).__gtLastChordSetup = { setup, variant: v, vi }; // test-only: ?sim plays chords against it
   const pairs = setup.kind === 'changes' ? setup.pairs.map(p => [names[p[0]], names[p[1]]] as [string, string]) : [];
@@ -397,6 +427,7 @@ export async function runChordAttempt(l: Lesson, cat: Catalog, opts: { bpm?: num
       perBox: setup.kind === 'accuracy' && !timed ? setup.ex.strums_per_chord ?? 4 : null, last: null, pairs, pairIdx: 0, count: 0, ends: null, startsAt: null, waiting: false, nextUp: null } });
   try {
     await acquireCapture(WHO, opts.deviceId);
+    alive(sig);
     const sr = sampleRate(), an = new StrumAnalyzer(sr), strums: Strum[] = [];
     (globalThis as any).__gtLastStrums = strums; // test-only diagnostics
     let onStrum: ((s: Strum) => void) | null = null;
@@ -405,9 +436,10 @@ export async function runChordAttempt(l: Lesson, cat: Catalog, opts: { bpm?: num
     if (setup.kind === 'changes') out = await chordChanges(setup, an, strums, sig, gm, names);
     else if (timed) out = await chordTimed(setup, v!, bpm!, an, strums, sig, gm, names, h => { onStrum = h; });
     else out = await chordOwn(setup, v!, an, strums, sig, gm, names, h => { onStrum = h; });
-    if (sig.cancelled) return;
+    alive(sig);
     finish();
     const cal = await getCalibration(routeName());
+    alive(sig);
     const save = async (accept: boolean) => {
       const met = gm === 'assisted' ? accept : out.met;
       let next = ladder;
@@ -423,18 +455,21 @@ export async function runChordAttempt(l: Lesson, cat: Catalog, opts: { bpm?: num
         metrics: { kind: out.kind, detected_met: out.met, bpm, route: routeLabel(), ch: capture.get().channel, posture: posture(), offsetMs: cal?.offset_ms ?? null,
           ...(g ? { variant: out.label, capo: out.capo, correct: g.correct, total: g.graded, ratio: +g.ratio.toFixed(3), missedBoxes: g.missedBoxes, owed: g.owed, confusion: g.confusion } : {}),
           ...(out.changes.length ? { changes: out.changes.map(c => ({ pair: c.pair.join('↔'), changes: c.changes, perMin: Math.round(c.perMin * 10) / 10, unclear: c.unclear, windowS: Math.round(c.windowS) })) } : {}) } });
+      if (stale(sig)) return;
       attempt.set({ phase: 'result', event, ladder: next, prevLadderBpm: ladder?.bpm, pending: false, chordResult: { ...out, met } });
     };
     attempt.set({ phase: 'result', chordResult: out, beat: -1, step: -1, pending: gm === 'assisted', event: null });
     if (gm === 'assisted') pendingConfirm = save; else await save(out.met);
   } catch (err) {
-    finish(); if (!sig.cancelled) attempt.set({ phase: 'error', message: (err as Error).message || 'Microphone not available' });
+    if (stale(sig)) return; // cancelAttempt already cleaned up
+    finish(); attempt.set({ phase: 'error', message: (err as Error).message || 'Microphone not available' });
   }
 }
 
 async function chordTimed(setup: Extract<ChordSetup, { kind: 'accuracy' }>, v: ChordVariant, bpm: number, an: StrumAnalyzer, strums: Strum[], sig: { cancelled: boolean }, gm: GraderMode, names: Record<string, string>, hook: (h: ((s: Strum) => void) | null) => void): Promise<ChordOutcome> {
   const sr = sampleRate(), ex = setup.ex;
   const cal = await getCalibration(routeName()); // read first: the click plan starts 0.5 s from now
+  alive(sig);
   const plan: ChordPlan = buildChordPlan(ex, v, bpm, meterInfo(ex.meter).beats, ctxNow() + 0.5);
   (globalThis as any).__gtLastChordPlan = plan;
   const tg = progressionTargets(ex, v), all = [...Object.values(tg.targets), ...tg.decoys];
@@ -456,6 +491,7 @@ async function chordTimed(setup: Extract<ChordSetup, { kind: 'accuracy' }>, v: C
   });
   setChord({ cue: 'count' });
   const beatTimer = window.setInterval(() => {
+    if (sig.cancelled) return;
     const now = ctxNow() - lag; let bt = -1; plan.clicks.forEach((c, i) => { if (c.t <= now) bt = i; });
     if (bt !== attempt.get().beat) attempt.set({ beat: bt });
     let idx = 0; plan.boxes.forEach((b, i) => { if (b.t0 <= now + 0.05) idx = i; });
@@ -465,6 +501,7 @@ async function chordTimed(setup: Extract<ChordSetup, { kind: 'accuracy' }>, v: C
   }, 40);
   try {
     await waitUntil(plan.start - 0.08, sig);
+    alive(sig);
     off();
     an.det.learnBleed();
     const arrive = bleedDelay(clickOn, plan.countIn);
@@ -472,6 +509,7 @@ async function chordTimed(setup: Extract<ChordSetup, { kind: 'accuracy' }>, v: C
     if (arrive !== null) { const arr = plan.clicks.map(c => c.t + arrive); an.det.isNearClick = (fr: number) => arr.some(a => Math.abs(fr / sr - a) < 0.03); }
     attempt.set({ phase: 'playing' });
     await waitUntil(plan.end + 0.6, sig);
+    alive(sig);
   } finally { clearInterval(beatTimer); off(); hook(null); }
   strums.push(...an.flush());
   const g = gradeTimedChords(strums.filter(s => s.t < plan.end + 0.3 + offsetS), plan, tg, { offsetS, ratio: setup.ratio, focus: ex.focus });
@@ -509,6 +547,7 @@ async function chordOwn(setup: Extract<ChordSetup, { kind: 'accuracy' }>, v: Cho
     tick();
   });
   an.onOnset = null;
+  alive(sig);
   for (const s of an.flush()) { strums.push(s); const bi = boxOf.get(s.t); if (bi !== undefined && !res.some(r => r.t === s.t)) { const vv = verifyChord(s.chroma, tg.targets[v.chords[bi]], all, undefined, undefined, s.low ?? null); res.push({ t: s.t, box: bi, expected: v.chords[bi], heard: vv.heard, ok: vv.ok, score: vv.score, margin: vv.margin }); } }
   hook(null);
   const boxes = v.chords.map((ref, i) => ({ ref, label: boxLabel(ex, v, i) }));
@@ -534,6 +573,7 @@ async function chordChanges(setup: Extract<ChordSetup, { kind: 'changes' }>, an:
     setChord({ waiting: false, pairIdx: i, count: 0, startsAt: t0, ends: t1, last: null, nextUp: a.name });
     simAuto('chord-changes', [i, t0, t1]);
     const timer = window.setInterval(() => {
+      if (sig.cancelled) return;
       const r = countChanges(strums, a, b, t0, Math.min(ctxNow(), t1), setup.target);
       const lastS = r.strums[r.strums.length - 1];
       const heard = lastS?.heard ?? null, prev = [...r.strums].reverse().find(x => x.heard)?.heard ?? null;
@@ -541,6 +581,7 @@ async function chordChanges(setup: Extract<ChordSetup, { kind: 'changes' }>, an:
       if (c && (c.count !== r.changes || (lastS && c.last?.heard !== (heard ? names[heard] : null)))) setChord({ count: r.changes, last: lastS ? { expected: '', heard: heard ? names[heard] : null, ok: !!lastS.counted } : null, nextUp: prev === a.id ? b.name : a.name });
     }, 100);
     try { await waitUntil(t1 + 0.55, sig); } finally { clearInterval(timer); }
+    alive(sig);
     strums.push(...an.flush());
     results.push(countChanges(strums, a, b, t0, t1, setup.target));
   }

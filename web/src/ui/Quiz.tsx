@@ -1,6 +1,6 @@
 // Inline quiz: 10 generated questions, answer timing, weak-spot weighting, and lesson grading.
 import { useState } from 'preact/hooks';
-import type { Catalog } from '../catalog';
+import type { Catalog, Lesson } from '../catalog';
 import { makeQuestion, rng, type Question } from '../quiz';
 import { playChords } from '../audio/engine';
 import { recordAttempt, bumpQuizItem, quizWeights, progress, saveStatus } from '../progressStore';
@@ -9,6 +9,9 @@ import { EVENT_TEXT } from '../progress';
 import { ChordDiagram } from './Diagrams';
 
 const N = 10;
+/** A quiz counts toward a quiz lesson when it's one of that lesson's quiz assets (a quiz can serve several lessons). */
+export const gradesLesson = (lesson: Lesson | undefined, quizId: string): boolean =>
+  !!lesson && lesson.pass_criteria.type === 'quiz' && !!lesson.assets.quizzes?.includes(quizId);
 export function QuizCard({ id, lessonId, cat }: { id: string; lessonId: string; cat: Catalog }) {
   const quiz = cat.quizzes.find(q => q.id === id);
   const [qs, setQs] = useState<Question[] | null>(null);
@@ -19,7 +22,7 @@ export function QuizCard({ id, lessonId, cat }: { id: string; lessonId: string; 
   const [result, setResult] = useState<string>('');
   if (!quiz) return <p class="error">Unknown quiz {id}</p>;
   const lesson = cat.lessonById[lessonId];
-  const grades = lesson && lesson.pass_criteria.type === 'quiz' && quiz.lesson === lessonId;
+  const grades = gradesLesson(lesson, id);
   const pass = lesson?.pass_criteria as { score?: number; max_s?: number } | undefined;
 
   const start = async () => {

@@ -29,4 +29,4 @@ The graded attempt plays these two lines with a click in 3/4 (one bar of count-i
 > Play the melody slightly *behind* the singer in your head, like a violin answering a vocal. That's the feel of a good worship lead.
 
 ### Goal
-The melody, with the right notes and in time.
+90% of the notes right, to the click at 80 BPM (the tempo ladder starts at 52). Any octave counts.

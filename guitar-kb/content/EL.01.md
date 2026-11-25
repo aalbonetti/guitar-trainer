@@ -18,4 +18,4 @@ Worship songs are mostly in **major keys**, and the **major pentatonic** (5 note
 > Lead playing is singing with your hands. Fewer notes, held longer, beats fast runs every time in worship.
 
 ### Goal
-4 bars of the box in eighths at 80 BPM, clean and even.
+4 bars of the box in eighth notes at 80 BPM, average error ≤ 40 ms.

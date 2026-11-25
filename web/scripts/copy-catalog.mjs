@@ -1,5 +1,5 @@
-// Copies the generated catalog into public/catalog and builds a compact chord library from chords-db.
-// The church's set list (setlist.json / CSV) is personal and is NOT published; it's imported on the phone.
+// Writes minified copies of the generated catalog into public/catalog (cleared first) and builds a compact chord library from chords-db.
+// A personal set list (setlist.json / CSV) is never published, and the app has no import for it.
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -7,12 +7,13 @@ const require = createRequire(import.meta.url);
 const here = path.dirname(new URL(import.meta.url).pathname);
 const src = path.resolve(here, '../../guitar-kb/catalog');
 const out = path.resolve(here, '../public/catalog');
-fs.mkdirSync(out, { recursive: true });
+// start empty, so a file removed from the catalog can't linger in the build
+fs.rmSync(out, { recursive: true, force: true }); fs.mkdirSync(out, { recursive: true });
 const SKIP = new Set(['setlist.json']);
 let n = 0;
 for (const f of fs.readdirSync(src)) {
   if (!f.endsWith('.json') || SKIP.has(f)) continue;
-  fs.copyFileSync(path.join(src, f), path.join(out, f)); n++;
+  fs.writeFileSync(path.join(out, f), JSON.stringify(JSON.parse(fs.readFileSync(path.join(src, f), 'utf8')))); n++; // minified copy
 }
 // Lesson text: guitar-kb/content/*.md -> public/content
 const csrc = path.resolve(here, '../../guitar-kb/content'), cout = path.resolve(here, '../public/content');
