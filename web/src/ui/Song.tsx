@@ -5,7 +5,7 @@ import type { Catalog, Outline } from '../catalog';
 import { shapeFor, transposeChord, keyUsesFlats, pcOf, keyName, KEY_NAMES, capoOptions } from '../music';
 import { ChordDiagram } from './Diagrams';
 import { ToolBar } from './Tools';
-import { persisted, useStore } from '../store';
+import { persisted, useStore, useSelect } from '../store';
 import { progress } from '../progressStore';
 import { touch } from '../practice';
 import { knownChords, bestCapo, fitLine, type Fit } from '../songfit';
@@ -24,7 +24,7 @@ export function songSettings(cat: Catalog, o: Outline, lp: Parameters<typeof kno
 }
 
 export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
-  const pr = useStore(progress);
+  const pr = { lp: useSelect(progress, p => p.lp) };
   const [, bump] = useState(0);
   useEffect(() => { touch(); }, [o.id]); // opening a song keeps the practice session open
   const [nash, setNash] = useState(false);
@@ -81,7 +81,7 @@ export function SongView({ cat, o }: { cat: Catalog; o: Outline }) {
         </div>
         <aside class="songside">
           <h3>Chords{capo ? ` (shapes with capo ${capo})` : ''}</h3>
-          <div class="chords">{used.map(c => <ChordDiagram name={c} shape={shapeFor(c)} size={0.9} />)}</div>
+          <div class="chords">{used.map(c => <ChordDiagram key={c} name={c} shape={shapeFor(c)} size={0.9} />)}</div>
           {o.practice_for.length ? <p class="muted">Practices: {o.practice_for.map((id, i) => <span>{i ? ' · ' : ''}<a href={`#/lesson/${id}`}>{id} {cat.lessonById[id]?.title}</a></span>)}</p> : null}
           {o.links.songselect ? <p><a href={o.links.songselect} target="_blank" rel="noopener">Open in SongSelect ↗</a></p> : null}
         </aside>

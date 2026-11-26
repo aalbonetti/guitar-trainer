@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { chime, capture } from '../audio/engine';
 import type { Catalog } from '../catalog';
-import { useStore } from '../store';
+import { useStore, useSelect } from '../store';
 import { progress } from '../progressStore';
 import { computeStates, dayOf, isReviewDue } from '../progress';
 import { getSetList } from '../setlist';
@@ -13,24 +13,26 @@ const routinePref = persisted<Routine>('gt_routine', 10);
 const KIND_ICON: Record<Item['kind'], string> = { warmup: '🔥', review: '↻', lesson: '🎸', ear: '👂' };
 
 export function useQueue(cat: Catalog, routine: Routine, visibleTrack: (id: string) => boolean) {
-  const pr = useStore(progress);
-  const states = computeStates(cat.lessons, cat.tracks, pr.lp);
-  return buildQueue({ cat, lp: pr.lp, states, day: dayOf(), today: new Date(), visibleTrack, setlist: getSetList() }, routine);
+  const lp = useSelect(progress, p => p.lp); // not the minutes: they change every 10 s
+  const states = computeStates(cat.lessons, cat.tracks, lp);
+  return buildQueue({ cat, lp, states, day: dayOf(), today: new Date(), visibleTrack, setlist: getSetList() }, routine);
 }
 
 /** Number of reviews due today (for the nav badge). */
 export function useDueCount(cat: Catalog | null, visibleTrack: (id: string) => boolean) {
-  const pr = useStore(progress);
+  // Only the lesson rows: the app shell calls this, so subscribing to all of `progress` redrew every screen on
+  // each 10 s activity tick.
+  const lp = useSelect(progress, p => p.lp);
   if (!cat) return 0;
   const day = dayOf();
-  return cat.lessons.filter(l => visibleTrack(l.track) && isReviewDue(pr.lp[l.id], day)).length;
+  return cat.lessons.filter(l => visibleTrack(l.track) && isReviewDue(lp[l.id], day)).length;
 }
 
 function QueueList({ items, done, idx }: { items: Item[]; done?: boolean[]; idx?: number }) {
   return (
     <ol class="queue">
       {items.map((it, i) => (
-        <li class={`${done?.[i] ? 'done' : ''} ${idx === i ? 'cur' : ''}`}>
+        <li key={`${it.kind}:${it.lessonId ?? i}`} class={`${done?.[i] ? 'done' : ''} ${idx === i ? 'cur' : ''}`}>
           <a href={itemHref(it)} onClick={() => { if (idx !== undefined) goTo(i); }}>
             <i>{done?.[i] ? '✓' : KIND_ICON[it.kind]}</i>
             <span><b>{it.lessonId && it.kind !== 'warmup' ? <span class="lid">{it.lessonId} </span> : null}{it.title}</b>

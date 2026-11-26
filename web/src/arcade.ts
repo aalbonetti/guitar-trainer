@@ -3,7 +3,7 @@ import * as db from './db';
 import { Store, persisted } from './store';
 import { addXp } from './xp';
 import { XP, xpForScore, stars as starsFor } from './games/core';
-import { progress, recordAttempt, addServiceDay } from './progressStore';
+import { progress, recordAttempt, addServiceDay, saveStatus } from './progressStore';
 import { isReviewDue, dayOf } from './progress';
 import { session, touch, songPool, expireIdle } from './practice';
 import { getSetList } from './setlist';
@@ -80,7 +80,10 @@ export async function finishRun(cat: Catalog, g: Game, l: GameLevel, r: RunResul
       const row: Best = { key, game_id: g.id, level_id: l.id, mode, best_score: Math.max(r.score, prev?.best_score || 0), best_stars: Math.max(stars, prev?.best_stars || 0), ghost: pb ? r.ghost : prev!.ghost, at: Date.now() };
       await db.put('game_best', row); bests.set({ map: { ...bests.get().map, [key]: row } });
     }
-  } catch { /* storage unavailable */ }
+  } catch (e) {
+    // Saving is never silent: same red banner as a lesson attempt that couldn't be saved.
+    saveStatus.set({ state: 'error', at: Date.now(), msg: `Couldn't save this round to the phone (${(e as Error)?.message || 'storage unavailable'}). Check that you're not in Incognito and that the phone has free space, then reload the app.` });
+  }
   const gained = xpForScore(r.score) + (pb && prev ? XP.pb : 0);
   await addXp('game', g.id, xpForScore(r.score));
   if (pb && prev) await addXp('pb', key, XP.pb);

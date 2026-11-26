@@ -330,7 +330,7 @@ async function timedNotes(setup: PitchSetup, bpm: number, sig: { cancelled: bool
   const tol = noteTolerance(plan.beat);
   const firstT = plan.expected[0]?.t ?? plan.start;
   setLive({ cue: 'count', firstBeat: Math.round((firstT - plan.start) / plan.beat) % plan.beatsPerBar + 1 });
-  let offsetS = (cal?.offset_ms ?? 0) / 1000, gradedAt = 0;
+  let offsetS = (cal?.offset_ms ?? 0) / 1000, gradedAt = 0, liveKey = '', liveG: ReturnType<typeof liveGrade> | null = null;
   const beatTimer = window.setInterval(() => {
     if (sig.cancelled) return;
     const now = ctxNow() - lag; let b = -1; plan.clicks.forEach((c, i) => { if (c.t <= now) b = i; });
@@ -341,7 +341,10 @@ async function timedNotes(setup: PitchSetup, bpm: number, sig: { cancelled: bool
     if (attempt.get().pitch?.cue !== cue) setLive({ cue });
     if (now - gradedAt > 0.3 && now > plan.start) {
       gradedAt = now;
-      const g = liveGrade(setup, frames.filter(f => f.t > plan.start - tol), onsets, plan.expected, true, tol, offsetS);
+      // regrade only when something new was heard (or the offset changed); the misses below still follow the clock
+      const key = `${frames.length}|${onsets.length}|${offsetS}`;
+      if (key !== liveKey || !liveG) { liveKey = key; liveG = liveGrade(setup, frames.filter(f => f.t > plan.start - tol), onsets, plan.expected, true, tol, offsetS); }
+      const g = liveG;
       // a note is settled once its window has passed
       setLive({ status: g.notes.map((n, i) => (n.ok ? 'ok' : plan.expected[i].t + tol + offsetS + 0.1 < ctxNow() ? 'miss' : 'todo')) });
     }
@@ -373,11 +376,12 @@ async function freeNotes(setup: PitchSetup, sig: { cancelled: boolean }, frames:
   attempt.set({ phase: 'playing' });
   setLive({ ends: t0 + limit });
   simAuto('pitch-free', [t0]);
-  let allAt: number | null = null, g = liveGrade(setup, [], [], setup.expected, false, 0, 0);
+  let allAt: number | null = null, g = liveGrade(setup, [], [], setup.expected, false, 0, 0), seen = '';
   await new Promise<void>(res => {
     const tick = () => {
       if (sig.cancelled) return res();
-      g = liveGrade(setup, frames.filter(f => f.t > t0), onsets.filter(t => t > t0), setup.expected, false, 0, 0);
+      const key = `${frames.length}|${onsets.length}`; // regrade only when something new was heard
+      if (key !== seen) { seen = key; g = liveGrade(setup, frames.filter(f => f.t > t0), onsets.filter(t => t > t0), setup.expected, false, 0, 0); }
       const lastOk = g.notes.map(n => n.ok).lastIndexOf(true);
       setLive({ status: g.notes.map((n, i) => (n.ok ? 'ok' : i < lastOk ? 'miss' : 'todo')), idx: Math.min(setup.expected.length - 1, lastOk + 1) });
       if (g.matched === g.expected && allAt === null) allAt = ctxNow();
@@ -572,8 +576,10 @@ async function chordChanges(setup: Extract<ChordSetup, { kind: 'changes' }>, an:
     const t0 = ctxNow() + 3, t1 = t0 + windowS; // 3-2-1 on screen, no sound (the mic is open)
     setChord({ waiting: false, pairIdx: i, count: 0, startsAt: t0, ends: t1, last: null, nextUp: a.name });
     simAuto('chord-changes', [i, t0, t1]);
+    let counted = -1; // strums already counted: the count can only change when a new strum arrives
     const timer = window.setInterval(() => {
-      if (sig.cancelled) return;
+      if (sig.cancelled || strums.length === counted) return;
+      counted = strums.length;
       const r = countChanges(strums, a, b, t0, Math.min(ctxNow(), t1), setup.target);
       const lastS = r.strums[r.strums.length - 1];
       const heard = lastS?.heard ?? null, prev = [...r.strums].reverse().find(x => x.heard)?.heard ?? null;

@@ -125,7 +125,7 @@ export function InputPicker() {
       <label class="field">Audio input
         <select value={sel} onChange={e => { const v = (e.target as HTMLSelectElement).value; setSel(v); inputPref.set(v); if (tuner.get().on) void startTuner(v || undefined); }}>
           <option value="">Phone microphone (default)</option>
-          {devs.filter(d => d.deviceId && d.deviceId !== 'default').map(d => <option value={d.deviceId}>{d.label || 'Input ' + d.deviceId.slice(0, 6)}</option>)}
+          {devs.filter(d => d.deviceId && d.deviceId !== 'default').map(d => <option key={d.deviceId} value={d.deviceId}>{d.label || 'Input ' + d.deviceId.slice(0, 6)}</option>)}
         </select>
         <small>Plug in a USB interface (or the Kemper), start the tuner once to grant the mic, then come back to pick it.</small>
       </label>

@@ -117,7 +117,7 @@ export function Fretboard({ zone, onTap, marks = [], frets, tappable = true }: {
       {[1, 2, 3, 4, 5, 6].map(s => <line x1={left} x2={W - 4} y1={y(s)} y2={y(s)} class={`str ${zone.strings.includes(s) ? '' : 'off'}`} style={{ strokeWidth: 0.6 + (s - 1) * 0.35 }} />)}
       {[3, 5, 7, 9, 12, 15].filter(f => f >= f0 && f <= f1 && f > 0).map(f => <text x={x(f) + cw / 2} y={H + 13} class="fno">{f}</text>)}
       {f0 === 0 ? <text x={x(0) + cw / 2} y={H + 13} class="fno">0</text> : null}
-      {marks.map(m => <circle cx={x(m.p.fret) + cw / 2} cy={y(m.p.string)} r={Math.min(cw, rh) * 0.36} class={`mark ${m.cls}`} />)}
+      {marks.map(m => <circle key={`${m.p.string}:${m.p.fret}:${m.cls}`} cx={x(m.p.fret) + cw / 2} cy={y(m.p.string)} r={Math.min(cw, rh) * 0.36} class={`mark ${m.cls}`} />)}
       {tappable && onTap ? cells.filter(inZone).map(p => <rect x={x(p.fret)} y={(p.string - 1) * rh} width={cw} height={rh} class="hit" data-s={p.string} data-f={p.fret} onPointerDown={e => { e.preventDefault(); onTap(p); }} />) : null}
     </svg>
   );

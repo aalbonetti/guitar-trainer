@@ -1,13 +1,13 @@
 // Screens: Today, Path, Lesson, Songs, Song, Tools, Settings.
 import { getThemePref, setThemePref, type ThemePref } from '../theme';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import type { Catalog, Lesson } from '../catalog';
 import { describePass, lessonTempo } from '../catalog';
 import type { Shape } from '../music';
 import { ChordDiagram, ScaleDiagram, StrumGrid } from './Diagrams';
 import { ToolBar, TunerPanel, MetronomePanel, InputPicker } from './Tools';
 import { getSetList, clearSetList } from '../setlist';
-import { persisted, useStore } from '../store';
+import { persisted, useStore, useSelect } from '../store';
 import { LessonContent } from './Content';
 import { progress, recordAttempt, saveStatus, streakInfo } from '../progressStore';
 import { computeStates, isReviewDue, dayOf, EVENT_TEXT, type State } from '../progress';
@@ -38,6 +38,7 @@ export function Today({ cat }: { cat: Catalog }) {
   const { pr, states } = useStates(cat);
   const day = dayOf();
   const sl = getSetList();
+  useSelect(progress, p => p.days); // the streak line changes when today starts to count
   const streak = streakInfo(day).current;
   const passed = Object.values(states).filter(s => s === 'passed').length;
   const vis = (id: string) => trackVisible(cat, id);
@@ -77,7 +78,12 @@ function StorageNote() {
 
 // ---------- Path ----------
 const ICON: Record<State, string> = { locked: '🔒', available: '○', in_progress: '◐', passed: '●' };
-function useStates(cat: Catalog) { const pr = useStore(progress); return { pr, states: computeStates(cat.lessons, cat.tracks, pr.lp) }; }
+/** Lesson rows and states. Selects only `lp`, so the 10 s activity ticks (minutes) don't redraw the screen. */
+function useStates(cat: Catalog) {
+  const lp = useSelect(progress, p => p.lp);
+  const states = useMemo(() => computeStates(cat.lessons, cat.tracks, lp), [cat, lp]);
+  return { pr: { lp }, states };
+}
 function StateBadge({ cat, id }: { cat: Catalog; id: string }) {
   const { pr, states } = useStates(cat);
   const s = states[id], due = isReviewDue(pr.lp[id], dayOf());
@@ -169,7 +175,7 @@ export function LessonView({ cat, id }: { cat: Catalog; id: string }) {
 }
 
 function PassPanel({ cat, l }: { cat: Catalog; l: Lesson }) {
-  const pr = useStore(progress);
+  const pr = { lp: useSelect(progress, p => p.lp) };
   const [msg, setMsg] = useState('');
   const type = l.pass_criteria.type;
   const p = pr.lp[l.id];
@@ -255,7 +261,7 @@ export function Songs({ cat, selected }: { cat: Catalog; selected?: string }) {
         <h1>Songs <small class="muted">({cat.outlines.length})</small></h1>
         <input type="search" placeholder="Search title, artist, CCLI" value={q} onInput={e => setQ((e.target as HTMLInputElement).value)} />
         <ul class="list">
-          {list.map(s => <li class={s.id === selected ? 'sel' : ''}><a href={`#/song/${s.id}`}>{s.title}<small>{s.sub}</small></a></li>)}
+          {list.map(s => <li key={s.id} class={s.id === selected ? 'sel' : ''}><a href={`#/song/${s.id}`}>{s.title}<small>{s.sub}</small></a></li>)}
         </ul>
       </div>
       <div class="songdetail">{selected && cat.outlineById[selected] ? <SongView cat={cat} o={cat.outlineById[selected]} /> : <p class="muted hint">Pick a song.</p>}</div>

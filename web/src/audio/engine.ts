@@ -19,13 +19,19 @@ export function audioContext(): AudioContext {
 }
 
 // ---------- wake lock (keep the screen on while the click or tuner runs) ----------
-let wake: { release(): Promise<void> } | null = null;
-async function updateWakeLock(attempt = false) {
-  const want = attempt || metro.get().running || tuner.get().on || planTimer !== null;
-  try {
-    if (want && !wake && 'wakeLock' in navigator) wake = await (navigator as any).wakeLock.request('screen');
-    if (!want && wake) { await wake.release(); wake = null; }
-  } catch { /* not fatal */ }
+// Requests run one at a time, each deciding from the state when it runs. A stop-then-start (restarting the click,
+// or a graded attempt stopping the metronome) used to let the start skip its request while the release was still
+// in flight, leaving no lock at all once the release finished.
+let wake: { release(): Promise<void> } | null = null, wakeQueue: Promise<void> = Promise.resolve();
+function updateWakeLock(attempt = false): Promise<void> {
+  wakeQueue = wakeQueue.then(async () => {
+    const want = attempt || metro.get().running || tuner.get().on || planTimer !== null;
+    try {
+      if (want && !wake && 'wakeLock' in navigator) wake = await (navigator as any).wakeLock.request('screen');
+      if (!want && wake) { const w = wake; wake = null; await w.release(); }
+    } catch { /* not fatal */ }
+  });
+  return wakeQueue;
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') { wake = null; void updateWakeLock(); }
@@ -140,7 +146,7 @@ if(inp.length!==this.nc){this.nc=inp.length;this.pk=new Float32Array(inp.length)
 for(let q=0;q<inp.length;q++){const x=inp[q];let m=this.pk[q];for(let k=0;k<x.length;k++){const a=x[k]<0?-x[k]:x[k];if(a>m)m=a;}this.pk[q]=m;}
 const c=inp[Math.min(this.ch,inp.length-1)];
 for(let k=0;k<c.length;k++){if(!this.n)this.s=currentFrame+k;this.b[this.n++]=c[k];
-if(this.n===512){this.port.postMessage({f:this.s,d:this.b.slice(0),pk:this.pk.slice(0)});this.pk.fill(0);this.n=0;}}return true;}}registerProcessor('cap',Cap);`;
+if(this.n===512){const d=this.b,p=this.pk;this.port.postMessage({f:this.s,d,pk:p},[d.buffer,p.buffer]);this.b=new Float32Array(512);this.pk=new Float32Array(p.length);this.n=0;}}return true;}}registerProcessor('cap',Cap);`;
 /** `channels`: how many the input delivers; `channel`: the one analyzed (0-based). */
 export interface CaptureState { on: boolean; label: string; error: string | null; gaps: number; channels: number; channel: number }
 export const capture = new Store<CaptureState>({ on: false, label: '', error: null, gaps: 0, channels: 1, channel: 0 });

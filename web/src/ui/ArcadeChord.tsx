@@ -276,7 +276,7 @@ export function SongRun({ cat, l, round, setup }: { cat: Catalog; l: GameLevel; 
         <p class="center"><b>{phase === 'countin' ? 'Count-in: one bar, then play' : phase === 'playing' ? 'Play!' : phase === 'opening' ? 'Opening the mic…' : phase === 'stopped' ? 'Stopped. Restart from the menu.' : phase === 'error' ? 'The microphone could not be opened.' : 'Song over'}</b></p>
         <p class="readline">{live.last ?? <span class="muted">{ear.on ? 'Strum each chord on its bar' : ''}</span>}</p>
       </div>
-      <div class="gboard"><div class="songboxes">{boxes.slice(from, from + 12).map((b, k) => <span class={`${live.status[from + k]} ${from + k === live.idx ? 'cur' : ''}`}>{b.label}</span>)}</div></div>
+      <div class="gboard"><div class="songboxes">{boxes.slice(from, from + 12).map((b, k) => <span key={from + k} class={`${live.status[from + k]} ${from + k === live.idx ? 'cur' : ''}`}>{b.label}</span>)}</div></div>
     </>
   );
 }

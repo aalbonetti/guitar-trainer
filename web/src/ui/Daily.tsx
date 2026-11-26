@@ -2,7 +2,7 @@
 // built once a day from your weak spots (daily.ts) and stays the same all day.
 import { useEffect, useState } from 'preact/hooks';
 import type { Catalog, Game, GameLevel } from '../catalog';
-import { useStore } from '../store';
+import { useStore, useSelect } from '../store';
 import * as db from '../db';
 import { daily, loadDaily, refreshDaily, buildDaily, DAILY_MINUTES, type DailyItem } from '../daily';
 import { progress } from '../progressStore';
@@ -49,7 +49,7 @@ const href = (i: DailyItem) => (i.kind === 'game' ? `#/arcade/${i.game}/${i.leve
 /** Today's challenge, kept current: loaded when progress is ready, when the date changes with the screen still
  *  open, and rechecked when the app comes back to the screen. Returns today's date. */
 function useDaily(cat: Catalog, visible: (track: string) => boolean): string {
-  const ready = useStore(progress).ready;
+  const ready = useSelect(progress, p => p.ready);
   const [now, setNow] = useState(() => ({ day: dayOf(), resumed: 0 }));
   useEffect(() => {
     const resume = () => { if (document.visibilityState === 'visible') setNow(n => ({ day: dayOf(), resumed: n.resumed + 1 })); };

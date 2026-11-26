@@ -112,7 +112,7 @@ function SongRunTile({ cat, g }: { cat: Catalog; g: Game }) {
 }
 
 function BadgesCard({ cat }: { cat: Catalog }) {
-  const bd = useStore(badges), b = useStore(bests); useStore(progress);
+  const bd = useStore(badges), b = useStore(bests); useSelect(progress, p => p.days); // longest streak
   const runs = useRuns();
   if (!cat.badges?.length) return null;
   const data: Omit<BadgeData, 'runs'> = { bests: b.map, churchSongs: churchSongs(cat), longestStreak: streakInfo().longest };
@@ -152,7 +152,7 @@ function CalNeeded({ onDone }: { onDone: () => void }) {
 
 export function GameScreen({ cat, gameId, levelId, fromDaily = false }: { cat: Catalog; gameId: string; levelId: string; fromDaily?: boolean }) {
   const g = cat.games.find(x => x.id === gameId), l = g?.levels.find(x => x.id === levelId);
-  useStore(progress); const b = useStore(bests); const dd = useStore(daily);
+  useSelect(progress, p => p.lp); const b = useStore(bests); const dd = useStore(daily);
   useEffect(() => { if (!b.ready) void loadBests(); }, []);
   useEffect(() => { if (fromDaily) void ensureDaily(cat, trackVisibleFor(cat)); }, [fromDaily]);
   const [runId, setRunId] = useState(0);

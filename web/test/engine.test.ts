@@ -173,3 +173,33 @@ describe('cancelling a run', () => {
     expect(await p).toBeNull(); expect(clicks.length).toBe(0);
   });
 });
+
+describe('screen wake lock', () => {
+  // A lock whose release takes a moment, like Chrome's. `held` = locks granted and not yet released.
+  function fakeWakeLock() {
+    const locks: { released: boolean }[] = [];
+    const wakeLock = { request: vi.fn(async () => { const l = { released: false, release: async () => { await tick(2); l.released = true; } }; locks.push(l); return l; }) };
+    vi.stubGlobal('navigator', { mediaDevices: { getUserMedia, enumerateDevices: async () => [] }, wakeLock });
+    return { held: () => locks.filter(l => !l.released).length, wakeLock };
+  }
+  it('restarting a running click keeps the screen on', async () => {
+    const w = fakeWakeLock();
+    const { engine } = await load();
+    engine.startMetronome({ bpm: 90 }); await tick(10);
+    expect(w.held()).toBe(1);
+    engine.setMetro({ meter: '3/4' }); await tick(10); // a new meter restarts the click
+    expect(engine.metro.get().running).toBe(true);
+    expect(w.held()).toBe(1);
+    engine.stopMetronome(); await tick(10);
+    expect(w.held()).toBe(0);
+  });
+  it('a graded click plan started over the metronome keeps the screen on', async () => {
+    const w = fakeWakeLock();
+    const { engine } = await load();
+    engine.startMetronome({ bpm: 90 }); await tick(10);
+    engine.playClickPlan([{ t: 1, kind: 0 }, { t: 2, kind: 1 }]); await tick(10);
+    expect(w.held()).toBe(1);
+    engine.cancelClickPlan(); await tick(10);
+    expect(w.held()).toBe(0);
+  });
+});

@@ -5,7 +5,7 @@ import type { Catalog, Scale } from '../catalog';
 import { KEY_NAMES, pcOf, keyName, keyUsesFlats, capoOptions, transposeChord, parseChord, libSuffixes, voicings, shapeMidi, shapeFor } from '../music';
 import { ChordDiagram, ScaleDiagram } from './Diagrams';
 import { playChords } from '../audio/engine';
-import { useStore, persisted } from '../store';
+import { useSelect, persisted } from '../store';
 import { progress } from '../progressStore';
 import { knownChords } from '../songfit';
 
@@ -37,7 +37,7 @@ export function ChordLibrary() {
     <div class="chordlib">
       <input type="search" placeholder="Type a chord: F#m7, Cadd9, Dsus4…" value={q} onInput={e => search((e.target as HTMLInputElement).value)} />
       <div class="keys">{KEY_NAMES.map(k => <button class={`small ${sel.root === k ? 'sel' : ''}`} onClick={() => setSel({ ...sel, root: k })}>{k}</button>)}</div>
-      <div class="keys">{list.map(s => <button class={`small ${sel.suffix === s ? 'sel' : ''}`} onClick={() => setSel({ ...sel, suffix: s })}>{label('', s) || 'major'}</button>)}
+      <div class="keys">{list.map(s => <button key={s} class={`small ${sel.suffix === s ? 'sel' : ''}`} onClick={() => setSel({ ...sel, suffix: s })}>{label('', s) || 'major'}</button>)}
         <button class="small ghost" onClick={() => setMore(!more)}>{more ? 'fewer' : 'more…'}</button></div>
       <p class="chordtitle"><b>{label(sel.root, sel.suffix)}</b> <small class="muted">{vs.length} voicing{vs.length === 1 ? '' : 's'}</small></p>
       <div class="chords">
@@ -83,7 +83,7 @@ export function ScaleViewer({ cat }: { cat: Catalog }) {
 
 // ---------- capo + transpose ----------
 export function CapoCalc({ cat }: { cat: Catalog }) {
-  const pr = useStore(progress);
+  const pr = { lp: useSelect(progress, p => p.lp) };
   const known = useMemo(() => knownChords(cat, pr.lp), [pr.lp]);
   const [key, setKey] = useState('Ab');
   const [capo, setCapo] = useState(2);

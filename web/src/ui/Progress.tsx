@@ -107,7 +107,7 @@ function Heatmap() {
           </>)}
         </div>
         <p class="muted small heatlegend"><i class="h1" /> under 60% <i class="h2" /> under 85% <i class="h3" /> 85%+ <i class="h4" /> 85%+ and quicker than your usual · string 1 on top</p>
-        {hard.length ? <><h3>Hard spots</h3><ul class="misses">{hard.map(c => <li>{lab(c)}</li>)}</ul><p class="muted small">These come up more often in the Daily Challenge.</p></> : null}
+        {hard.length ? <><h3>Hard spots</h3><ul class="misses">{hard.map(c => <li key={`${c.string}:${c.fret}`}>{lab(c)}</li>)}</ul><p class="muted small">These come up more often in the Daily Challenge.</p></> : null}
       </>}
     </section>
   );

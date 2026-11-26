@@ -17,7 +17,7 @@ const dev = () => inputPref.get() || undefined;
 /** The tempo a timing lesson is practiced at right now: the tempo-ladder BPM, or the goal once passed or when a review is due.
  *  Null for lessons without a tempo ladder. Used by the lesson tool bar and the lesson's click buttons, so every number agrees. */
 export function usePracticeTempo(l: Lesson): { bpm: number; goal: number; atGoal: boolean } | null {
-  const phase = useSelect(attempt, a => a.phase); const pr = useStore(progress);
+  const phase = useSelect(attempt, a => a.phase); const pr = { lp: useSelect(progress, p => p.lp) };
   const [ladder, setLadder] = useState<Ladder | null>(null);
   // timing lessons, and pitch/chord lessons played to a click (they have a bpm and a tempo ladder)
   const timing = l.pass_criteria.type === 'timing' || ((l.pass_criteria.type === 'pitch' || l.pass_criteria.type === 'chord_accuracy') && !!l.pass_criteria.bpm);
@@ -73,7 +73,7 @@ export function CalibrationCard({ compact = false, onDone }: { compact?: boolean
       {mine && a.phase === 'result' && a.cal && a.calAt !== stale.current ? <p class="okText">Offset {a.cal.offsetMs.toFixed(0)} ms · spread {a.cal.spreadMs.toFixed(0)} ms · {a.cal.matched}/16 strums. {a.message}</p> : null}
       {mine && a.phase === 'error' ? <p class="error">{a.message}</p> : null}
       {!compact && list.length ? (
-        <ul class="list callist">{list.map(c => <li>{c.input_route} · {c.posture}<small>{c.offset_ms.toFixed(0)} ms (±{c.spread_ms.toFixed(0)}) · {new Date(c.measured_at).toLocaleDateString()}</small></li>)}</ul>
+        <ul class="list callist">{list.map(c => <li key={c.key}>{c.input_route} · {c.posture}<small>{c.offset_ms.toFixed(0)} ms (±{c.spread_ms.toFixed(0)}) · {new Date(c.measured_at).toLocaleDateString()}</small></li>)}</ul>
       ) : null}
     </div>
   );

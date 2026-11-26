@@ -78,7 +78,12 @@ export async function exportAll(): Promise<Record<string, unknown>> {
 }
 export async function importAll(data: Record<string, unknown>) {
   if (!data || typeof data !== 'object' || !STORES.some(s => Array.isArray(data[s]))) throw new Error('This doesn’t look like a Guitar Trainer backup.');
-  for (const s of STORES) { const rows = data[s]; if (!Array.isArray(rows)) continue; await clear(s); for (const row of rows) await put(s, row); }
+  // One transaction for every table: the restore lands whole or not at all, and rows aren't each their own commit.
+  const stores = STORES.filter(s => Array.isArray(data[s]));
+  const d = await open(), t = d.transaction(stores, 'readwrite');
+  const done = new Promise<void>((res, rej) => { t.oncomplete = () => res(); t.onabort = t.onerror = () => rej(t.error || new Error('Restore was cancelled')); });
+  for (const s of stores) { const os = t.objectStore(s); os.clear(); for (const row of data[s] as unknown[]) os.put(row); }
+  await done;
   const local = data._local as Record<string, string> | undefined;
   if (local) try { for (const [k, v] of Object.entries(local)) if (k.startsWith('gt_')) localStorage.setItem(k, v); } catch { /* ignore */ }
 }
