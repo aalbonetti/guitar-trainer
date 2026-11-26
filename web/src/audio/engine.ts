@@ -139,6 +139,8 @@ export function tapTempo() {
 // Multichannel inputs (the Kemper over USB can show up with several channels): the worklet reports the
 // channel count, forwards only the chosen channel to the analyzers, and sends per-channel peaks so the
 // Settings picker can show which channel carries the guitar.
+// Blocks and peaks are transferred, not copied; a transferred array reads as length 0 afterwards, so the next
+// peaks array is sized from the channel count (nc), never from the one just sent.
 const WORKLET = `class Cap extends AudioWorkletProcessor{constructor(){super();this.b=new Float32Array(512);this.n=0;this.s=0;this.ch=0;this.nc=-1;this.pk=new Float32Array(1);this.off=false;
 this.port.onmessage=e=>{if(!e.data)return;if(e.data.ch!=null)this.ch=e.data.ch|0;if(e.data.stop)this.off=true;};}
 process(i){if(this.off)return false;const inp=i[0];if(!inp||!inp.length)return true;
@@ -146,7 +148,7 @@ if(inp.length!==this.nc){this.nc=inp.length;this.pk=new Float32Array(inp.length)
 for(let q=0;q<inp.length;q++){const x=inp[q];let m=this.pk[q];for(let k=0;k<x.length;k++){const a=x[k]<0?-x[k]:x[k];if(a>m)m=a;}this.pk[q]=m;}
 const c=inp[Math.min(this.ch,inp.length-1)];
 for(let k=0;k<c.length;k++){if(!this.n)this.s=currentFrame+k;this.b[this.n++]=c[k];
-if(this.n===512){const d=this.b,p=this.pk;this.port.postMessage({f:this.s,d,pk:p},[d.buffer,p.buffer]);this.b=new Float32Array(512);this.pk=new Float32Array(p.length);this.n=0;}}return true;}}registerProcessor('cap',Cap);`;
+if(this.n===512){const d=this.b,p=this.pk;this.port.postMessage({f:this.s,d,pk:p},[d.buffer,p.buffer]);this.b=new Float32Array(512);this.pk=new Float32Array(this.nc);this.n=0;}}return true;}}registerProcessor('cap',Cap);`;
 /** `channels`: how many the input delivers; `channel`: the one analyzed (0-based). */
 export interface CaptureState { on: boolean; label: string; error: string | null; gaps: number; channels: number; channel: number }
 export const capture = new Store<CaptureState>({ on: false, label: '', error: null, gaps: 0, channels: 1, channel: 0 });
